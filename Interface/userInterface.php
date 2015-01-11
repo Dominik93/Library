@@ -31,6 +31,7 @@ interface IUser{
         public function showAllBorrows();
         public function showAllBooks();
         public function showAdmin($adminID);
+        public function showEditAdmin($readerID);
         public function showReader($readerID);
         public function showReaderLight($readerID);
         public function showEditReader($readerID);
@@ -39,9 +40,10 @@ interface IUser{
         public function showBorrow($borrowID);
         public function showMyBorrows();
 	public function addReader($login, $email, $name, $surname, $password1, $password2, $adres);
-        public function editReader($login, $email, $name, $surname, $adres);
+        public function editReader($id, $login, $email, $name, $surname, $adres);
         public function addBook($isbn, $title, $publisher_house, $nr_page, $edition, $premiere, $number, $author);
         public function addAdmin($name, $surname, $password1, $password2, $email, $login);
+        public function editAdmin($id, $name, $surname, $email, $login);
         public function addNews($title, $text);
         public function deleteNews($id);
         public function orderBook($bookID);

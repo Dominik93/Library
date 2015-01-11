@@ -44,10 +44,13 @@ class User implements IUser{
 				</p>';
 	}
     public function showRegulation(){
-		return '<p>
-					Tu bedzie regulamin!;p
-				</p>';
-	}
+	return '<p><ul>'
+                . '<li>1. Rejestracja w stacjonarnym punkcie biblioteki</li>'
+                . '<li>2. Możliwość wypożyczenia książki tylko przez użytkowników z aktywnymi kontami</li>'
+                . '<li>3. Jeżel książka nie będzie odebrana w 3 dni zostanie odesłana do magazynu</li>'
+                . '<li>4. Za opóźnienie w oddaniu książki naliczana jest kara, 0,25 gr za dzień</li>'
+                . '</ul></p>';
+    }
     public function showLogin(){
             return templateForm("Logowanie",
                     array(
@@ -372,7 +375,7 @@ class User implements IUser{
     public function addReader($login, $email, $name, $surname, $password1, $password2, $adres){
             return 'Brak dostępu';
 	}
-    public function editReader($login, $email, $name, $surname, $adres) {
+    public function editReader($id, $login, $email, $name, $surname, $adres) {
             return "Brak dostępu";
         }
     public function addBook($isbn, $title, $publisher_house, $nr_page, $edition, $premiere, $number, $author) {
@@ -404,5 +407,14 @@ class User implements IUser{
     public function getData($ID){
 		return $this->Data;
 	}
+
+    public function editAdmin($id, $name, $surname, $email, $login) {
+        return "Brak dostepu";
+    }
+
+    public function showEditAdmin($readerID) {
+        return "Brak dostepu";
+    }
+
 }
 ?>

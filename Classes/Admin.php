@@ -173,8 +173,23 @@ class Admin extends User{
                             Login: '.$userData['admin_login'].'<br>
                             Email: '.$userData['admin_email'].'<br>
                             Prawa: '.$userData['acces_right_name'].'<br>
+                                <button id="editAdmin">Edytuj</button>
+                                <button id="deleteAdmin">Usuń</button>
                         </p>';
         }
+    public function showEditAdmin($adminID){
+        $userData =  $this->getData($adminID);
+        return '<div align="center"> Edytowanie admina o '.$userData['admin_id'].'
+            <form action="'.backToFuture().'Library/AdminAction/edit_admin.php?id='.$userData['admin_id'].'" method="post">
+                Imie: <input type="text" id="name" name="name" value="'.$userData['admin_name'].'"/><br>
+                Nazwisko: <input type="text" id="surname" name="surname" value="'.$userData['admin_surname'].'"/><br>
+                Login: <input type="text" id="login" name="login" value="'.$userData['admin_login'].'"/><br>
+                Email: <input type="email" id="email" name="email" value="'.$userData['admin_email'].'"/><br>
+                <input type="hidden" id="edit" value="'.$userData['admin_id'].'"/>
+                <input type="submit" id="submit" value="Zapisz zmiany">
+            </form>'
+                .'</div>';
+        }    
     public function showReader($readerID){
         $userData =  $this->controller->getReaderData($readerID);
         return '<p>
@@ -207,13 +222,13 @@ class Admin extends User{
     }
     public function showEditReader($readerID){
         $userData = $this->controller->getReaderData($readerID);
-        return '<div align="center">
-            <form action="'.backToFuture().'../Library/AdminAction/profile_readers.php?id='.$userData['reader_id'].'" method="post">
-                <input type="text" id="name" name="imie" value="'.$userData['reader_name'].'"/><br>
-                <input type="text" id="surname" name="imie" value="'.$userData['reader_surname'].'"/><br>
-                <input type="text" id="login" name="imie" value="'.$userData['reader_login'].'"/><br>
-                <input type="email" id="email" name="imie" value="'.$userData['reader_email'].'"/><br>
-                <input type="text" id="adres" name="imie" value="'.$userData['reader_address'].'"/><br>	
+        return '<div align="center">Edytowanie czytelnika o '.$userData['reader_id'].'
+            <form action="'.backToFuture().'Library/AdminAction/edit_reader.php?id='.$userData['reader_id'].'" method="post">
+                Imie: <input type="text" id="name" name="name" value="'.$userData['reader_name'].'"/><br>
+                Nazwisko: <input type="text" id="surname" name="surname" value="'.$userData['reader_surname'].'"/><br>
+                Login: <input type="text" id="login" name="login" value="'.$userData['reader_login'].'"/><br>
+                Email: <input type="email" id="email" name="email" value="'.$userData['reader_email'].'"/><br>
+                Adres: <input type="text" id="address" name="address" value="'.$userData['reader_address'].'"/><br>	
                 <input type="hidden" id="edit" value="'.$userData['reader_id'].'"/>
                 <input type="submit" id="submit" value="Zapisz zmiany">
             </form>'
@@ -365,6 +380,18 @@ class Admin extends User{
                 return "<p>Dodano admina</p>";
             }
         }
+    public function editAdmin($id, $name, $surname, $email, $login){
+        $this->controller->updateTableRecordValuesWhere("admins",
+                        array(
+                            array("admin_login",$this->controller->clear($login)),
+                            array("admin_email",$this->controller->clear($email)),
+                            array("admin_name",$this->controller->clear($name)),
+                            array("admin_surname",$this->controller->clear($surname))
+                            ),
+                        array(array("admin_id","=",$this->controller->clear($id),"")));
+        return "<p>Edytowano admina</p>";
+        
+    }
     public function addNews($title, $text){
 	if(empty($title) ||
             empty($text)){
@@ -507,13 +534,24 @@ class Admin extends User{
                     return '<p>Czytelnik Został poprawnie zarejestrowany! Możesz się teraz wrócić na <a href="'.backToFuture().'Library/index.php">stronę główną</a>.</p>';
 		}
 	}
-    public function editReader($login, $email, $name, $surname, $adres) {
-        parent::editReader($login, $email, $name, $surname, $adres);
+    public function editReader($id, $login, $email, $name, $surname, $address) {
+        $this->controller->updateTableRecordValuesWhere("readers",
+                        array(
+                            array("reader_login",$this->controller->clear($login)),
+                            array("reader_email",$this->controller->clear($email)),
+                            array("reader_name",$this->controller->clear($name)),
+                            array("reader_surname",$this->controller->clear($surname)),
+                            array("reader_address",$this->controller->clear($address))
+                            ),
+                        array(array("reader_id","=",$this->controller->clear($id),"")));
+        return "<p>Edytowano czytelnika</p>";
     }
     public function deleteNews($id){
+        $id = $this->controller->clear($id);
         $this->controller->deleteTableWhere("news", array(array("new_id","=",$id,"")));
     }    
     public function getData($ID){
+        $ID = $this->controller->clear($ID);
 	return $this->controller->getAdminData($ID);
     }
 }

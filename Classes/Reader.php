@@ -81,10 +81,14 @@ class Reader extends User{
     public function showMyBorrows(){
         $myBorrows = "";
         $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("borrows", null, null, array(array("borrow_reader_id","=", $this->userID, "")));
-        while($row = mysqli_fetch_array($result)){
-            $myBorrows = $myBorrows.$this->showBorrow($row['borrow_id']);
-            $myBorrows = $myBorrows.'<p>------------------------------------------</p>';
+        if(mysqli_num_rows($result) == 0){
+            return "<p>Aklutalnie brak wypożyczeń</p>";
         }
+        else
+            while($row = mysqli_fetch_array($result)){
+                $myBorrows = $myBorrows.$this->showBorrow($row['borrow_id']);
+                $myBorrows = $myBorrows.'<p>------------------------------------------</p>';
+            }
         return $myBorrows;
     }
     public function showAccount(){

@@ -7,6 +7,7 @@ $controller = new Controller();
 if(isset($_POST['editReader'])){
     echo $user->showEditReader($_POST['id']);
 }
+
 if(isset($_POST['book'])){
     $book = "";
     $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("books",
@@ -60,6 +61,7 @@ if(isset($_POST['book'])){
 		}     
     echo '<p>'.$books.'</p>';
 }
+
 if(isset($_POST['borrows'])){
     echo '<p>'.templateTable($controller, array('ID','ID książki','ID czytelnika', 'Data wypożyczenia', 'Data zwrotu'),
                               array('borrow_id','borrow_book_id','borrow_reader_id', 'borrow_date_borrow', 'borrow_return'),
@@ -70,7 +72,7 @@ if(isset($_POST['borrows'])){
                 array("borrow_reader_id", "like", $_POST["IDC"], "and"),
                 array("borrow_date_borrow", "like", $_POST["DW"], "and"),
                 array("borrow_return", "like", $_POST["DZ"], "")
-                ));
+                )).'</p>';
 }
 
 if (isset($_POST['reader'])){
@@ -106,8 +108,22 @@ if(isset($_POST['delete'])){
 
 if(isset($_POST['deleteReader'])){
     $controller->deleteTableWhere("readers", array(array("reader_id", "=", $_POST['deleteReader'], "")));
-    echo "Usunięto czytelnika";
+    echo "<p>Usunięto czytelnika</p>";
 }
+
+if(isset($_POST['deleteAdmin'])){
+    $controller->deleteTableWhere("admins", array(array("admin_id", "=", $_POST['deleteAdmin'], "")));
+    echo "<p>Usunięto admina</p>";
+}
+
+if(isset($_POST['newPassword'])){
+    $pass = uniqid("reader".$_POST['newPassword'].'.');
+    $controller->updateTableRecordValuesWhere("readers",
+            array(array("reader_password", Codepass($pass))),
+            array(array("reader_id", "=", $_POST['newPassword'], "")));
+    echo "<p>Nowe hasło to: ".$pass.'</p>';
+}
+
 if(isset($_POST['extendAccount'])){
     $date = date_create(date('Y-m-d'));
     date_add($date, date_interval_create_from_date_string('365 days')); 
@@ -116,7 +132,7 @@ if(isset($_POST['extendAccount'])){
                             null,
                             array(array("acces_right_name","=", "activeReader", "")));
     if(mysqli_num_rows($resultAccessRgihts) == 0) {
-        die('Błąd');
+        die('<p>Błąd</p>');
     }
     $rowAR = mysqli_fetch_assoc($resultAccessRgihts);
     $controller->updateTableRecordValuesWhere("readers",
@@ -127,7 +143,7 @@ if(isset($_POST['extendAccount'])){
             array(array("reader_active_account", date_format($date,"y-m-d"))),
             array(array("reader_id", "=", $_POST['extendAccount'], ""))
             );
-    echo "Przedłużono konto";
+    echo "<p>Przedłużono konto</p>";
 }
 
 if(isset($_POST['receive'])){
