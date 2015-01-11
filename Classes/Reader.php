@@ -11,7 +11,7 @@ class Reader extends User{
         $this->controller->updateTableRecordValuesWhere("sessions", 
                 array(array("session_last_action", date('Y-m-d H:i:s'))),
                 array(
-                    array("session_user", $this->userID, "AND"),
+                    array("session_user", "=", $this->userID, "AND"),
                     array("session_acces_right","=", "reader", "")
                     ));
     }
@@ -58,11 +58,23 @@ class Reader extends User{
         }
     public function showBorrow($borrowID){
         $borrow = "";
-        $borrowResult = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("borrows", null, null,
+        $borrowResult = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("borrows",
+                null, null,
                 array(array("borrow_id","=", $borrowID, "")));
         $row = mysqli_fetch_array($borrowResult);
-        $borrow = $borrow.'<p>Data wypożyczenia: '.$row['borrow_date_borrow'].'<br>Data zwrotu: '.$row['borrow_return'].'<br>Opóźnienie: '.$row['borrow_delay_date'].'<br> Kwota do zapłaty za opóźnienie: </p>';
-        $borrow = $borrow.'<div id="book" align="center">Książka:<br>'.$this->showBookLight($row['borrow_book_id']).'</div>';
+        $feesResult = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("fees",
+                null, null,
+                array(array("borrow_id","=", $borrowID, "")));
+        $rowF = mysqli_fetch_array($feesResult);
+        $delay = 0;
+        if($rowF['borrow_delay'] > 0){
+            $delay = $rowF['borrow_delay'];
+        }
+        $borrow .= '<p>Data wypożyczenia: '.$row['borrow_date_borrow'].'<br>'
+                . 'Data zwrotu: '.$row['borrow_return'].'<br>'
+                . 'Opóźnienie: '.$delay.' dni<br>'
+                . 'Kwota do zapłaty za opóźnienie: '.$delay*0.25.' </p>';
+        $borrow .= '<div id="book" align="center">Książka:<br>'.$this->showBookLight($row['borrow_book_id']).'</div>';
         
         return $borrow;
     }  

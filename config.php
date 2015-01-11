@@ -5,12 +5,13 @@ function backToFuture(){
     $future= "";
     $pathExplode = explode("/", $path);
     $i = count($pathExplode) - 1;
+        while($pathExplode[$i] != "public_html"){
+            array_pop($pathExplode);
+            $future.="../";
+            $i--;
+        }
     
-    while($pathExplode[$i] != "public_html"){
-        array_pop($pathExplode);
-        $future.="../";
-        $i--;
-    }
+    
     $path = implode("/", $pathExplode);
     return $future;
 }
@@ -112,6 +113,7 @@ function templateTable($controller, $array, $arrayTable, $table, $tableStyle, $l
         }
 
 session_start();
+date_default_timezone_set("Europe/Warsaw");
 //CreateOwner();
 if(!isset($_SESSION['logged'])) {
 	$_SESSION['id'] = session_id();

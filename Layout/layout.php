@@ -22,7 +22,6 @@
                         <li><a href="'.backToFuture().'Library/Menu/opening_hours.php">Godziny otwarcia</a></li>
 			<li><a href="'.backToFuture().'Library/Menu/regulations.php">Regulamin</a></li>
 			<li><a href="'.backToFuture().'Library/Menu/contact.php">Kontakt</a></li>
-			<li><a href="Menu/help.php">Pomoc</a></li>
                     </ul>
 		</p>
             </div>';

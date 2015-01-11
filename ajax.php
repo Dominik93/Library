@@ -44,7 +44,7 @@ if(isset($_POST['book'])){
                                                 array("books.book_id", "=", $row['book_id'], "")
                                                 )
                                     );
-				$books = $books.'<tr onClick="location.href=\'http://localhost/~dominik/Library/book.php?book='.$row['book_id'].'\'" /> '
+				$books = $books.'<tr onClick="location.href=\'http://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$row['book_id'].'\'" /> '
                                                     . '<td>'.$row['book_id'].'</td> '
                                                     . '<td>'.$row['book_isbn'].'</td> '
                                                     . '<td>'.$row['book_title'].'</td> '
@@ -101,28 +101,40 @@ if (isset($_POST['admin'])){
 
 if(isset($_POST['delete'])){
     $controller->deleteTableWhere("borrows", array(array("borrow_id", "=", $_POST['delete'], "")));
-    echo "OK";
+    echo "<p>Książka została zwrócona</p>";
 }
 
 if(isset($_POST['deleteReader'])){
     $controller->deleteTableWhere("readers", array(array("reader_id", "=", $_POST['deleteReader'], "")));
-    echo "OK";
+    echo "Usunięto czytelnika";
 }
 if(isset($_POST['extendAccount'])){
     $date = date_create(date('Y-m-d'));
-    date_add($date, date_interval_create_from_date_string('365 days'));    
+    date_add($date, date_interval_create_from_date_string('365 days')); 
+    $resultAccessRgihts = $controller->selectTableWhatJoinWhereGroupOrderLimit("acces_rights", 
+                            array("*"),
+                            null,
+                            array(array("acces_right_name","=", "activeReader", "")));
+    if(mysqli_num_rows($resultAccessRgihts) == 0) {
+        die('Błąd');
+    }
+    $rowAR = mysqli_fetch_assoc($resultAccessRgihts);
+    $controller->updateTableRecordValuesWhere("readers",
+            array(array("reader_acces_right_id", $rowAR['acces_right_id'] )),
+            array(array("reader_id", "=", $_POST['extendAccount'], ""))
+            );
     $controller->updateTableRecordValuesWhere("readers", 
             array(array("reader_active_account", date_format($date,"y-m-d"))),
             array(array("reader_id", "=", $_POST['extendAccount'], ""))
             );
-    echo "OK";
+    echo "Przedłużono konto";
 }
 
 if(isset($_POST['receive'])){
     $controller->updateTableRecordValuesWhere("borrows",
             array(array("borrow_received", "1")),
             array(array("borrow_id", "=", $_POST['receive'], "")));
-    echo "OK";
+    echo "<p>Odebrano książke<p>";
 }
 
 if(isset($_POST['login'])){

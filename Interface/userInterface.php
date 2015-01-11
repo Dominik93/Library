@@ -32,6 +32,7 @@ interface IUser{
         public function showAllBooks();
         public function showAdmin($adminID);
         public function showReader($readerID);
+        public function showReaderLight($readerID);
         public function showEditReader($readerID);
         public function showBook($bookID);
         public function showBookLight($bookID);

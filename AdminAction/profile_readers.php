@@ -4,9 +4,7 @@
 	
     function Content(){
         $user = unserialize($_SESSION['user']);
-        echo "dd";
         if(isset($_POST['name'])){
-            echo "cc";
             $user->controller->updateTableRecordValuesWhere("readers",
                         array(
                             array("reader_login",$_POST['login']),
@@ -44,46 +42,23 @@
                          
                        $("#deleteReader").click(function(){
                            var readerID = <?php echo json_encode($_GET); ?>;
-                           $.ajax({
-				type: "POST",
-				url: "../ajax.php",
-				data: "deleteReader="+ readerID['id'],
-				success: function(msg){
-                                    $("#content").ajaxComplete(function(event, request){
-                                        alert(msg);
-                                        if(msg == 'OK'){
-                                            $("#content").html('Usinięto czytelnika');
-                                            return true;
-					}
-                                        else{
-                                            $("#content").html('Błąd');
-                                            return false;
-					}
-                                    });
-				}
-                            });                           
+                           $("#content").load("../ajax.php", {deleteReader: readerID['id']},
+                           function(responseTxt,statusTxt,xhr){
+                                if(statusTxt=="success"){
+                                }
+                                if(statusTxt=="error")
+                                    alert("Error: "+xhr.status+": "+xhr.statusText);
+                            });                  
                        });
                        $("#extendAccount").click(function(){
                            var readerID = <?php echo json_encode($_GET); ?>;
-                           $.ajax({
-				type: "POST",
-				url: "../ajax.php",
-				data: "extendAccount="+ readerID['id'],
-				success: function(msg){
-                                    $("#content").ajaxComplete(function(event, request){
-                                        alert(msg);
-                                        if(msg == 'OK'){
-                                            $("#content").html('Przedłużono konto czytelnikowi');
-                                            return true;
-					}
-                                        else{
-                                            $("#content").html('Błąd');
-                                            return false;
-					}
-                                    });
-				}
+                           $("#content").load("../ajax.php", {extendAccount: readerID['id']},
+                           function(responseTxt,statusTxt,xhr){
+                                if(statusTxt=="success"){
+                                }
+                                if(statusTxt=="error")
+                                    alert("Error: "+xhr.status+": "+xhr.statusText);
                             }); 
-                           
                        });
                     });
                 </script>

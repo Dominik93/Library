@@ -78,31 +78,31 @@ class Admin extends User{
                                         <tr>Dodaj czytelnika</tr>
 					<tr>
                                             <td>Login:</td>
-                                            <td><input id="login" type="text" value="'.$_POST['login'].'" name="login" placeholder="Login" required/><span id="status_login"></span></td>
+                                            <td><input id="login" type="text" value="'.@$_POST['login'].'" name="login" placeholder="Login" required/><span id="status_login"></span></td>
                                         </tr>
 					<tr>
                                             <td>E-mail:</td>
-                                            <td><input id="email" type="email" value="'.$_POST['email'].'" name="email" placeholder="E-mail" required/><span id="status_email"></span>
+                                            <td><input id="email" type="email" value="'.@$_POST['email'].'" name="email" placeholder="E-mail" required/><span id="status_email"></span>
                                         </td></tr>
 					<tr>
                                             <td>Hasło:</td>
-                                            <td><input id="password1" type="password" value="'.$_POST['password1'].'" name="password1" placeholder="Hasło" required/></td>
+                                            <td><input id="password1" type="password" value="'.@$_POST['password1'].'" name="password1" placeholder="Hasło" required/></td>
                                         </tr>
 					<tr>
                                             <td>Powtórz hasło:</td>
-                                            <td><input id="password2" type="password" value="'.$_POST['password2'].'" name="password2" placeholder="Powtórz hasło" required/><span id="status_password"></span></td>
+                                            <td><input id="password2" type="password" value="'.@$_POST['password2'].'" name="password2" placeholder="Powtórz hasło" required/><span id="status_password"></span></td>
                                         </tr>
 					<tr>
                                             <td>Imie:</td>
-                                            <td><input id="name" type="text" value="'.$_POST['name'].'" name="name" placeholder="Imie" required/></td>
+                                            <td><input id="name" type="text" value="'.@$_POST['name'].'" name="name" placeholder="Imie" required/></td>
                                         </tr>
 					<tr>
                                             <td>Nazwisko:</td>
-                                            <td><input id="surname" type="text" value="'.$_POST['surname'].'" name="surname" placeholder="Nazwisko" required/></td>
+                                            <td><input id="surname" type="text" value="'.@$_POST['surname'].'" name="surname" placeholder="Nazwisko" required/></td>
                                         </tr>
 					<tr>
                                             <td>Adres:</td>
-                                            <td><input id="adres" type="text" value="'.$_POST['adres'].'" name="adres" placeholder="Adres" required/></td>
+                                            <td><input id="adres" type="text" value="'.@$_POST['adres'].'" name="adres" placeholder="Adres" required/></td>
                                         </tr>
 				</table>
 				<input type="submit" id="submit" value="Zarejestruj czytelnika">
@@ -114,12 +114,12 @@ class Admin extends User{
 			<form action="'.backToFuture().'Library/AdminAction/registration_admin.php" method="post">
 				<table>
 					<tr>Dodaj admina</tr>
-					<tr><td>Login:</td><td><input id="login" type="text" value="'.$_POST['login'].'" name="login" placeholder="Login" required/><span id="status_login"></span></td></tr>
-					<tr><td>E-mail:</td><td><input id="email" type="email" value="'.$_POST['email'].'" name="email" placeholder="E-mail" required/><span id="status_email"></span></td></tr>
-					<tr><td>Hasło:</td><td><input id="password1" type="password" value="'.$_POST['password1'].'" name="password1" placeholder="Hasło" required/></td></tr>
-					<tr><td>Powtórz hasło:</td><td><input id="password2" type="password" value="'.$_POST['password2'].'" name="password2" placeholder="Powtórz hasło" required/><span id="status_password"></span></td></tr>
-					<tr><td>Imie:</td><td><input id="name" type="text" value="'.$_POST['name'].'" name="name" placeholder="Imie" required/></td></tr>
-					<tr><td>Nazwisko:</td><td><input id="surname" type="text" value="'.$_POST['surname'].'" name="surname" placeholder="Nazwisko" required/></td></tr>
+					<tr><td>Login:</td><td><input id="login" type="text" value="'.@$_POST['login'].'" name="login" placeholder="Login" required/><span id="status_login"></span></td></tr>
+					<tr><td>E-mail:</td><td><input id="email" type="email" value="'.@$_POST['email'].'" name="email" placeholder="E-mail" required/><span id="status_email"></span></td></tr>
+					<tr><td>Hasło:</td><td><input id="password1" type="password" value="'.@$_POST['password1'].'" name="password1" placeholder="Hasło" required/></td></tr>
+					<tr><td>Powtórz hasło:</td><td><input id="password2" type="password" value="'.@$_POST['password2'].'" name="password2" placeholder="Powtórz hasło" required/><span id="status_password"></span></td></tr>
+					<tr><td>Imie:</td><td><input id="name" type="text" value="'.@$_POST['name'].'" name="name" placeholder="Imie" required/></td></tr>
+					<tr><td>Nazwisko:</td><td><input id="surname" type="text" value="'.@$_POST['surname'].'" name="surname" placeholder="Nazwisko" required/></td></tr>
 				</table>
 				<input type="submit" id="submit" value="Zarejestruj admina">
 			</form>
@@ -130,14 +130,14 @@ class Admin extends User{
 		<form action="'.backToFuture().'Library/AdminAction/add_book.php" method="post">
 			<table>
 				<tr> <td colspan = 2 align="center">Dodaj książke:</tf><tr>
-				<tr><td>ISBN:</td><td><input type="text" value="'.$_POST['isbn'].'" name="isbn" placeholder="ISBN" required/></td></tr>
-				<tr><td>Tytuł:</td><td><input type="text" value="'.$_POST['title'].'" name="title" placeholder="Tytuł" required/></td></tr>
-				<tr><td>Wydawca:</td><td><input type="text" value="'.$_POST['publisher_house'].'" name="publisher_house" placeholder="Wydawca" required/></td></tr>
-				<tr><td>Ilość stron:</td><td><input type="text" value="'.$_POST['nr_page'].'" name="nr_page" placeholder="Ilość stron" required/></td></tr>
-				<tr><td>Wydanie:</td><td><input type="text" value="'.$_POST['edition'].'" name="edition" placeholder="Wydanie" required/></td></tr>
-				<tr><td>Rok wydania:</td><td><input type="text" value="'.$_POST['premiere'].'" name="premiere" placeholder="Rok Wydania" required/></td></tr>
-				<tr><td>Ilość egzemplarzy:</td><td><input type="text" value="'.$_POST['number'].'" name="number" placeholder="Ilość egzemplarzy" required/></td></tr>
-				<tr><td>Autor:</td><td><input type="text" value="'.$_POST['author'].'" name="author" placeholder="Imie Nazwisko;" required/></td></tr>
+				<tr><td>ISBN:</td><td><input type="text" value="'.@$_POST['isbn'].'" name="isbn" placeholder="ISBN" required/></td></tr>
+				<tr><td>Tytuł:</td><td><input type="text" value="'.@$_POST['title'].'" name="title" placeholder="Tytuł" required/></td></tr>
+				<tr><td>Wydawca:</td><td><input type="text" value="'.@$_POST['publisher_house'].'" name="publisher_house" placeholder="Wydawca" required/></td></tr>
+				<tr><td>Ilość stron:</td><td><input type="text" value="'.@$_POST['nr_page'].'" name="nr_page" placeholder="Ilość stron" required/></td></tr>
+				<tr><td>Wydanie:</td><td><input type="text" value="'.@$_POST['edition'].'" name="edition" placeholder="Wydanie" required/></td></tr>
+				<tr><td>Rok wydania:</td><td><input type="text" value="'.@$_POST['premiere'].'" name="premiere" placeholder="Rok Wydania" required/></td></tr>
+				<tr><td>Ilość egzemplarzy:</td><td><input type="text" value="'.@$_POST['number'].'" name="number" placeholder="Ilość egzemplarzy" required/></td></tr>
+				<tr><td>Autor:</td><td><input type="text" value="'.@$_POST['author'].'" name="author" placeholder="Imie Nazwisko;" required/></td></tr>
 			</table>
 			<input type="submit" value="Dodaj ksiażke">
 		</form>
@@ -153,11 +153,11 @@ class Admin extends User{
                         <tr>
 			<tr>
                             <td>Tytył:</td>
-                            <td><input type="text" value="'.$_POST['title'].'" name="title" placeholder="Tytuł" required/></td>
+                            <td><input type="text" value="'.@$_POST['title'].'" name="title" placeholder="Tytuł" required/></td>
                         </tr>
 			<tr>
                             <td>Tekst:</td>
-                            <td><textarea id="news_input" value="'.$_POST['text'].'" name="text" placeholder="Tekst" required></textarea></td>
+                            <td><textarea id="news_input" value="'.@$_POST['text'].'" name="text" placeholder="Tekst" required></textarea></td>
                         </tr>
                     </table>
                     <input type="submit" value="Dodaj news">
@@ -192,6 +192,19 @@ class Admin extends User{
             <button id="newPassword">Wygeneruj nowe hasło</button> 
 	</p>';
     }
+    public function showReaderLight($readerID){
+        $userData =  $this->controller->getReaderData($readerID);
+        return '<p>
+            ID: '.$userData['reader_id'].'<br>
+            Imie: '.$userData['reader_name'].'<br>
+            Nazwisko: '.$userData['reader_surname'].'<br>
+            Login: '.$userData['reader_login'].'<br>
+            Email: '.$userData['reader_email'].'<br>
+            Konto aktywne do: '.$userData['reader_active_account'].'<br>
+            Adres: '.$userData['reader_address'].'<br>	
+            Prawa: '.$userData['acces_right_name'].'<br>
+	</p>';
+    }
     public function showEditReader($readerID){
         $userData = $this->controller->getReaderData($readerID);
         return '<div align="center">
@@ -215,7 +228,7 @@ class Admin extends User{
         $rowFee = mysqli_fetch_array($feeResult);
         $borrow = $borrow.'<p>Data wypożyczenia: '.$rowBorrow['borrow_date_borrow'].'<br>Data zwrotu: '.$rowBorrow['borrow_return'].'<br>Odebrano: '.$rowBorrow['borrow_received'].'<br>Opóźnienie: '.$rowFee['borrow_delay'].'<br>Do zapłaty: '.$rowFee['amount'].'</p>';
         $borrow = $borrow.'<p><button id="receive">Odebrano</button> <button id="delete">Zwrócono</button></p>';
-        $borrow = $borrow.'<div id="reader" align="center">Czytelnik:<br>'.$this->showReader($rowBorrow['borrow_reader_id']).'</div>';
+        $borrow = $borrow.'<div id="reader" align="center">Czytelnik:<br>'.$this->showReaderLight($rowBorrow['borrow_reader_id']).'</div>';
         $borrow = $borrow.'<div id="book" align="center">Książka:<br>'.$this->showBookLight($rowBorrow['borrow_book_id']).'</div>';
         return $borrow;
     }    
@@ -279,7 +292,7 @@ class Admin extends User{
                                                 array("books.book_id", "=", $row['book_id'], "")
                                                 )
                                     );
-				$books = $books.'<tr onClick="location.href=\'http://localhost/~dominik/Library/book.php?book='.$row['book_id'].'\'" /> '
+				$books = $books.'<tr onClick="location.href=\'http://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$row['book_id'].'\'" /> '
                                                     . '<td>'.$row['book_id'].'</td> '
                                                     . '<td>'.$row['book_isbn'].'</td> '
                                                     . '<td>'.$row['book_title'].'</td> '

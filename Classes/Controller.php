@@ -13,8 +13,10 @@ class Controller{
 
     public function doQuery($query){
         $this->mysql->Connect();
+        //echo $query;
         $result = mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
 	$this->mysql->Close();
+        return $result;
     }
     
     public function insertTableRecordValue($table, $arrayRecord, $arrayValues){
