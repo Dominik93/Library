@@ -5,13 +5,14 @@
     function Content(){
         $user = unserialize($_SESSION['user']);
         if(isset($_POST['name'])){
-            echo '<div id="content">'.$user->editAdmin($_GET['id'], $_POST['login'],
-                    $_POST['email'], $_POST['name'], $_POST['surname']).'</div>';
+            echo '<div id="content">'.$user->editAdmin($_GET['id'], $_POST['name'],
+                    $_POST['surname'], $_POST['email'], $_POST['login']).'</div>';
         }
         else
             echo '<div id="content">'.$user->showEditAdmin($_GET['id']).'</div>';
     }   
 ?>
+<a href="../Classes/Admin.php"></a>
 
 <!DOCTYPE html>
 <html>

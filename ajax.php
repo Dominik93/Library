@@ -10,6 +10,18 @@ if(isset($_POST['editReader'])){
 
 if(isset($_POST['book'])){
     $book = "";
+    
+    
+    $authorDetail = array();
+    $authorDetail[0] = "%".$authorDetail[0]."%";
+    $authorDetail[1] = "%".$authorDetail[1]."%";  
+    
+    if(empty($author)) $_POST['A'] = "%";
+            else{
+                $authorDetail = explode(" ", $_POST['A']);
+                $authorDetail[0] = "%".$authorDetail[0]."%";
+                $authorDetail[1] = "%".$authorDetail[1]."%";    
+            }
     $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("books",
                     array("*"),
                     array(array("publisher_houses","publisher_houses.publisher_house_id","books.book_publisher_house_id")),
@@ -21,7 +33,9 @@ if(isset($_POST['book'])){
                 array("book_nr_page","like",$_POST['NP'],"and"),
                 array("book_edition","like",$_POST['E'],"and"),
                 array("book_premiere","like",$_POST['P'],"and"),
-                array("book_number","like",$_POST['N'],"")
+                array("book_number","like",$_POST['N'],"and"),
+                array("authors.author_name","LIKE",$authorDetail[0],"and"),
+                array("authors.author_surname","LIKE",$authorDetail[1],"")
                 )
             
             );
@@ -181,20 +195,19 @@ if(isset($_POST['email'])){
 	$dostepny = true;
 	$poprawny = true;
 	if (filter_var($email, FILTER_VALIDATE_EMAIL) == false){
-		echo '<span style="color: #cc0000;"><strong>'.$email.'</strong> jest niepoprawny.</span>';
 		$poprawny = false;
 	}
 	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit("readers", null, null,
                 array(array("reader_email","=",$email,"")));
-	if(mysqli_num_rows($result)){
+	if(mysqli_num_rows($result) > 0){
 		$dostepny = false;
 	}
 	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit("admins", null, null,
                 array(array("admin_email","=",$email,"")));
-	if(mysqli_num_rows($result)){
+	if(mysqli_num_rows($result) > 0){
 		$dostepny = false;
 	}
-	if(!poprawny){
+	if(!$poprawny){
 		echo 'Niepoprawny';
 	}else if(!$dostepny){
 		echo 'Niedostepny';

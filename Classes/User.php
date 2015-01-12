@@ -125,6 +125,10 @@ class User implements IUser{
         }
     public function search($isbn, $title, $publisher_house, $edition, $premiere, $author){
             $books = "";
+            $authorDetail = array();
+            $authorDetail[0] = "%".$authorDetail[0]."%";
+            $authorDetail[1] = "%".$authorDetail[1]."%";  
+            
             if(empty($isbn)) $isbn = "%";
             else $isbn = '%'.$isbn.'%';
             if(empty($title)) $title = "%";
@@ -135,13 +139,20 @@ class User implements IUser{
             else $edition = '%'.$edition.'%';
             if(empty($premiere)) $premiere = "%";
             else $premiere = '%'.$premiere.'%';
+            if(empty($author)) $author = "%";
+            else{
+                $authorDetail = explode(" ", $author);
+                $authorDetail[0] = "%".$authorDetail[0]."%";
+                $authorDetail[1] = "%".$authorDetail[1]."%";    
+            }
             
             $isbn = $this->controller->clear($isbn);
             $title = $this->controller->clear($title);
             $publisher_house = $this->controller->clear($publisher_house);
             $edition = $this->controller->clear($edition);
             $premiere = $this->controller->clear($premiere);
-            $author = "%";
+            $author =  $this->controller->clear($author);
+            
             $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("books", 
                     array("books.*", "publisher_houses.publisher_house_name" ),
                     array(
@@ -155,7 +166,8 @@ class User implements IUser{
                         array("publisher_houses.publisher_house_name","LIKE",$publisher_house,"AND"),
                         array("books.book_premiere","LIKE",$premiere,"AND"),
                         array("books.book_edition","LIKE",$edition,"AND"),
-                        array("authors.author_name","LIKE",$author,"")
+                        array("authors.author_name","LIKE",$authorDetail[0],"AND"),
+                        array("authors.author_surname","LIKE",$authorDetail[1],"")
                     ),
                     "books.book_id");
             if(mysqli_num_rows($result) == 0) {
@@ -228,14 +240,7 @@ class User implements IUser{
 				</p>
 				<ul>
 					<li><a href="'.  backToFuture().'Library/UserAction/login.php">Zaloguj się</a></li>
-				</ul>
-			session id =
-                        '.session_id().' logger = 
-			'.$_SESSION['logged'].' userid =
-			'.$_SESSION['user_id'].' ip =
-			'.$_SESSION['ip'].' access = 
-			'.$_SESSION['acces_right'].' class.userID =
-                        '.$this->userID.'';
+				</ul>';
 	}
     public function showNews(){
                 $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("news");
@@ -402,7 +407,7 @@ class User implements IUser{
                 return 0;
         }
     public function orderBook($bookID) {
-            die("Błąd");
+            return "Brak dostepu";
         }
     public function getData($ID){
 		return $this->Data;

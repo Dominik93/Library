@@ -32,13 +32,8 @@ class Admin extends User{
 				<li><a href="'.backToFuture().'Library/Manage/manage_books.php">Zarządzaj ksiażkami</a></li>
 				<li><a href="'.backToFuture().'Library/Manage/manage_borrows.php">Zarządaj wypożyczeniami</a></li>
 				<li><a href="'.backToFuture().'Library/Manage/manage_sessions.php">Lista zalogowanych</a></li>
-                                <li><a href="'.backToFuture().'Library/Classes/Backup.php">Backup</a></li>
                                 <li><a href="'.backToFuture().'Library/UserAction/logout.php">Wyloguj</a></li>
-			</ul>
-			session id = '.session_id().' logger = '.$_SESSION['logged'].' userid = '.$_SESSION['user_id'].' ip =
-			'.$_SESSION['ip'].' access = 
-			'.$_SESSION['acces_right'].' class.userID =
-                        '.$this->userID.'';	
+			</ul>';	
 	}
     public function showNews(){
 		$result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("news");
@@ -178,7 +173,7 @@ class Admin extends User{
                         </p>';
         }
     public function showEditAdmin($adminID){
-        $userData =  $this->getData($adminID);
+        $userData =  $this->controller->getAdminData($adminID);
         return '<div align="center"> Edytowanie admina o '.$userData['admin_id'].'
             <form action="'.backToFuture().'Library/AdminAction/edit_admin.php?id='.$userData['admin_id'].'" method="post">
                 Imie: <input type="text" id="name" name="name" value="'.$userData['admin_name'].'"/><br>
@@ -239,9 +234,15 @@ class Admin extends User{
         $borrowResult = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("borrows", null, null,
                 array(array("borrow_id","=", $borrowID, "")));
         $rowBorrow = mysqli_fetch_array($borrowResult);
-        $feeResult = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("fees", null, null, array(array("borrow_id", "=", $borrowID, "")));
-        $rowFee = mysqli_fetch_array($feeResult);
-        $borrow = $borrow.'<p>Data wypożyczenia: '.$rowBorrow['borrow_date_borrow'].'<br>Data zwrotu: '.$rowBorrow['borrow_return'].'<br>Odebrano: '.$rowBorrow['borrow_received'].'<br>Opóźnienie: '.$rowFee['borrow_delay'].'<br>Do zapłaty: '.$rowFee['amount'].'</p>';
+        $feesResult = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("fees",
+                null, null,
+                array(array("borrow_id","=", $borrowID, "")));
+        $rowF = mysqli_fetch_array($feesResult);
+        $delay = 0;
+        if($rowF['borrow_delay'] > 0){
+            $delay = $rowF['borrow_delay'];
+        }
+        $borrow = $borrow.'<p>Data wypożyczenia: '.$rowBorrow['borrow_date_borrow'].'<br>Data zwrotu: '.$rowBorrow['borrow_return'].'<br>Odebrano: '.$rowBorrow['borrow_received'].'<br>Opóźnienie: '.$delay.'<br>Do zapłaty: '.$delay*0.25.'</p>';
         $borrow = $borrow.'<p><button id="receive">Odebrano</button> <button id="delete">Zwrócono</button></p>';
         $borrow = $borrow.'<div id="reader" align="center">Czytelnik:<br>'.$this->showReaderLight($rowBorrow['borrow_reader_id']).'</div>';
         $borrow = $borrow.'<div id="book" align="center">Książka:<br>'.$this->showBookLight($rowBorrow['borrow_book_id']).'</div>';

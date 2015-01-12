@@ -53,16 +53,19 @@
                                                         $("#email").removeClass("red");
                                                         $("#email").addClass("green");
                                                         $("#status_email").html('<font color="Green">Dostępny</font>');
+                                                        return true;
                                                     }
                                                     else if(responseTxt == 'Niedostępny'){
                                                         $("#email").removeClass("green");
                                                         $("#email").addClass("red");
                                                         $("#status_email").html('<font color="Red">Niedostepny</font>');
+                                                        return false;
                                                     }
                                                     else{
                                                         $("#email").removeClass("green");
                                                         $("#email").addClass("red");
-                                                        $("#status_email").html('<font color="Red">Niepoprawny</font>');			
+                                                        $("#status_email").html('<font color="Red">Niepoprawny</font>');
+                                                        return false;
                                                     }
                                                 }
                                                 if(statusTxt=="error")
@@ -86,15 +89,18 @@
                                                         $("#login").removeClass("red");
                                                         $("#login").addClass("green");
                                                         $("#status_login").html('<font color="Green">Dostępny</font>');
+                                                        return true;
                                                     }
                                                     else if(responseTxt == 'Niedostępny'){
                                                         $("#login").removeClass("green");
                                                         $("#login").addClass("red");
                                                         $("#status_login").html('<font color="Red">Niedostepny</font>');
+                                                        return false;
                                                     }else{
                                                         $("#login").removeClass("green");
                                                         $("#login").addClass("red");
                                                         $("#status_login").html('<font color="Red">Niepoprawny</font>');
+                                                        return false;
                                                     }
                                                 }
                                                 if(statusTxt=="error")
@@ -121,6 +127,21 @@
 				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
 			});
 			$("#password1").change(function(){
+                                msg = $("#status_password");
+				if(document.getElementById("password1").value == document.getElementById("password2").value){
+					$("#password1").removeClass("red");
+					$("#password1").addClass("green");
+					$("#password2").removeClass("red");
+					$("#password2").addClass("green");
+					msg.html('<font color="Green">Prawidołowy</font>');
+					$password = true;
+				}else{
+					$("#password1").removeClass("green");
+					$("#password1").addClass("red");
+					$("#password2").removeClass("green");
+					$("#password2").addClass("red");
+					msg.html('<font color="Red">Nieprawidłowy</font>');
+				}
 				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
 			});
 			$("#password2").change(function(){

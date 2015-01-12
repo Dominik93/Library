@@ -30,15 +30,7 @@ class Reader extends User{
 				<li><a href="'.backToFuture().'Library/UserAction/profile.php">Twój profil</a></li>
 				<li><a href="'.backToFuture().'Library/UserAction/my_borrows.php">Twoje wypożyczenia</a></li>
 				<li><a href="'.backToFuture().'Library/UserAction/logout.php">Wyloguj</a></li>
-			</ul>
-                        session id =
-                        '.session_id().' logger = 
-			'.$_SESSION['logged'].' userid =
-			'.$_SESSION['user_id'].' ip =
-			'.$_SESSION['ip'].' access = 
-			'.$_SESSION['acces_right'].' class.userID =
-                        '.$this->userID.' class.active =
-                        '.$this->active.'';
+			</ul>';
 	}
     public function showNews(){
             return parent::showNews();
@@ -114,7 +106,7 @@ class Reader extends User{
         $this->controller->insertTableRecordValue("borrows",
                 array("borrow_book_id", "borrow_reader_id", "borrow_date_borrow", "borrow_return"),
                 array($bookID, $this->userID, $date, date_format($dateReturn,"y-m-d")));
-        echo 'Zamówiono książke. Odbiór w najbliższych 3 dniach';
+        echo '<p>Zamówiono książke. Odbiór w najbliższych 3 dniach</p>';
         }
 }
 ?>
