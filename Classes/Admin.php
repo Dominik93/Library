@@ -584,9 +584,7 @@ class Admin extends User{
             if(empty($publisher_house)) $publisher_house = "%";
             else $publisher_house = '%'.$publisher_house.'%';
             if(empty($edition)) $edition = "%";
-            else $edition = '%'.$edition.'%';
             if(empty($premiere)) $premiere = "%";
-            else $premiere = '%'.$premiere.'%';
             if(empty($author)) $author = "%";
             else{
                 $authorDetail = explode(" ", $author);
@@ -601,7 +599,77 @@ class Admin extends User{
             $premiere = $this->controller->clear($premiere);
             $author =  $this->controller->clear($author);
             
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("books", 
+            $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("full_books", 
+                    null,
+                    null,
+                    array(
+                        array("book_isbn","LIKE",$isbn,"AND"),
+                        array("book_title","LIKE",$title,"AND"),
+                        array("publisher_house_name","LIKE",$publisher_house,"AND"),
+                        array("book_premiere","LIKE",$premiere,"AND"),
+                        array("book_edition","LIKE",$edition,"")
+                    ),
+                    null,null,null);
+            
+            $bool = false;
+            while($rowB = mysqli_fetch_assoc($resultBook)){
+                $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors",
+                        null,null,
+                        array(
+                            array("authors.author_name","LIKE",$authorDetail[0],"AND"),
+                            array("authors.author_surname","LIKE",$authorDetail[1],"")
+                            ),
+                    null,null,null);
+                while($rowA = mysqli_fetch_assoc($resultAuthor)){
+                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors_books",null,null,
+                            array(array("author_id","=",$rowA['author_id'],"AND"),
+                                array("book_id","=",$rowB['book_id'],"")
+                                ),null,null,null); 
+                    if(mysqli_num_rows($result)>0){
+                        $bool = true;
+                    }
+                }
+                if($bool){
+                    $bool = false;
+                    $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
+                            null,
+                            array(
+                                array("authors_books", "authors_books.author_id", "authors.author_id"),
+                                array("books", "books.book_id", "authors_books.book_id")
+                                ),
+                            array(
+                                array("books.book_id","=", $rowB['book_id'], " ")
+                                ),null,null,null);
+                    if(mysqli_num_rows($resultA) == 0) {
+                        die('Brak autorów bład');
+                    }
+                    else{	
+                        $books .= '<p>
+                        ID: '.$rowB['book_id'].'<br>
+                        ISBN: '.$rowB['book_isbn'].'<br>
+                        Autor: '.$this->controller->authorsToString($resultA).'<br>
+                        Tytuł: '.$rowB['book_title'].'<br>
+                        Wydawca: '.$rowB['publisher_house_name'].'<br>
+                        Ilość stron: '.$rowB['book_nr_page'].'<br>
+                        Wydanie: '.$rowB['book_edition'].'<br>
+                        Rok wydania: '.$rowB['book_premiere'].'<br>
+                        Ilość sztuk: '.$rowB['book_number'].'<br>
+                        <a href="'.backToFuture().'Library/UserAction/book.php?book='.$rowB['book_id'].'">Przejdź do książki</a>
+                        </p>';
+                    }
+                }
+            }
+            return $books;
+    }
+            /*
+            $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors",
+                    null,
+                    null,
+                    array(array("authors.author_name","LIKE",$authorDetail[0],"AND"),
+                        array("authors.author_surname","LIKE",$authorDetail[1],"")
+                        ));
+            while($rowA = mysqli_fetch_assoc($resultAuthors)){
+                $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("books", 
                     array("books.*", "publisher_houses.publisher_house_name" ),
                     array(
                         array("publisher_houses","publisher_houses.publisher_house_id","books.book_publisher_house_id"),
@@ -609,21 +677,16 @@ class Admin extends User{
                         array("authors","authors_books.author_id","authors.author_id")
                         ),
                     array(
+                        array("authors_books.author_id","LIKE",$rowA['author_id'],"AND"),
                         array("books.book_isbn","LIKE",$isbn,"AND"),
                         array("books.book_title","LIKE",$title,"AND"),
                         array("publisher_houses.publisher_house_name","LIKE",$publisher_house,"AND"),
                         array("books.book_premiere","LIKE",$premiere,"AND"),
-                        array("books.book_edition","LIKE",$edition,"AND"),
-                        array("authors.author_name","LIKE",$authorDetail[0],"AND"),
-                        array("authors.author_surname","LIKE",$authorDetail[1],"")
+                        array("books.book_edition","LIKE",$edition,"")
                     ),
                     "books.book_id");
-            if(mysqli_num_rows($result) == 0) {
-		return 'Brak książek';
-            }
-            else{
                 while($row = mysqli_fetch_assoc($result)){
-                    $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
+                    $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
                             $arrayW = array("authors.*"),
                             $arrayJ = array(
                                         array("authors_books", "authors_books.author_id", "authors.author_id"),
@@ -633,11 +696,11 @@ class Admin extends User{
                                         array("books.book_id","=", $row['book_id'], " ")
                                         )
                             );
-                    if(mysqli_num_rows($resultAuthors) == 0) {
+                    if(mysqli_num_rows($resultA) == 0) {
                         die('Brak autorów bład');
                     }
                     else{			
-			$autorzy = $this->controller->authorsToString($resultAuthors);
+			$autorzy = $this->controller->authorsToString($resultA);
 			$books = $books.'<p>
 							ID: '.$row['book_id'].'<br>
 							ISBN: '.$row['book_isbn'].'<br>
@@ -654,7 +717,7 @@ class Admin extends User{
                 }
             }
             return $books;
-        }
+        }*/
     public function showBook($bookID, $active = "disabled") {
             $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("books", 
                     array("books.*", "publisher_houses.publisher_house_name"),

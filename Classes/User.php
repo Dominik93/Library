@@ -29,7 +29,7 @@ class User implements IUser{
 				<tr><td>Wydawca:</td><td><input type="text" value="'.@$_POST['publisher_house'].'" name="publisher_house" placeholder="Wydawca"/></td></tr>
 				<tr><td>Wydanie:</td><td><input type="text" value="'.@$_POST['edition'].'" name="edition" placeholder="Wydanie"/></td></tr>
 				<tr><td>Rok wydania:</td><td><input type="text" value="'.@$_POST['premiere'].'" name="premiere" placeholder="Rok Wydania"/></td></tr>
-				<tr><td>Autor:</td><td><input type="text" value="'.@$_POST['author'].'" name="author" placeholder="Imie Nazwisko;"/></td></tr>
+				<tr><td>Autor:</td><td><input type="text" value="'.@$_POST['author'].'" name="author" placeholder="Imie Nazwisko"/></td></tr>
 			</table>
 			<input type="submit" value="Szukaj ksiażki">
 		</form>
@@ -86,6 +86,14 @@ class User implements IUser{
 	}
     public function logout(){
             $this->controller->deleteTableWhere("sessions", array(array("session_id","=", session_id(), "")));
+            
+            $_SESSION['id'] = session_regenerate_id(true);
+            $_SESSION['logged'] = false;
+            $_SESSION['user_id'] = -1;
+            $_SESSION['acces_right'] = "user";
+            $_SESSION['ip'] = null;
+            $_SESSION['user'] = serialize(new User(new Controller()));
+            
             return '<p>Zostałeś wylogowany. Przejdz na <a href="'.backToFuture().'Library/index.php">strone główną</a>.</p>';
 	}
     public function login($login, $password) {
@@ -136,9 +144,7 @@ class User implements IUser{
             if(empty($publisher_house)) $publisher_house = "%";
             else $publisher_house = '%'.$publisher_house.'%';
             if(empty($edition)) $edition = "%";
-            else $edition = '%'.$edition.'%';
             if(empty($premiere)) $premiere = "%";
-            else $premiere = '%'.$premiere.'%';
             if(empty($author)) $author = "%";
             else{
                 $authorDetail = explode(" ", $author);
@@ -153,54 +159,62 @@ class User implements IUser{
             $premiere = $this->controller->clear($premiere);
             $author =  $this->controller->clear($author);
             
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("books", 
-                    array("books.*", "publisher_houses.publisher_house_name" ),
+            $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("full_books", 
+                    null,
+                    null,
                     array(
-                        array("publisher_houses","publisher_houses.publisher_house_id","books.book_publisher_house_id"),
-                        array("authors_books","authors_books.book_id","books.book_id"),
-                        array("authors","authors_books.author_id","authors.author_id")
-                        ),
-                    array(
-                        array("books.book_isbn","LIKE",$isbn,"AND"),
-                        array("books.book_title","LIKE",$title,"AND"),
-                        array("publisher_houses.publisher_house_name","LIKE",$publisher_house,"AND"),
-                        array("books.book_premiere","LIKE",$premiere,"AND"),
-                        array("books.book_edition","LIKE",$edition,"AND"),
-                        array("authors.author_name","LIKE",$authorDetail[0],"AND"),
-                        array("authors.author_surname","LIKE",$authorDetail[1],"")
+                        array("book_isbn","LIKE",$isbn,"AND"),
+                        array("book_title","LIKE",$title,"AND"),
+                        array("publisher_house_name","LIKE",$publisher_house,"AND"),
+                        array("book_premiere","LIKE",$premiere,"AND"),
+                        array("book_edition","LIKE",$edition,"")
                     ),
-                    "books.book_id");
-            if(mysqli_num_rows($result) == 0) {
-		return 'Brak książek';
-            }
-            else{
-                while($row = mysqli_fetch_assoc($result)){
-                    $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
-                            $arrayW = array("authors.*"),
-                            $arrayJ = array(
-                                        array("authors_books", "authors_books.author_id", "authors.author_id"),
-                                        array("books", "books.book_id", "authors_books.book_id")
-                                        ),
-                            $arrayWh = array(
-                                        array("books.book_id","=", $row['book_id'], " ")
-                                        )
-                            );
-                    if(mysqli_num_rows($resultAuthors) == 0) {
+                    null,null,null);
+            
+            $bool = false;
+            while($rowB = mysqli_fetch_assoc($resultBook)){
+                $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors",
+                        null,null,
+                        array(
+                            array("authors.author_name","LIKE",$authorDetail[0],"AND"),
+                            array("authors.author_surname","LIKE",$authorDetail[1],"")
+                            ),
+                    null,null,null);
+                while($rowA = mysqli_fetch_assoc($resultAuthor)){
+                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors_books",null,null,
+                            array(array("author_id","=",$rowA['author_id'],"AND"),
+                                array("book_id","=",$rowB['book_id'],"")
+                                ),null,null,null); 
+                    if(mysqli_num_rows($result)>0){
+                        $bool = true;
+                    }
+                }
+                if($bool){
+                    $bool = false;
+                    $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
+                            null,
+                            array(
+                                array("authors_books", "authors_books.author_id", "authors.author_id"),
+                                array("books", "books.book_id", "authors_books.book_id")
+                                ),
+                            array(
+                                array("books.book_id","=", $rowB['book_id'], " ")
+                                ),null,null,null);
+                    if(mysqli_num_rows($resultA) == 0) {
                         die('Brak autorów bład');
                     }
-                    else{			
-			$autorzy = $this->controller->authorsToString($resultAuthors);
-			$books = $books.'<p>
-							ISBN: '.$row['book_isbn'].'<br>
-							Autor: '.$autorzy.'<br>
-							Tytuł: '.$row['book_title'].'<br>
-							Wydawca: '.$row['publisher_house_name'].'<br>
-							Ilość stron: '.$row['book_nr_page'].'<br>
-							Wydanie: '.$row['book_edition'].'<br>
-							Rok wydania: '.$row['book_premiere'].'<br>
-							<a href="'.backToFuture().'Library/UserAction/book.php?book='.$row['book_id'].'">Przejdź do książki</a>
-						</p>';
-                        }
+                    else{	
+                        $books .= '<p>
+                        ISBN: '.$rowB['book_isbn'].'<br>
+                        Autor: '.$this->controller->authorsToString($resultA).'<br>
+                        Tytuł: '.$rowB['book_title'].'<br>
+                        Wydawca: '.$rowB['publisher_house_name'].'<br>
+                        Ilość stron: '.$rowB['book_nr_page'].'<br>
+                        Wydanie: '.$rowB['book_edition'].'<br>
+                        Rok wydania: '.$rowB['book_premiere'].'<br>
+                        <a href="'.backToFuture().'Library/UserAction/book.php?book='.$rowB['book_id'].'">Przejdź do książki</a>
+                        </p>';
+                    }
                 }
             }
             return $books;
@@ -219,9 +233,8 @@ class User implements IUser{
         }
     public function session(){
             
-        }
+    }
     public function timeOut(){
-            session_start();
             $_SESSION['id'] = session_regenerate_id(true);
             $_SESSION['logged'] = false;
             $_SESSION['user_id'] = -1;

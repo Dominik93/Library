@@ -19,7 +19,7 @@ class Controller{
         return $result;
     }
     
-    public function insertTableRecordValue($table, $arrayRecord, $arrayValues){
+    public function insertTableRecordValue($table, $arrayRecord, $arrayValues, $test = false){
         $this->mysql->Connect();
         $query = 'INSERT INTO '.$table.' (';
         for($i = 0; $i < count($arrayRecord); $i++){
@@ -30,22 +30,24 @@ class Controller{
             $query = $query.'"'.$arrayValues[$i].'",';
         }
         $query = substr($query, 0 , strlen($query)-1).');';
+        if($test)
         echo $query.'<br>';
         mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
         $this->mysql->Close();
     }    
-    public function deleteTableWhere($table, $arrayWhere){
+    public function deleteTableWhere($table, $arrayWhere, $test = false){
         $this->mysql->Connect();
         $query = 'DELETE FROM '.$table.' WHERE ';
         for($i = 0; $i< count($arrayWhere); $i++){
             $query = $query.' ('.$arrayWhere[$i][0].' '.$arrayWhere[$i][1].'"'.$arrayWhere[$i][2].'") '.$arrayWhere[$i][3];
         }
         $query = $query.';';
+        if($test)
         echo $query.'<br>';
         mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
 	$this->mysql->Close();
     }
-    public function selectTableWhatJoinWhereGroupOrderLimit($t, $arrayW = null, $arrayJ = null, $arrayWh = null, $groupBy = null, $orderBy = null, $limit = null){
+    public function selectTableWhatJoinWhereGroupOrderLimit($t, $arrayW = null, $arrayJ = null, $arrayWh = null, $groupBy = null, $orderBy = null, $limit = null, $test = false){
         $this->mysql->Connect();
         $query = 'SELECT ';
         if($arrayW != null){
@@ -79,6 +81,7 @@ class Controller{
             $query = $query.' LIMIT '.$limit;
         }
         $query = $query.';';
+        if($test)
         echo $query.'<br>';
 	$result = mysqli_query($this->mysql->baseLink, $query)
                 or die(mysqli_error($this->mysql->baseLink));
@@ -86,7 +89,7 @@ class Controller{
 	return $result;
         
     }
-    public function updateTableRecordValuesWhere($table, $arrayRecordValues, $arrayWh = null){
+    public function updateTableRecordValuesWhere($table, $arrayRecordValues, $arrayWh = null, $test = false){
         $this->mysql->Connect();
         $query = 'UPDATE '.$table.' SET ';
         for($i = 0; $i < count($arrayRecordValues); $i++){
@@ -100,6 +103,7 @@ class Controller{
             }
         }
         $query = $query.';';
+        if($test)
         echo $query.'<br>';
 	mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
 	$this->mysql->Close();

@@ -9,14 +9,14 @@ if(isset($_POST['editReader'])){
 }
 
 if(isset($_POST['book'])){
-    $book = "";
+    $books = "";
     $authorDetail = array();
     $authorDetail[0] = "%".$authorDetail[0]."%";
     $authorDetail[1] = "%".$authorDetail[1]."%"; 
     if(empty($_POST['ID'])) 
         $id = "%";
     else 
-        $id = '%'.$_POST['ID'].'%';
+        $id = $_POST['ID'];
     if(empty($_POST['ISBN'])) 
         $isbn = "%";
     else 
@@ -40,15 +40,15 @@ if(isset($_POST['book'])){
     if(empty($_POST['N']))
         $number = "%";
     else 
-        $number = '%'.$_POST['N'].'%';
+        $number = $_POST['N'];
     if(empty($_POST['NP']))
         $nrPage = "%";
     else 
-        $nrPage = '%'.$_POST['NP'].'%';
-    if(empty($author))
+        $nrPage = $_POST['NP'];
+    if(empty($_POST['A']))
         $author = "%";
     else{
-        $authorDetail = explode(" ", $author);
+        $authorDetail = explode(" ", $_POST['A']);
         $authorDetail[0] = "%".$authorDetail[0]."%";
         $authorDetail[1] = "%".$authorDetail[1]."%";    
     }
@@ -58,64 +58,76 @@ if(isset($_POST['book'])){
     $edition = $controller->clear($edition);
     $premiere = $controller->clear($premiere);
     $number = $controller->clear($number);
-    $author =  $controller->clear($author);
     $nrPage =  $controller->clear($nrPage);
-    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("books",
-                    array("*"),
+  
+            $resultBook = $controller->selectTableWhatJoinWhereGroupOrderLimit("full_books", 
+                    null,
+                    null,
                     array(
-                        array("publisher_houses","publisher_houses.publisher_house_id","books.book_publisher_house_id"),
-                        array("authors_books","authors_books.book_id","books.book_id"),
-                        array("authors","authors_books.author_id","authors.author_id")
-                        ),
-            array(
-                array("books.book_id","like",$id,"and"),
-                array("book_isbn","like",$isbn,"and"),
-                array("book_title","like",$title,"and"),
-                array("publisher_houses.publisher_house_name","like",$publisher_house,"and"),
-                array("book_nr_page","like",$nrPage,"and"),
-                array("book_edition","like",$edition,"and"),
-                array("book_premiere","like",$premiere,"and"),
-                array("book_number","like",$number,"and"),
-                array("authors.author_name","LIKE",$authorDetail[0],"and"),
-                array("authors.author_surname","LIKE",$authorDetail[1],"")
-                )
+                        array("book_id","LIKE",$id,"AND"),
+                        array("book_isbn","LIKE",$isbn,"AND"),
+                        array("book_title","LIKE",$title,"AND"),
+                        array("publisher_house_name","LIKE",$publisher_house,"AND"),
+                        array("book_premiere","LIKE",$premiere,"AND"),
+                        array("book_edition","LIKE",$edition,"")
+                    ),
+                    null,null,null,true);
             
-            );
-            if(mysqli_num_rows($result) == 0) {
-			$books = $books.'Brak książek';
-            }
-            else{
-			$books = $books.'
+            $bool = false;
+            $books = $books.'
 				<div id="booksTable" align="center">
 				<p><table>
 					<tr> <td>ID</td> <td>ISBN</td> <td>Tytył</td> <td>Autorzy</td> <td>Wydawca</td> <td>Ilość stron</td> <td>Wydanie</td> <td>Premiera</td> <td>Ilość egzemplarzy</td> </tr>
 				';
-			while($row = mysqli_fetch_assoc($result)) {
-				$resultAuthors = $controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
-                                    array("authors.*"),
-                                    array(
-                                                array("authors_books", "authors_books.author_id", "authors.author_id"),
-                                                array("books", "books.book_id", "authors_books.book_id")
-                                                ),
-                                    array(
-                                                array("books.book_id", "=", $row['book_id'], "")
-                                                )
-                                    );
-				$books = $books.'<tr onClick="location.href=\'http://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$row['book_id'].'\'" /> '
-                                                    . '<td>'.$row['book_id'].'</td> '
-                                                    . '<td>'.$row['book_isbn'].'</td> '
-                                                    . '<td>'.$row['book_title'].'</td> '
-                                                    . '<td>'.$controller->authorsToString($resultAuthors).'</td> '
-                                                    . '<td>'.$row['publisher_house_name'].'</td>'
-                                                    . ' <td>'.$row['book_nr_page'].'</td>'
-                                                    . ' <td>'.$row['book_edition'].'</td> '
-                                                    . '<td>'.$row['book_premiere'].'</td>'
-                                                    . ' <td>'.$row['book_number'].'</td>'
+            while($rowB = mysqli_fetch_assoc($resultBook)){
+                $resultAuthor = $controller->selectTableWhatJoinWhereGroupOrderLimit("authors",
+                        null,null,
+                        array(
+                            array("authors.author_name","LIKE",$authorDetail[0],"AND"),
+                            array("authors.author_surname","LIKE",$authorDetail[1],"")
+                            ),
+                    null,null,null,true);
+                while($rowA = mysqli_fetch_assoc($resultAuthor)){
+                    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("authors_books",null,null,
+                            array(array("author_id","=",$rowA['author_id'],"AND"),
+                                array("book_id","=",$rowB['book_id'],"")
+                                ),null,null,null,true); 
+                    if(mysqli_num_rows($result)>0){
+                        $bool = true;
+                    }
+                }
+                if($bool){
+                    $bool = false;
+                    $resultA = $controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
+                            null,
+                            array(
+                                array("authors_books", "authors_books.author_id", "authors.author_id"),
+                                array("books", "books.book_id", "authors_books.book_id")
+                                ),
+                            array(
+                                array("books.book_id","=", $rowB['book_id'], " ")
+                                ),null,null,null,true);
+                    if(mysqli_num_rows($resultA) == 0) {
+                        die('Brak autorów bład');
+                    }
+                    else{	
+                        $books = $books.'<tr onClick="location.href=\'http://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$rowB['book_id'].'\'" /> '
+                                                    . '<td>'.$rowB['book_id'].'</td> '
+                                                    . '<td>'.$rowB['book_isbn'].'</td> '
+                                                    . '<td>'.$rowB['book_title'].'</td> '
+                                                    . '<td>'.$controller->authorsToString($resultA).'</td> '
+                                                    . '<td>'.$rowB['publisher_house_name'].'</td>'
+                                                    . ' <td>'.$rowB['book_nr_page'].'</td>'
+                                                    . ' <td>'.$rowB['book_edition'].'</td> '
+                                                    . '<td>'.$rowB['book_premiere'].'</td>'
+                                                    . ' <td>'.$rowB['book_number'].'</td>'
                                                 . ' </tr>';
-			}
-			$books = $books.'</table><p><a href="'.backToFuture().'Library/AdminAction/add_book.php">Dodaj</a></p></div>';
-		}     
-    echo '<p>'.$books.'</p>';
+                    }
+                }
+            }
+            $books = $books.'</table><p><a href="'.backToFuture().'Library/AdminAction/add_book.php">Dodaj</a></p></div>';
+		
+            echo $books;
 }
 
 if(isset($_POST['borrows'])){

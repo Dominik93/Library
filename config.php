@@ -1,18 +1,14 @@
 <?php
 
 function backToFuture(){
-    $path = getcwd();
     $future= "";
-    $pathExplode = explode("/", $path);
+    $pathExplode = explode("/", getcwd());
     $i = count($pathExplode) - 1;
         while($pathExplode[$i] != "public_html"){
             array_pop($pathExplode);
             $future.="../";
             $i--;
         }
-    
-    
-    $path = implode("/", $pathExplode);
     return $future;
 }
 
@@ -122,4 +118,5 @@ if(!isset($_SESSION['logged'])) {
 	$_SESSION['acces_right'] = "user";
 	$_SESSION['user'] = serialize(new User(new Controller()));
 }
+
 ?>
