@@ -19,22 +19,19 @@
                 $(document).ready(function(){
                     $("#delete").click(function(){
                         var borrowID = <?php echo json_encode($_GET); ?>;
-                        $("#content").load("../ajax.php", {delete: borrowID['id']},
+                        $("#content").load("../ajax.php", {deleteBorrow: borrowID['id']},
                             function(responseTxt,statusTxt,xhr){
                                 if(statusTxt=="success"){
-                                    alert(responseTxt);
                                 }
                                 else if(statusTxt=="error")
                                     alert("Error: "+xhr.status+": "+xhr.statusText);
                                 });
                     });
                     $("#receive").click(function(){
-                    
                         var borrowID = <?php echo json_encode($_GET); ?>;
-                        $("#content").load("../ajax.php", {receive: borrowID['id']},
+                        $("#content").load("../ajax.php", {receiveBorrow: borrowID['id']},
                             function(responseTxt,statusTxt,xhr){
                                 if(statusTxt=="success"){
-                                    alert(responseTxt);
                                 }
                                 else if(statusTxt=="error")
                                     alert("Error: "+xhr.status+": "+xhr.statusText);

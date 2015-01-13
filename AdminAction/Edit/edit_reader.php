@@ -1,11 +1,11 @@
 <?php
 	
-    include "../config.php";	
+    include "../../config.php";	
 
     function Content(){
         $user = unserialize($_SESSION['user']);
-        if(isset($_POST['name'])){
-            echo '<div id="content">'.$user->editReader($_GET['id'], $_POST['login'],
+        if(isset($_POST['edit'])){
+            echo '<div id="content">'.$user->editReader($_POST['edit'], $_POST['login'],
                     $_POST['email'], $_POST['name'], $_POST['surname'], $_POST['address']).'</div>';
         }
         else

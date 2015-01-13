@@ -10,30 +10,72 @@ if(isset($_POST['editReader'])){
 
 if(isset($_POST['book'])){
     $book = "";
-    
-    
     $authorDetail = array();
     $authorDetail[0] = "%".$authorDetail[0]."%";
-    $authorDetail[1] = "%".$authorDetail[1]."%";  
-    
-    if(empty($author)) $_POST['A'] = "%";
-            else{
-                $authorDetail = explode(" ", $_POST['A']);
-                $authorDetail[0] = "%".$authorDetail[0]."%";
-                $authorDetail[1] = "%".$authorDetail[1]."%";    
-            }
+    $authorDetail[1] = "%".$authorDetail[1]."%"; 
+    if(empty($_POST['ID'])) 
+        $id = "%";
+    else 
+        $id = '%'.$_POST['ID'].'%';
+    if(empty($_POST['ISBN'])) 
+        $isbn = "%";
+    else 
+        $isbn = '%'.$_POST['ISBN'].'%';
+    if(empty($_POST['T'])) 
+        $title = "%";
+    else 
+        $title = '%'.$_POST['T'].'%';
+    if(empty($_POST['PH'])) 
+        $publisher_house = "%";
+    else 
+        $publisher_house = '%'.$_POST['PH'].'%';
+    if(empty($_POST['E'])) 
+        $edition = "%";
+    else
+        $edition = $_POST['E'];
+    if(empty($_POST['P'])) 
+        $premiere = "%";
+    else 
+        $premiere = '%'.$_POST['P'].'%';
+    if(empty($_POST['N']))
+        $number = "%";
+    else 
+        $number = '%'.$_POST['N'].'%';
+    if(empty($_POST['NP']))
+        $nrPage = "%";
+    else 
+        $nrPage = '%'.$_POST['NP'].'%';
+    if(empty($author))
+        $author = "%";
+    else{
+        $authorDetail = explode(" ", $author);
+        $authorDetail[0] = "%".$authorDetail[0]."%";
+        $authorDetail[1] = "%".$authorDetail[1]."%";    
+    }
+    $isbn = $controller->clear($isbn);
+    $title = $controller->clear($title);
+    $publisher_house = $controller->clear($publisher_house);
+    $edition = $controller->clear($edition);
+    $premiere = $controller->clear($premiere);
+    $number = $controller->clear($number);
+    $author =  $controller->clear($author);
+    $nrPage =  $controller->clear($nrPage);
     $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("books",
                     array("*"),
-                    array(array("publisher_houses","publisher_houses.publisher_house_id","books.book_publisher_house_id")),
+                    array(
+                        array("publisher_houses","publisher_houses.publisher_house_id","books.book_publisher_house_id"),
+                        array("authors_books","authors_books.book_id","books.book_id"),
+                        array("authors","authors_books.author_id","authors.author_id")
+                        ),
             array(
-                array("book_id","like",$_POST['ID'],"and"),
-                array("book_isbn","like",$_POST['ISBN'],"and"),
-                array("book_title","like",$_POST['T'],"and"),
-                array("publisher_houses.publisher_house_name","like",$_POST['PH'],"and"),
-                array("book_nr_page","like",$_POST['NP'],"and"),
-                array("book_edition","like",$_POST['E'],"and"),
-                array("book_premiere","like",$_POST['P'],"and"),
-                array("book_number","like",$_POST['N'],"and"),
+                array("books.book_id","like",$id,"and"),
+                array("book_isbn","like",$isbn,"and"),
+                array("book_title","like",$title,"and"),
+                array("publisher_houses.publisher_house_name","like",$publisher_house,"and"),
+                array("book_nr_page","like",$nrPage,"and"),
+                array("book_edition","like",$edition,"and"),
+                array("book_premiere","like",$premiere,"and"),
+                array("book_number","like",$number,"and"),
                 array("authors.author_name","LIKE",$authorDetail[0],"and"),
                 array("authors.author_surname","LIKE",$authorDetail[1],"")
                 )
@@ -115,14 +157,34 @@ if (isset($_POST['admin'])){
             )).'</p>';
 }
 
-if(isset($_POST['delete'])){
+if(isset($_POST['deleteBorrow'])){
     $controller->deleteTableWhere("borrows", array(array("borrow_id", "=", $_POST['delete'], "")));
     echo "<p>Książka została zwrócona</p>";
 }
 
 if(isset($_POST['deleteReader'])){
-    $controller->deleteTableWhere("readers", array(array("reader_id", "=", $_POST['deleteReader'], "")));
-    echo "<p>Usunięto czytelnika</p>";
+    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("borrows",
+            null, null, array(array("borrow_reader_id","=",$_POST['deleteReader'],"")));
+    if(mysqli_num_rows($result) > 0){
+        echo "<p>Nie można usunąć czytelnika</p>";
+    }
+    else{
+        $controller->deleteTableWhere("readers", array(array("reader_id", "=", $_POST['deleteReader'], "")));
+        echo "<p>Usunięto czytelnika</p>";
+    }
+}
+
+if(isset($_POST['deleteBook'])){
+    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("borrows",
+            null, null, array(array("borrow_book_id","=",$_POST['deleteBook'],"")));
+    if(mysqli_num_rows($result) > 0){
+        echo "<p>Nie można usunąć książki</p>";
+    }
+    else{
+        $controller->deleteTableWhere("authors_books", array(array("book_id", "=", $_POST['deleteBook'], "")));
+        $controller->deleteTableWhere("books", array(array("book_id", "=", $_POST['deleteBook'], "")));
+        echo "<p>Usunięto książke</p>";
+    }
 }
 
 if(isset($_POST['deleteAdmin'])){
@@ -160,10 +222,10 @@ if(isset($_POST['extendAccount'])){
     echo "<p>Przedłużono konto</p>";
 }
 
-if(isset($_POST['receive'])){
+if(isset($_POST['receiveBorrow'])){
     $controller->updateTableRecordValuesWhere("borrows",
             array(array("borrow_received", "1")),
-            array(array("borrow_id", "=", $_POST['receive'], "")));
+            array(array("borrow_id", "=", $_POST['receiveBorrow'], "")));
     echo "<p>Odebrano książke<p>";
 }
 

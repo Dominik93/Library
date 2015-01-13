@@ -111,7 +111,6 @@ function templateTable($controller, $array, $arrayTable, $table, $tableStyle, $l
             $return = $return.'</table></div>';
             return $return;
         }
-
 session_start();
 date_default_timezone_set("Europe/Warsaw");
 //CreateOwner();

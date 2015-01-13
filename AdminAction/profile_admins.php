@@ -20,7 +20,7 @@
                 $(document).ready(function(){
                         $("#editAdmin").click(function(){
                             var adminID = <?php echo json_encode($_GET); ?>;
-                            window.location.href = "http://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/edit_admin.php?id="+adminID['id']+"";
+                            window.location.href = "http://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/Edit/edit_admin.php?id="+adminID['id']+"";
                         });
                          
                        $("#deleteAdmin").click(function(){

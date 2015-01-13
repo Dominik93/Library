@@ -191,7 +191,6 @@ class User implements IUser{
                     else{			
 			$autorzy = $this->controller->authorsToString($resultAuthors);
 			$books = $books.'<p>
-							ID: '.$row['book_id'].'<br>
 							ISBN: '.$row['book_isbn'].'<br>
 							Autor: '.$autorzy.'<br>
 							Tytuł: '.$row['book_title'].'<br>
@@ -199,7 +198,6 @@ class User implements IUser{
 							Ilość stron: '.$row['book_nr_page'].'<br>
 							Wydanie: '.$row['book_edition'].'<br>
 							Rok wydania: '.$row['book_premiere'].'<br>
-							Ilość sztuk: '.$row['book_number'].'<br>
 							<a href="'.backToFuture().'Library/UserAction/book.php?book='.$row['book_id'].'">Przejdź do książki</a>
 						</p>';
                         }
@@ -224,11 +222,11 @@ class User implements IUser{
         }
     public function timeOut(){
             session_start();
-            $_SESSION['id'] = session_id();
+            $_SESSION['id'] = session_regenerate_id(true);
             $_SESSION['logged'] = false;
             $_SESSION['user_id'] = -1;
             $_SESSION['acces_right'] = "user";
-            $_SESSION['ip'] = null;
+            $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
             $_SESSION['user'] = serialize(new User(new Controller()));
         }
 
@@ -329,7 +327,6 @@ class User implements IUser{
                 $freeBook = $rowFreeBook['free_books'];
             }
             return '<p>
-					ID: '.$row['book_id'].'<br>
 					ISBN: '.$row['book_isbn'].'<br>
 					Tytuł: '.$row['book_title'].'<br>
 					Autorzy: '.$this->controller->authorsToString($resultAuthors).'<br>
@@ -339,7 +336,7 @@ class User implements IUser{
 					Ilość stron: '.$row['book_nr_page'].'<br>
 					Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
 					<form align="center" action="'.backToFuture().'/Library/UserAction/book.php?book='.$row['book_id'].'" method="post">
-                                        <p><input type="hidden" name="orderHidden" value="1" />		
+                                        <p><input type="hidden" name="orderHidden" value="'.$row['book_id'].'" />		
                                         <input type="submit" name="order" '.$active.' value="Zamów">
 					</form>
 				</p>';
@@ -418,6 +415,14 @@ class User implements IUser{
     }
 
     public function showEditAdmin($readerID) {
+        return "Brak dostepu";
+    }
+
+    public function editBook($id, $isbn, $title, $publisher_house, $nr_page, $edition, $premiere, $number, $author) {
+        return "Brak dostepu";
+    }
+
+    public function showEditBook($bookID) {
         return "Brak dostepu";
     }
 
