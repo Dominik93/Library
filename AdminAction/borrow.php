@@ -19,42 +19,23 @@
                 $(document).ready(function(){
                     $("#delete").click(function(){
                         var borrowID = <?php echo json_encode($_GET); ?>;
-                        $.ajax({
-                            type: "POST",
-                            url: "../ajax.php",
-                            data: "delete="+borrowID['id'],
-                            success: function(msg){
-				$("#content").ajaxComplete(function(event, request){
-                                                    if(msg == 'OK'){
-                                                        $("#content").html("<p>Oddano książke</p>");
-                                                        return true;
-                                                    else{
-                                                        $("#content").html("<p>Błąd</p>");
-                                                        return false;
-                                                    }
-                                                    });
-                            }
-			});
+                        $("#content").load("../ajax.php", {deleteBorrow: borrowID['id']},
+                            function(responseTxt,statusTxt,xhr){
+                                if(statusTxt=="success"){
+                                }
+                                else if(statusTxt=="error")
+                                    alert("Error: "+xhr.status+": "+xhr.statusText);
+                                });
                     });
                     $("#receive").click(function(){
                         var borrowID = <?php echo json_encode($_GET); ?>;
-                        $.ajax({
-                            type: "POST",
-                            url: ".../ajax.php",
-                            data: "receive="+borrowID['id'],
-                            success: function(msg){
-				$("#content").ajaxComplete(function(event, request){
-                                                    if(msg == 'OK'){
-                                                        $("#content").html("<p>Książka została wydana</p>");
-                                                        return true;
-                                                    }
-                                                    else{
-                                                        $("#content").html("<p>Błąd</p>");
-                                                        return false;
-                                                    }
-                                                    });
-                            }
-			});
+                        $("#content").load("../ajax.php", {receiveBorrow: borrowID['id']},
+                            function(responseTxt,statusTxt,xhr){
+                                if(statusTxt=="success"){
+                                }
+                                else if(statusTxt=="error")
+                                    alert("Error: "+xhr.status+": "+xhr.statusText);
+                                });
                     });
                 });
                 </script>

@@ -2,13 +2,6 @@
 
 	include "../config.php";
 	
-	session_start();
-	$_SESSION['id'] = session_id();
-	$_SESSION['logged'] = false;
-	$_SESSION['user_id'] = -1;
-	$_SESSION['acces_right'] = "user";
-	$_SESSION['ip'] = null;
-	$_SESSION['user'] = serialize(new User(new Controller()));
 	
 	function Content(){
 		$user = unserialize($_SESSION['user']);
