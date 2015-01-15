@@ -28,7 +28,7 @@
                     $(document).ready(function(){
                         $("#editBook").click(function(){
                             var bookID = <?php echo json_encode($_GET); ?>;
-                            window.location.href = "http://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/Edit/edit_book.php?id="+bookID['book']+"";
+                            window.location.href = "https://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/Edit/edit_book.php?id="+bookID['book']+"";
                         });
                          
                        $("#deleteBook").click(function(){

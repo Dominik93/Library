@@ -445,5 +445,13 @@ class User implements IUser{
         return "Brak dostepu";
     }
 
+    public function changePass($oldPass, $newPass) {
+        return "Brak dostepu";
+    }
+
+    public function changePassForm() {
+        return "Brak dostepu";
+    }
+
 }
 ?>

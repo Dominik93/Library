@@ -358,7 +358,7 @@ class Admin extends User{
                                                 array("books.book_id", "=", $row['book_id'], "")
                                                 )
                                     );
-				$books = $books.'<tr onClick="location.href=\'http://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$row['book_id'].'\'" /> '
+				$books = $books.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$row['book_id'].'\'" /> '
                                                     . '<td>'.$row['book_id'].'</td> '
                                                     . '<td>'.$row['book_isbn'].'</td> '
                                                     . '<td>'.$row['book_title'].'</td> '

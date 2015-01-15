@@ -21,7 +21,7 @@
                     $(document).ready(function(){
                         $("#editReader").click(function(){
                             var readerID = <?php echo json_encode($_GET); ?>;
-                            window.location.href = "http://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/Edit/edit_reader.php?id="+readerID['id']+"";
+                            window.location.href = "https://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/Edit/edit_reader.php?id="+readerID['id']+"";
                         });
                          
                        $("#deleteReader").click(function(){

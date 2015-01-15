@@ -51,5 +51,7 @@ interface IUser{
     public function orderBook($bookID);
     public function isActive($ID);
     public function getData($ID);
+    public function changePassForm();
+    public function changePass($oldPass, $newPass);
     }
 ?>

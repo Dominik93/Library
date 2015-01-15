@@ -111,7 +111,7 @@ if(isset($_POST['book'])){
                         die('Brak autorów bład');
                     }
                     else{	
-                        $books = $books.'<tr onClick="location.href=\'http://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$rowB['book_id'].'\'" > '
+                        $books = $books.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$rowB['book_id'].'\'" > '
                                                     . '<td>'.$rowB['book_id'].'</td> '
                                                     . '<td>'.$rowB['book_isbn'].'</td> '
                                                     . '<td>'.$rowB['book_title'].'</td> '

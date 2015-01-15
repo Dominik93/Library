@@ -77,11 +77,12 @@ class Reader extends User{
         if(mysqli_num_rows($result) == 0){
             return "<p>Aklutalnie brak wypożyczeń</p>";
         }
-        else
+        else{
             while($row = mysqli_fetch_array($result)){
                 $myBorrows = $myBorrows.$this->showBorrow($row['borrow_id']);
                 $myBorrows = $myBorrows.'<p>------------------------------------------</p>';
             }
+        }
         return $myBorrows;
     }
     public function showAccount(){
@@ -94,11 +95,36 @@ class Reader extends User{
                             Email: '.$userData['reader_email'].'<br>
                             Konto aktywne do: '.$userData['reader_active_account'].'<br>
                             Adres: '.$userData['reader_address'].'<br>	
-                            Prawa: '.$userData['acces_right_name'].'<br>					
+                            Prawa: '.$userData['acces_right_name'].'<br>
+                            <button id="changePassword">Zmien hasło</button>
 			</p>';
 	}
     public function getData($ID){
 	return $this->controller->getReaderData($this->userID);
+    }
+    public function changePassForm(){
+        return '<div id="changePass" align="center">
+			<form action="'.backToFuture().'Library/UserAction/Edit/edit_pass.php" method="post">
+				<table>
+					<tr><td>Aktualne hasło:</td><td><input id="oldPassword" type="password" value="" name="oldPassword"  required/><span id="status_email"></span></td></tr>
+					<tr><td>Nowe hasło:</td><td><input id="newPassword1" type="password" value="" name="newPassword1" required/></td></tr>
+					<tr><td>Powtórz nowe hasło:</td><td><input id="newPassword2" type="password" value="" name="newPassword2" required/><span id="status_password"></span></td></tr>
+				</table>
+				<input type="submit" id="submit" value="Zmien">
+			</form>
+		</div>';
+    }
+    public function changePass($oldPass, $newPass){
+        $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("readers",array("reader_password"),null,
+                array(array("reader_id","=",$this->userID,"")),null,null,null,True);
+        $row = mysqli_fetch_assoc($result);
+        if($row["reader_password"] != Codepass($oldPass)){
+            return "<p>Podano błedne hasło<p>";
+        }
+        $this->controller->updateTableRecordValuesWhere("readers",
+                array(array("reader_password", Codepass($newPass))),
+                array(array("reader_id","=",$this->userID,"")),true);
+        return "<p>Zmieniono hasło<p>";
     }
     public function orderBook($bookID) {
         $date = date('Y-m-d');
