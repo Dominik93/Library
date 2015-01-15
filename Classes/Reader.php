@@ -18,6 +18,7 @@ class Reader extends User{
     public function showOptionPanel(){
         if(!$this->checkSession()){
             $this->timeOut();
+            echo "session time out";
             return parent::showOptionPanel();
         }
         $this->session();

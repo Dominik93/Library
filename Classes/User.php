@@ -105,26 +105,26 @@ class User implements IUser{
 		$_SESSION['logged'] = true;
 		$_SESSION['user_id'] = $row['admin_id'];
 		$_SESSION['acces_right'] = "admin";
-		$_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
+                $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
 		$_SESSION['user'] = serialize(new Admin(new Controller(), $u = $row['admin_id']));
                 $this->controller->insertTableRecordValue("sessions", 
-                        array("session_id", "session_ip", "session_user", "session_logged", "session_acces_right"),
-                        array(session_id(), $_SERVER['REMOTE_ADDR'], $row['admin_id'], 1, "admin" ));
+                        array("session_id", "session_ip", "session_user", "session_user_agent","session_logged", "session_acces_right"),
+                        array(session_id(), $_SESSION['ip'], $row['admin_id'],$_SESSION['user_agent'], 1, "admin" ));
                 return '<p>Witaj jesteś adminem, zostałeś poprawnie zalogowany! Możesz teraz przejść na <a href="'.backToFuture().'Library/index.php">stronę główną</a>.</p>';
             }
             else{
 		$result = $this->controller->validationLoginReader($login, $password);
 		if(mysqli_num_rows($result) > 0) {
-		$row = mysqli_fetch_assoc($result);
-		$_SESSION['logged'] = true;
-		$_SESSION['user_id'] = $row['reader_id'];
-		$_SESSION['acces_right'] = "reader";
-		$_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
-		$_SESSION['user'] = serialize(new Reader($this->isActive($row['reader_id']), new Controller(), $u = $row['reader_id']));
-                $this->controller->insertTableRecordValue("sessions", 
-                        array("session_id", "session_ip", "session_user", "session_logged", "session_acces_right"),
-                        array(session_id(), $_SERVER['REMOTE_ADDR'], $row['reader_id'], 1, "reader" ));
-                return '<p>Witaj jesteś czytelnikiem, zostałeś poprawnie zalogowany! Możesz teraz przejść na <a href="'.backToFuture().'Library/index.php">stronę główną</a>.</p>';
+                    $row = mysqli_fetch_assoc($result);
+                    $_SESSION['logged'] = true;
+                    $_SESSION['user_id'] = $row['reader_id'];
+                    $_SESSION['acces_right'] = "reader";
+                    $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
+                    $_SESSION['user'] = serialize(new Reader($this->isActive($row['reader_id']), new Controller(), $u = $row['reader_id']));
+                    $this->controller->insertTableRecordValue("sessions", 
+                            array("session_id", "session_ip","session_user_agent", "session_user", "session_logged", "session_acces_right"),
+                            array(session_id(), $_SESSION['ip'], $_SESSION['user_agent'], $row['reader_id'], 1, "reader" ));
+                    return '<p>Witaj jesteś czytelnikiem, zostałeś poprawnie zalogowany! Możesz teraz przejść na <a href="'.backToFuture().'Library/index.php">stronę główną</a>.</p>';
 		}
                 else{
                     return '<p>Podany login i/lub hasło jest nieprawidłowe.</p>';
@@ -227,6 +227,11 @@ class User implements IUser{
             }
             $row = mysqli_fetch_assoc($result);
             if($row['session_ip'] != $_SERVER['REMOTE_ADDR']){
+                echo "zły adres ip";
+                return false;
+            }
+            if($row['session_user_agent'] != $_SERVER['HTTP_USER_AGENT']){
+                echo "zły user agent";
                 return false;
             }
             return true;
@@ -240,6 +245,7 @@ class User implements IUser{
             $_SESSION['user_id'] = -1;
             $_SESSION['acces_right'] = "user";
             $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
+            $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
             $_SESSION['user'] = serialize(new User(new Controller()));
         }
 

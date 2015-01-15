@@ -97,7 +97,7 @@ function templateTable($controller, $array, $arrayTable, $table, $tableStyle, $l
                    $return = $return.'<tr>'.$row['reader_id'].'</tr>';
                 }
                 else{
-                    $return = $return.'<tr onClick="location.href=\'http://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/'.$link.'='.$row[0].'\'" />';
+                    $return = $return.'<tr onClick="location.href=\'http://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/'.$link.'='.$row[0].'\'">';
                 }
 		for($i = 0; $i< count($array); $i++){
                     $return = $return.'<td>'.$row[$arrayTable[$i]].'</td>';
@@ -111,11 +111,16 @@ session_start();
 date_default_timezone_set("Europe/Warsaw");
 //CreateOwner();
 if(!isset($_SESSION['logged'])) {
+    $controller = new Controller();
+    do{
+        $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("sessions",null,null,array(array("session_id","=",  session_regenerate_id(),"")));
+    }while(mysqli_num_rows($result) > 0);
 	$_SESSION['id'] = session_id();
         $_SESSION['logged'] = false;
         $_SESSION['user_id'] = -1;
 	$_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
 	$_SESSION['acces_right'] = "user";
+        $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 	$_SESSION['user'] = serialize(new User(new Controller()));
 }
 

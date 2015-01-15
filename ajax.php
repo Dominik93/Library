@@ -111,7 +111,7 @@ if(isset($_POST['book'])){
                         die('Brak autorów bład');
                     }
                     else{	
-                        $books = $books.'<tr onClick="location.href=\'http://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$rowB['book_id'].'\'" /> '
+                        $books = $books.'<tr onClick="location.href=\'http://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$rowB['book_id'].'\'" > '
                                                     . '<td>'.$rowB['book_id'].'</td> '
                                                     . '<td>'.$rowB['book_isbn'].'</td> '
                                                     . '<td>'.$rowB['book_title'].'</td> '
@@ -133,7 +133,7 @@ if(isset($_POST['book'])){
 if(isset($_POST['borrows'])){
     echo '<p>'.templateTable($controller, array('ID','ID książki','ID czytelnika', 'Data wypożyczenia', 'Data zwrotu'),
                               array('borrow_id','borrow_book_id','borrow_reader_id', 'borrow_date_borrow', 'borrow_return'),
-                                    "borrows", "borrowsTable", "borrow.php?id", null, null,
+                                    "borrows", "borrowsTable", backToFuture().'../Library/AdminAction/borrow.php?id', null, null,
             array(
                 array("borrow_id", "like", $_POST["ID"], "and"),
                 array("borrow_book_id", "like", $_POST["IDK"], "and"),
@@ -146,7 +146,7 @@ if(isset($_POST['borrows'])){
 if (isset($_POST['reader'])){
     echo '<p>'.templateTable($controller, array("ID", "Login", "Email", "Imie", "Nazwisko"),
                                         array("reader_id", "reader_login", "reader_email", "reader_name", "reader_surname"),
-                                        "readers", "usersTable", "profile_readers.php?id", null, null,
+                                        "readers", "usersTable", backToFuture().'../Library/AdminAction/profile_readers.php?id', null, null,
             array(
                 array("reader_id","like",$_POST['ID'],"and"),
                 array("reader_login","like",$_POST['L'],"and"),
@@ -157,16 +157,16 @@ if (isset($_POST['reader'])){
 }
 
 if (isset($_POST['admin'])){
-    echo '<p>'.templateTable($controller, array("ID", "Login", "Email", "Imie", "Nazwisko"),
+    echo templateTable($controller, array("ID", "Login", "Email", "Imie", "Nazwisko"),
                                         array("admin_id", "admin_login", "admin_email", "admin_name", "admin_surname"),
-                                        "admins", "usersTable", "profile_admin.php?id", null, null,
+                                        "admins", "usersTable", backToFuture().'../Library/AdminAction/profile_admins.php?id', null, null,
             array(
                 array("admin_id","like",$_POST['ID'],"and"),
                 array("admin_login","like",$_POST['L'],"and"),
                 array("admin_email","like",$_POST['E'],"and"),
                 array("admin_name","like",$_POST['I'],"and"),
                 array("admin_surname","like",$_POST['N'],"")
-            )).'</p>';
+            ));
 }
 
 if(isset($_POST['deleteBorrow'])){

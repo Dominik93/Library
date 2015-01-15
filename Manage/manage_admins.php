@@ -13,7 +13,8 @@
 		<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="<?php echo backToFuture() ?>Library/Layout/layout.css">
                 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.0/jquery.min.js" type="text/javascript"></script>
-		<title>Biblioteka PAI</title>
+		<script src="<?php echo backToFuture() ?>Library/jquery-2.1.3.min.js" type="text/javascript"></script>
+                <title>Biblioteka PAI</title>
                 
                 <script type="text/javascript">
                
@@ -29,7 +30,7 @@
                         if(imie == "") imie = "%";
                         var nazwisko = $("#surname").val();
                         if(nazwisko == "") nazwisko = "%";
-                        $("#usersTable").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
+                        $("#table").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
                         function(responseTxt,statusTxt,xhr){
                             if(statusTxt=="success"){
                                 
@@ -49,7 +50,7 @@
                         if(imie == "") imie = "%";
                         var nazwisko = $("#surname").val();
                         if(nazwisko == "") nazwisko = "%";
-                        $("#usersTable").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
+                        $("#table").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
                         function(responseTxt,statusTxt,xhr){
                             
                         });
@@ -65,7 +66,7 @@
                         if(imie == "") imie = "%";
                         var nazwisko = $("#surname").val();
                         if(nazwisko == "") nazwisko = "%";
-                        $("#usersTable").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
+                        $("#table").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
                         function(responseTxt,statusTxt,xhr){
                             
                         });
@@ -81,7 +82,7 @@
                         if(imie == "") imie = "%";
                         var nazwisko = $("#surname").val();
                         if(nazwisko == "") nazwisko = "%";
-                        $("#usersTable").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
+                        $("#table").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
                         function(responseTxt,statusTxt,xhr){
                             
                         });
@@ -97,7 +98,7 @@
                         if(imie == "") imie = "%";
                         var nazwisko = $("#surname").val();
                         if(nazwisko == "") nazwisko = "%";
-                        $("#usersTable").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
+                        $("#table").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
                         function(responseTxt,statusTxt,xhr){
                             
                         });

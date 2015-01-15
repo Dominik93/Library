@@ -26,7 +26,8 @@
 		<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="<?php echo backToFuture() ?>Library/Layout/layout.css">
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.0/jquery.min.js" type="text/javascript"></script>
-		<title>Biblioteka PAI</title>
+		<script src="<?php echo backToFuture() ?>Library/jquery-2.1.3.min.js" type="text/javascript"></script>
+                <title>Biblioteka PAI</title>
 	
 	<script type="text/javascript">
 
@@ -46,7 +47,7 @@
                     var email = $("#email").val();
                     if(email.length > 4){
                     $("#status_email").html('Sprawdzanie dostępności.');
-                    $("#status_email").load("../ajax.php",{ email:email },
+                    $("#status_email").load("../../ajax.php",{ email:email },
                                             function(responseTxt,statusTxt,xhr){
                                                 if(statusTxt=="success"){
                                                     if(responseTxt == "OK"){
@@ -82,7 +83,7 @@
 				var login = $("#login").val();
 				if(login.length > 4){
 					$("#status_login").html('Sprawdzanie dostępności.');
-                                        $("#status_login").load("../ajax.php",{ login: login },
+                                        $("#status_login").load("../../ajax.php",{ login: login },
                                             function(responseTxt,statusTxt,xhr){
                                                 if(statusTxt=="success"){
                                                     if(responseTxt == "OK"){

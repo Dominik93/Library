@@ -67,6 +67,7 @@ class Admin extends User{
     public function showOptionPanel(){
         if(!$this->checkSession()){
             $this->timeOut();
+            echo "session time out";
             return parent::showOptionPanel();
         }
         $this->session();
@@ -101,8 +102,8 @@ class Admin extends User{
 		return $news;
 	}
     public function showLogged(){
-        return '<p>'.templateTable($this->controller, array("Session ID", "IP", "User", "Logged", "Rights", "Last action"),
-                                        array("session_id", "session_ip", "session_user", "session_logged", "session_acces_right", "session_last_action"),
+        return '<p>'.templateTable($this->controller, array("Session ID", "IP","User Agent", "User", "Logged", "Rights", "Last action"),
+                                        array("session_id", "session_ip","session_user_agent", "session_user", "session_logged", "session_acces_right", "session_last_action"),
                                         "sessions", "loggedTable", "" ).'</p>';
 	}
     public function showAccount(){
@@ -374,16 +375,16 @@ class Admin extends User{
             return $books; 
         }
     public function showAllAdmins(){
-        return '<p><div id="search" align="center"><table><tr>'
+        return '<div id="search" align="center"><table><tr>'
                 . '<td><input placeholder="ID" style="width: 60%;" type="text" id="id"></td>'
                 . '<td><input placeholder="Login" style="width: 60%;" type="text" id="login"></td>'
                 . '<td><input placeholder="Email" style="width: 60%;" type="text" id="email"></td>'
                 . '<td><input placeholder="Imie" style="width: 60%;" type="text" id="name"></td>'
                 . '<td><input placeholder="Nazwisko" style="width: 60%;" type="text" id="surname"></td>'
-                . '</tr></table></div>'.templateTable($this->controller, array("ID", "Login", "Email", "Imie", "Nazwisko"),
+                . '</tr></table></div><div id="table">'.templateTable($this->controller, array("ID", "Login", "Email", "Imie", "Nazwisko"),
                                     array("admin_id", "admin_login", "admin_email", "admin_name", "admin_surname"),
                                     "admins", "usersTable", backToFuture().'Library/AdminAction/profile_admins.php?id').
-                '<p><a href="'.backToFuture().'Library/AdminAction/Add/registration_admin.php">Dodaj</a></p>';
+                '</div><p><a href="'.backToFuture().'Library/AdminAction/Add/registration_admin.php">Dodaj</a></p>';
         }
     public function addAdmin($name, $surname, $password1, $password2, $email, $login) {
             $name = $this->controller->clear($name);
@@ -661,63 +662,6 @@ class Admin extends User{
             }
             return $books;
     }
-            /*
-            $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors",
-                    null,
-                    null,
-                    array(array("authors.author_name","LIKE",$authorDetail[0],"AND"),
-                        array("authors.author_surname","LIKE",$authorDetail[1],"")
-                        ));
-            while($rowA = mysqli_fetch_assoc($resultAuthors)){
-                $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("books", 
-                    array("books.*", "publisher_houses.publisher_house_name" ),
-                    array(
-                        array("publisher_houses","publisher_houses.publisher_house_id","books.book_publisher_house_id"),
-                        array("authors_books","authors_books.book_id","books.book_id"),
-                        array("authors","authors_books.author_id","authors.author_id")
-                        ),
-                    array(
-                        array("authors_books.author_id","LIKE",$rowA['author_id'],"AND"),
-                        array("books.book_isbn","LIKE",$isbn,"AND"),
-                        array("books.book_title","LIKE",$title,"AND"),
-                        array("publisher_houses.publisher_house_name","LIKE",$publisher_house,"AND"),
-                        array("books.book_premiere","LIKE",$premiere,"AND"),
-                        array("books.book_edition","LIKE",$edition,"")
-                    ),
-                    "books.book_id");
-                while($row = mysqli_fetch_assoc($result)){
-                    $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
-                            $arrayW = array("authors.*"),
-                            $arrayJ = array(
-                                        array("authors_books", "authors_books.author_id", "authors.author_id"),
-                                        array("books", "books.book_id", "authors_books.book_id")
-                                        ),
-                            $arrayWh = array(
-                                        array("books.book_id","=", $row['book_id'], " ")
-                                        )
-                            );
-                    if(mysqli_num_rows($resultA) == 0) {
-                        die('Brak autorów bład');
-                    }
-                    else{			
-			$autorzy = $this->controller->authorsToString($resultA);
-			$books = $books.'<p>
-							ID: '.$row['book_id'].'<br>
-							ISBN: '.$row['book_isbn'].'<br>
-							Autor: '.$autorzy.'<br>
-							Tytuł: '.$row['book_title'].'<br>
-							Wydawca: '.$row['publisher_house_name'].'<br>
-							Ilość stron: '.$row['book_nr_page'].'<br>
-							Wydanie: '.$row['book_edition'].'<br>
-							Rok wydania: '.$row['book_premiere'].'<br>
-							Ilość sztuk: '.$row['book_number'].'<br>
-							<a href="'.backToFuture().'Library/UserAction/book.php?book='.$row['book_id'].'">Przejdź do książki</a>
-						</p>';
-                        }
-                }
-            }
-            return $books;
-        }*/
     public function showBook($bookID, $active = "disabled") {
             $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("books", 
                     array("books.*", "publisher_houses.publisher_house_name"),
