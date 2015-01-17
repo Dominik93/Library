@@ -40,9 +40,9 @@ interface IUser{
     public function showBookLight($bookID);
     public function showBorrow($borrowID);
     public function showMyBorrows();
-    public function addReader($login, $email, $name, $surname, $password1, $password2, $adres);
+    public function addReader($login, $email, $name, $surname, $password1, $password2, $country, $city, $street, $post_code, $nr_house);
     public function editReader($id, $login, $email, $name, $surname, $adres);
-    public function addBook($isbn, $title, $publisher_house, $nr_page, $edition, $premiere, $number, $author);
+    public function addBook($isbn, $original_title, $title, $original_punblisher_house, $original_country,  $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $author, $translator);
     public function editBook($id,$isbn, $title, $publisher_house, $nr_page, $edition, $premiere, $number, $author);
     public function addAdmin($name, $surname, $password1, $password2, $email, $login);
     public function editAdmin($id, $name, $surname, $email, $login);

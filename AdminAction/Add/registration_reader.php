@@ -6,13 +6,18 @@
 	function Content(){
             $user = unserialize($_SESSION['user']);
             if(isset($_POST['login'])) {
+                var_dump($_POST);
                 echo '<div id="content">'.$user->addReader($_POST['login'],
 					$_POST['email'],
 					$_POST['name'],
 					$_POST['surname'],
 					$_POST['password1'],
 					$_POST['password2'],
-					$_POST['adres']).'</div>';			
+					$_POST['country'],
+                                        $_POST['city'],
+                                        $_POST['street'],
+                                        $_POST['post_code'],
+                                        $_POST['nr_house']).'</div>';			
             }
             else{
                 echo '<div id="content">'.$user->showRegistrationReader().'</div>';
@@ -37,8 +42,12 @@
 				document.getElementById("login").value != "" &&
 				document.getElementById("password1").value != "" &&
 				document.getElementById("password2").value != "" &&
-				document.getElementById("adres").value != "" &&
-				document.getElementById("email").value != "" 
+				document.getElementById("email").value != "" &&
+                                document.getElementById("city").value != "" &&
+				document.getElementById("country").value != "" &&
+				document.getElementById("post_code").value != "" &&
+				document.getElementById("street").value != "" &&
+				document.getElementById("nr_house").value != "" 
 				) return true;
 			return false;
 		}
@@ -121,12 +130,7 @@
 		
 			document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
 			
-			$("#surname").change(function(){
-				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
-			});
-			$("#name").change(function(){
-				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
-			});
+			
 			$("#password1").change(function(){
                                 msg = $("#status_password");
 				if(document.getElementById("password1").value == document.getElementById("password2").value){
@@ -147,7 +151,7 @@
 			});
 			$("#password2").change(function(){
 				msg = $("#status_password");
-				if(document.getElementById("password1").value == document.getElementById("password2").value){
+                                if(document.getElementById("password1").value == document.getElementById("password2").value){
 					$("#password1").removeClass("red");
 					$("#password1").addClass("green");
 					$("#password2").removeClass("red");
@@ -163,15 +167,31 @@
 				}
 				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
 			});
-			$("#adres").change(function(){
+                        $("#surname").change(function(){
 				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
 			});
-			
+			$("#name").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
+			$("#country").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
+                        $("#city").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
+                        $("#street").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
+                        $("#nr_house").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
+                        $("#post_code").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
 			$("#login").change(function(){
 				$login = !checkLogin();
 				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
 			});
-			
 			$("#email").change(function(){
 				$email = !checkEmail();
 				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;

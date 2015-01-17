@@ -8,7 +8,7 @@ class Reader extends User{
         $this->active = $a;
     }
     public function session(){
-        $this->controller->updateTableRecordValuesWhere("sessions", 
+        $this->controller->updateTableRecordValuesWhere(false,"sessions", 
                 array(array("session_last_action", date('Y-m-d H:i:s'))),
                 array(
                     array("session_user", "=", $this->userID, "AND"),
@@ -37,7 +37,7 @@ class Reader extends User{
             return parent::showNews();
         }
     public function showBook($bookID){
-            $resultFreeBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("free_books", 
+            $resultFreeBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "free_books", 
                         array("*"),
                         null,
                         array(
@@ -51,11 +51,11 @@ class Reader extends User{
         }
     public function showBorrow($borrowID){
         $borrow = "";
-        $borrowResult = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("borrows",
+        $borrowResult = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "borrows",
                 null, null,
                 array(array("borrow_id","=", $borrowID, "")));
         $row = mysqli_fetch_array($borrowResult);
-        $feesResult = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("fees",
+        $feesResult = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "fees",
                 null, null,
                 array(array("borrow_id","=", $borrowID, "")));
         $rowF = mysqli_fetch_array($feesResult);
@@ -73,7 +73,7 @@ class Reader extends User{
     }  
     public function showMyBorrows(){
         $myBorrows = "";
-        $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("borrows", null, null, array(array("borrow_reader_id","=", $this->userID, "")));
+        $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "borrows", null, null, array(array("borrow_reader_id","=", $this->userID, "")));
         if(mysqli_num_rows($result) == 0){
             return "<p>Aklutalnie brak wypożyczeń</p>";
         }
@@ -115,13 +115,13 @@ class Reader extends User{
 		</div>';
     }
     public function changePass($oldPass, $newPass){
-        $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("readers",array("reader_password"),null,
+        $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "readers",array("reader_password"),null,
                 array(array("reader_id","=",$this->userID,"")),null,null,null,True);
         $row = mysqli_fetch_assoc($result);
         if($row["reader_password"] != Codepass($oldPass)){
             return "<p>Podano błedne hasło<p>";
         }
-        $this->controller->updateTableRecordValuesWhere("readers",
+        $this->controller->updateTableRecordValuesWhere(false,"readers",
                 array(array("reader_password", Codepass($newPass))),
                 array(array("reader_id","=",$this->userID,"")),true);
         return "<p>Zmieniono hasło<p>";
@@ -130,7 +130,7 @@ class Reader extends User{
         $date = date('Y-m-d');
         $dateReturn = date_create(date('Y-m-d'));
 	date_add($dateReturn, date_interval_create_from_date_string('60 days'));
-        $this->controller->insertTableRecordValue("borrows",
+        $this->controller->insertTableRecordValue(false,"borrows",
                 array("borrow_book_id", "borrow_reader_id", "borrow_date_borrow", "borrow_return"),
                 array($bookID, $this->userID, $date, date_format($dateReturn,"y-m-d")));
         echo '<p>Zamówiono książke. Odbiór w najbliższych 3 dniach</p>';

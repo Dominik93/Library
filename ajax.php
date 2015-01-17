@@ -10,6 +10,7 @@ if(isset($_POST['editReader'])){
 
 if(isset($_POST['book'])){
     $books = "";
+    $controller->connect();
     $authorDetail = array();
     $authorDetail[0] = "%".$authorDetail[0]."%";
     $authorDetail[1] = "%".$authorDetail[1]."%"; 
@@ -60,7 +61,7 @@ if(isset($_POST['book'])){
     $number = $controller->clear($number);
     $nrPage =  $controller->clear($nrPage);
   
-            $resultBook = $controller->selectTableWhatJoinWhereGroupOrderLimit("full_books", 
+            $resultBook = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "full_books", 
                     null,
                     null,
                     array(
@@ -80,7 +81,7 @@ if(isset($_POST['book'])){
 					<tr> <td>ID</td> <td>ISBN</td> <td>Tytył</td> <td>Autorzy</td> <td>Wydawca</td> <td>Ilość stron</td> <td>Wydanie</td> <td>Premiera</td> <td>Ilość egzemplarzy</td> </tr>
 				';
             while($rowB = mysqli_fetch_assoc($resultBook)){
-                $resultAuthor = $controller->selectTableWhatJoinWhereGroupOrderLimit("authors",
+                $resultAuthor = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors",
                         null,null,
                         array(
                             array("authors.author_name","LIKE",$authorDetail[0],"AND"),
@@ -88,7 +89,7 @@ if(isset($_POST['book'])){
                             ),
                     null,null,null,true);
                 while($rowA = mysqli_fetch_assoc($resultAuthor)){
-                    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("authors_books",null,null,
+                    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors_books",null,null,
                             array(array("author_id","=",$rowA['author_id'],"AND"),
                                 array("book_id","=",$rowB['book_id'],"")
                                 ),null,null,null,true); 
@@ -98,7 +99,7 @@ if(isset($_POST['book'])){
                 }
                 if($bool){
                     $bool = false;
-                    $resultA = $controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
+                    $resultA = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
                             null,
                             array(
                                 array("authors_books", "authors_books.author_id", "authors.author_id"),
@@ -126,7 +127,7 @@ if(isset($_POST['book'])){
                 }
             }
             $books = $books.'</table><p><a href="'.backToFuture().'Library/AdminAction/add_book.php">Dodaj</a></p></div>';
-		
+		$controller->close();
             echo $books;
 }
 
@@ -156,7 +157,8 @@ if (isset($_POST['reader'])){
             )).'</p>';
 }
 
-if (isset($_POST['admin'])){
+if (isset($_POST['admin']))
+    {
     echo templateTable($controller, array("ID", "Login", "Email", "Imie", "Nazwisko"),
                                         array("admin_id", "admin_login", "admin_email", "admin_name", "admin_surname"),
                                         "admins", "usersTable", backToFuture().'../Library/AdminAction/profile_admins.php?id', null, null,
@@ -170,52 +172,63 @@ if (isset($_POST['admin'])){
 }
 
 if(isset($_POST['deleteBorrow'])){
-    $controller->deleteTableWhere("borrows", array(array("borrow_id", "=", $_POST['delete'], "")));
+    $controller->connect();
+    $controller->deleteTableWhere(false,"borrows", array(array("borrow_id", "=", $_POST['delete'], "")));
     echo "<p>Książka została zwrócona</p>";
+    $controller->close();
 }
 
 if(isset($_POST['deleteReader'])){
-    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("borrows",
+    $controller->connect();
+    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "borrows",
             null, null, array(array("borrow_reader_id","=",$_POST['deleteReader'],"")));
     if(mysqli_num_rows($result) > 0){
         echo "<p>Nie można usunąć czytelnika</p>";
     }
     else{
-        $controller->deleteTableWhere("readers", array(array("reader_id", "=", $_POST['deleteReader'], "")));
+        $controller->deleteTableWhere(false,"readers", array(array("reader_id", "=", $_POST['deleteReader'], "")));
         echo "<p>Usunięto czytelnika</p>";
     }
+    $controller->close();
 }
 
 if(isset($_POST['deleteBook'])){
-    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("borrows",
+    $controller->connect();
+    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "borrows",
             null, null, array(array("borrow_book_id","=",$_POST['deleteBook'],"")));
     if(mysqli_num_rows($result) > 0){
         echo "<p>Nie można usunąć książki</p>";
     }
     else{
-        $controller->deleteTableWhere("authors_books", array(array("book_id", "=", $_POST['deleteBook'], "")));
-        $controller->deleteTableWhere("books", array(array("book_id", "=", $_POST['deleteBook'], "")));
+        $controller->deleteTableWhere(false,"authors_books", array(array("book_id", "=", $_POST['deleteBook'], "")));
+        $controller->deleteTableWhere(false,"books", array(array("book_id", "=", $_POST['deleteBook'], "")));
         echo "<p>Usunięto książke</p>";
     }
+    $controller->close();
 }
 
 if(isset($_POST['deleteAdmin'])){
-    $controller->deleteTableWhere("admins", array(array("admin_id", "=", $_POST['deleteAdmin'], "")));
+    $controller->connect();
+    $controller->deleteTableWhere(false,"admins", array(array("admin_id", "=", $_POST['deleteAdmin'], "")));
+    $controller->close();
     echo "<p>Usunięto admina</p>";
 }
 
 if(isset($_POST['newPassword'])){
+    $controller->connect();
     $pass = uniqid("reader".$_POST['newPassword'].'.');
-    $controller->updateTableRecordValuesWhere("readers",
+    $controller->updateTableRecordValuesWhere(false,"readers",
             array(array("reader_password", Codepass($pass))),
             array(array("reader_id", "=", $_POST['newPassword'], "")));
+    $controller->close();
     echo "<p>Nowe hasło to: ".$pass.'</p>';
 }
 
 if(isset($_POST['extendAccount'])){
+    $controller->connect();
     $date = date_create(date('Y-m-d'));
     date_add($date, date_interval_create_from_date_string('365 days')); 
-    $resultAccessRgihts = $controller->selectTableWhatJoinWhereGroupOrderLimit("acces_rights", 
+    $resultAccessRgihts = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "acces_rights", 
                             array("*"),
                             null,
                             array(array("acces_right_name","=", "activeReader", "")));
@@ -223,39 +236,44 @@ if(isset($_POST['extendAccount'])){
         die('<p>Błąd</p>');
     }
     $rowAR = mysqli_fetch_assoc($resultAccessRgihts);
-    $controller->updateTableRecordValuesWhere("readers",
+    $controller->updateTableRecordValuesWhere(false,"readers",
             array(array("reader_acces_right_id", $rowAR['acces_right_id'] )),
             array(array("reader_id", "=", $_POST['extendAccount'], ""))
             );
-    $controller->updateTableRecordValuesWhere("readers", 
+    $controller->updateTableRecordValuesWhere(false,"readers", 
             array(array("reader_active_account", date_format($date,"y-m-d"))),
             array(array("reader_id", "=", $_POST['extendAccount'], ""))
             );
+    $controller->close();
     echo "<p>Przedłużono konto</p>";
 }
 
 if(isset($_POST['receiveBorrow'])){
-    $controller->updateTableRecordValuesWhere("borrows",
+    $controller->connect();
+    $controller->updateTableRecordValuesWhere(false,"borrows",
             array(array("borrow_received", "1")),
             array(array("borrow_id", "=", $_POST['receiveBorrow'], "")));
+    $controller->close();
     echo "<p>Odebrano książke<p>";
 }
 
 if(isset($_POST['login'])){
+    $controller->connect();
 	$login = $_POST['login'];
 	$login = $controller->clear($login);
 	$dostepny = true;
-	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit("readers", null, null,
+	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "readers", null, null,
                 array(array("reader_login","=",$login,"")));
 	
 	if(mysqli_num_rows($result)){
 		$dostepny = false;
 	}
-	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit("admins", null, null,
+	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "admins", null, null,
                 array(array("admin_login","=",$login,"")));
 	if(mysqli_num_rows($result)){
 		$dostepny = false;
 	}
+        $controller->close();
 	if(!$dostepny){
 		echo 'Niedostępny';
 	}else{
@@ -264,6 +282,7 @@ if(isset($_POST['login'])){
 }
 
 if(isset($_POST['email'])){
+        $controller->connect();
 	$email = $_POST['email'];
 	$email = $controller->clear($email);
 	$dostepny = true;
@@ -271,16 +290,17 @@ if(isset($_POST['email'])){
 	if (filter_var($email, FILTER_VALIDATE_EMAIL) == false){
 		$poprawny = false;
 	}
-	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit("readers", null, null,
+	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "readers", null, null,
                 array(array("reader_email","=",$email,"")));
 	if(mysqli_num_rows($result) > 0){
 		$dostepny = false;
 	}
-	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit("admins", null, null,
+	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "admins", null, null,
                 array(array("admin_email","=",$email,"")));
 	if(mysqli_num_rows($result) > 0){
 		$dostepny = false;
 	}
+        $controller->close();
 	if(!$poprawny){
 		echo 'Niepoprawny';
 	}else if(!$dostepny){

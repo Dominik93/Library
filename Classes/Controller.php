@@ -10,17 +10,22 @@ class Controller{
         else
             $this->mysql = new Mysql('localhost', 'dslusarz', 'kasztan', 'dslusarz_baza');
     }
-
-    public function doQuery($query){
+    
+    public function connect(){
         $this->mysql->Connect();
+    }
+    
+    public function close(){
+        $this->mysql->Close();
+    }
+    
+    public function doQuery($query){
         //echo $query;
         $result = mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
-	$this->mysql->Close();
         return $result;
     }
     
-    public function insertTableRecordValue($table, $arrayRecord, $arrayValues, $test = false){
-        $this->mysql->Connect();
+    public function insertTableRecordValue($test, $table, $arrayRecord, $arrayValues){
         $query = 'INSERT INTO '.$table.' (';
         for($i = 0; $i < count($arrayRecord); $i++){
             $query = $query.$arrayRecord[$i].',';
@@ -33,10 +38,8 @@ class Controller{
         if($test)
         echo $query.'<br>';
         mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
-        $this->mysql->Close();
     }    
-    public function deleteTableWhere($table, $arrayWhere, $test = false){
-        $this->mysql->Connect();
+    public function deleteTableWhere($test, $table, $arrayWhere){
         $query = 'DELETE FROM '.$table.' WHERE ';
         for($i = 0; $i< count($arrayWhere); $i++){
             $query = $query.' ('.$arrayWhere[$i][0].' '.$arrayWhere[$i][1].'"'.$arrayWhere[$i][2].'") '.$arrayWhere[$i][3];
@@ -45,10 +48,8 @@ class Controller{
         if($test)
         echo $query.'<br>';
         mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
-	$this->mysql->Close();
     }
-    public function selectTableWhatJoinWhereGroupOrderLimit($t, $arrayW = null, $arrayJ = null, $arrayWh = null, $groupBy = null, $orderBy = null, $limit = null, $test = false){
-        $this->mysql->Connect();
+    public function selectTableWhatJoinWhereGroupOrderLimit($test, $t, $arrayW = null, $arrayJ = null, $arrayWh = null, $groupBy = null, $orderBy = null, $limit = null){
         $query = 'SELECT ';
         if($arrayW != null){
             for($i = 0; $i< count($arrayW); $i++){
@@ -85,12 +86,10 @@ class Controller{
         echo $query.'<br>';
 	$result = mysqli_query($this->mysql->baseLink, $query)
                 or die(mysqli_error($this->mysql->baseLink));
-	$this->mysql->Close();
 	return $result;
         
     }
-    public function updateTableRecordValuesWhere($table, $arrayRecordValues, $arrayWh = null, $test = false){
-        $this->mysql->Connect();
+    public function updateTableRecordValuesWhere($test, $table, $arrayRecordValues, $arrayWh = null){
         $query = 'UPDATE '.$table.' SET ';
         for($i = 0; $i < count($arrayRecordValues); $i++){
             $query = $query.' '.$arrayRecordValues[$i][0].' = "'.$arrayRecordValues[$i][1].'",';
@@ -106,7 +105,6 @@ class Controller{
         if($test)
         echo $query.'<br>';
 	mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
-	$this->mysql->Close();
     }
     
     public function clear($text){
@@ -114,43 +112,32 @@ class Controller{
             $text = stripslashes($text);
 	}
 	$text = trim($text);
-        $this->mysql->Connect();
 	$text = mysqli_real_escape_string($this->mysql->baseLink,$text) or die(mysqli_error($this->mysql->baseLink));
-        $this->mysql->Close();
 	$text = htmlspecialchars($text);
 	return $text;
     }
     public function validationLoginAdmin($login, $password){
-	$this->mysql->Connect();
 	$query = 'SELECT admin_id FROM admins WHERE admin_login = "'.$login.'" AND admin_password = "'.Codepass($password).'" LIMIT 1;';
         $result = mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
-	$this->mysql->Close();
 	return $result;
 	}
     public function validationLoginReader($login, $password){
-	$this->mysql->Connect();
         $query = 'SELECT reader_id FROM readers WHERE reader_login = "'.$login.'" AND reader_password = "'.Codepass($password).'" LIMIT 1;';
 	$result = mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
-	$this->mysql->Close();
 	return $result;
 	}
     public function getReaderData($reader_id = -1){
-	$this->mysql->Connect();
 	if($reader_id == -1) {
             $reader_id = $_SESSION['user_id'];
 	}
-        $query = 'SELECT readers.*, acces_rights.acces_right_name FROM readers
-		join acces_rights on acces_rights.acces_right_id = readers.reader_acces_right_id
-		WHERE reader_id = "'.$reader_id.'" LIMIT 1;';
+        $query = 'SELECT * FROM view_readers WHERE reader_id = "'.$reader_id.'" LIMIT 1;';
 	$result = mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
-	$this->mysql->Close();
 	if(!$result){
             return false;
 	}
 	return mysqli_fetch_assoc($result);
     }
     public function getAdminData($admin_id = -1){
-	$this->mysql->Connect();
 	if($admin_id == -1) {
             $admin_id = $_SESSION['user_id'];
 	}
@@ -158,17 +145,14 @@ class Controller{
 		join acces_rights on acces_rights.acces_right_id = admins.admin_acces_right_id
 		WHERE admin_id = "'.$admin_id.'" LIMIT 1;';
 	$result = mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
-	$this->mysql->Close();
 	if(!$result){
 		return false;
 	}
 	return mysqli_fetch_assoc($result);
     }
     public function userExist($from, $record, $login, $email){
-	$this->mysql->Connect();
         $query = 'SELECT Count('.$record.'_id) FROM '.$from.' WHERE '.$record.'_login = "'.$login.'" OR '.$record.'_email = "'.$email.'";';
 	$result = mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
-	$this->mysql->Close();
         $row = mysqli_fetch_row($result);
         if($row[0] > 0) {
             return true;
@@ -186,6 +170,18 @@ class Controller{
             }
         }
         return substr($autorzy,0, strlen($autorzy)-2);
+    }
+    public function translatorsToString($resultTranslators){
+        $transtalors = "";
+	if(mysqli_num_rows($resultTranslators) == 0) {
+            return "";
+	}
+        else{		
+            while($rowT = mysqli_fetch_assoc($resultTranslators)) {
+		$transtalors .= $rowT['translator_name'].' '.$rowT['translator_surname'].', ';
+            }
+        }
+        return substr($transtalors,0, strlen($transtalors)-2);
     }
 }
 

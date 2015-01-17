@@ -4,7 +4,7 @@
 
     function Content(){
         $user = unserialize($_SESSION['user']);
-	echo '<div id="content">'.$user->showAdmin($_GET[id]).'</div>';
+	echo '<div id="content">'.$user->showAdmin($_GET['id']).'</div>';
     }
 ?>
 

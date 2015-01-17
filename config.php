@@ -23,64 +23,26 @@ function Codepass($password) {
 
 function CreateOwner(){
 	$controller = new Controller();
-	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit("admins", array("admin_login"),null,array(array("admin_login","=","dslusarz","")));
+        $controller->connect();
+	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "admins", array("admin_login"),null,array(array("admin_login","=","dslusarz","")));
 	if(mysqli_num_rows($result) == 0){
-            $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("acces_rights",null,null,array(array("acces_right_name", "=", "admin","")));
+            $result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "acces_rights",null,null,array(array("acces_right_name", "=", "admin","")));
 
             if(mysqli_num_rows($result) == 0) {
                 die('Błąd');
             }
             $row = mysqli_fetch_assoc($result);
 
-            $controller->insertTableRecordValue("admins",
+            $controller->insertTableRecordValue(false,"admins",
                     array("admin_login", "admin_password", "admin_email", "admin_name", "admin_surname", "admin_acces_right_id"),
                     array("dslusarz", Codepass('wiosna'), "slusarz.dominik@gmail.com", "Dominik", "Ślusarz", $row['acces_right_id']));
         }
+        $controller->close();
 }
 
-function templateForm($name, $arrayDiv, $arrayForm, $arrayTable, $arrayFormInput, $arraySubmit, $arraySpan = null){
-            $form = '<div';
-            for($i = 0; $i < count($arrayDiv); $i++){
-                $form = $form.' '.$arrayDiv[$i][0].' '.$arrayDiv[$i][1].'"'.$arrayDiv[$i][2].'"';
-            }
-            $form = $form.'><p>'.$name.'</p>';
-            $form = $form.'<form';
-            for($i = 0; $i < count($arrayForm); $i++){
-                $form = $form.' '.$arrayForm[$i][0].' '.$arrayForm[$i][1].'"'.$arrayForm[$i][2].'"';
-            }
-            $form = $form.'>';
-            // "isbn" ""
-            $form = $form.'<table';
-            for($i = 0; $i < count($arrayTable); $i++){
-                $form = $form.' '.$arrayTable[$i][0].' '.$arrayTable[$i][1].'"'.$arrayTable[$i][2].'"';
-            }
-            $form = $form.'>';
-            for($i = 0; $i < count($arrayFormInput); $i++){
-                $form = $form.'<tr>';
-                $form = $form.'<td><input';
-                for($j = 0; $j < count($arrayFormInput[$i]); $j++){
-                    $form = $form.' '.$arrayFormInput[$i][$j][0].''.$arrayFormInput[$i][$j][1].'"'.$arrayFormInput[$i][$j][2].'"';
-                }  
-                if($arraySpan != null){
-                    $form = $form.'/>'.$arraySpan[$i].'</td>';
-                }
-                else{
-                    $form = $form.'/></td>';
-                }    
-                $form = $form.'</tr>';
-            }
-            $form = $form.'</table>';
-            $form = $form.'<input';
-            for($i = 0; $i < count($arraySubmit); $i++){
-                $form = $form.' '.$arraySubmit[$i][0].' '.$arraySubmit[$i][1].'"'.$arraySubmit[$i][2].'"';
-            }
-            $form = $form.'/>';
-            $form = $form.'</form></div>';
-            return $form;
-        }
-
 function templateTable($controller, $array, $arrayTable, $table, $tableStyle, $link = null, $what = null, $join = null, $where = null){
-            $result = $controller->selectTableWhatJoinWhereGroupOrderLimit($table, $what, $join, $where);
+            $controller->connect();
+            $result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, $table, $what, $join, $where);
             $return = "";
             $return .= '<div id="'.$tableStyle.'" align="center">
                             <table>';
@@ -105,6 +67,7 @@ function templateTable($controller, $array, $arrayTable, $table, $tableStyle, $l
                 $return = $return.'<tr>';
             }
             $return = $return.'</table></div>';
+            $controller->close();
             return $return;
         }
 session_start();
@@ -112,8 +75,9 @@ date_default_timezone_set("Europe/Warsaw");
 //CreateOwner();
 if(!isset($_SESSION['logged'])) {
     $controller = new Controller();
+    $controller->connect();
     do{
-        $result = $controller->selectTableWhatJoinWhereGroupOrderLimit("sessions",null,null,array(array("session_id","=",  session_regenerate_id(),"")));
+        $result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "sessions",null,null,array(array("session_id","=",  session_regenerate_id(),"")));
     }while(mysqli_num_rows($result) > 0);
 	$_SESSION['id'] = session_id();
         $_SESSION['logged'] = false;
@@ -122,6 +86,7 @@ if(!isset($_SESSION['logged'])) {
 	$_SESSION['acces_right'] = "user";
         $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 	$_SESSION['user'] = serialize(new User(new Controller()));
+    $controller->close();
 }
 
 ?>

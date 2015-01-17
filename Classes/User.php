@@ -52,51 +52,37 @@ class User implements IUser{
                 . '</ul></p>';
     }
     public function showLogin(){
-            return templateForm("Logowanie",
-                    array(
-                        array("id", "=", "login"),
-                        array("align", "=", "center")
-                    ),
-                    array(
-                        array("action", "=", backToFuture().'Library/UserAction/login.php'),
-                        array("method", "=", "post")
-                    ),
-                    array(),
-                    array(
-                        array(
-                            array("type","=","text"),
-                            array("value","=", @$_POST["login"]),
-                            array("name","=","login"),
-                            array("placeholder","=","Login"),
-                            array("required","","")
-                            ),
-                        array(
-                            array("type","=","password"),
-                            array("value","=",@$_POST["password"]),
-                            array("name","=","password"),
-                            array("placeholder","=","Hasło"),
-                            array("required","","")
-                            )
-                        ),
-                    array(
-                        array("type", "=", "submit"),
-                        array("value", "=", "Zaloguj się")
-                        )
-                    );
+        return '<div align="center" id="login">' 
+                    . '<form action="'.backToFuture().'Library/UserAction/login.php" method="post">'
+                        . '<table>'
+                            . '<tr align="center">'
+                                . '<td>LOGOWANIE</td>'
+                            . '</tr>'
+                            . '<tr>'
+                                . '<td><input type="text" required placeholder="Login" name="login" value=""></td>'
+                            . '</tr>'
+                            . '<tr>'
+                                . '<td><input type="password" required placeholder="Hasło" name="password" value=""></td>'
+                            . '</tr>'
+                        . '</table>'
+                        . '<input type="submit" value="Zaloguj się">'
+                    . '</form>'
+                . '</div>';
 	}
     public function logout(){
-            $this->controller->deleteTableWhere("sessions", array(array("session_id","=", session_id(), "")));
-            
-            $_SESSION['id'] = session_regenerate_id(true);
-            $_SESSION['logged'] = false;
-            $_SESSION['user_id'] = -1;
-            $_SESSION['acces_right'] = "user";
-            $_SESSION['ip'] = null;
-            $_SESSION['user'] = serialize(new User(new Controller()));
-            
-            return '<p>Zostałeś wylogowany. Przejdz na <a href="'.backToFuture().'Library/index.php">strone główną</a>.</p>';
-	}
+        $this->controller->connect();
+        $this->controller->deleteTableWhere(false,"sessions", array(array("session_id","=", session_id(), "")));
+        $this->controller->close();
+        $_SESSION['id'] = session_regenerate_id(true);
+        $_SESSION['logged'] = false;
+        $_SESSION['user_id'] = -1;
+        $_SESSION['acces_right'] = "user";
+        $_SESSION['ip'] = null;
+        $_SESSION['user'] = serialize(new User(new Controller()));
+        return '<p>Zostałeś wylogowany. Przejdz na <a href="'.backToFuture().'Library/index.php">strone główną</a>.</p>';       
+    }
     public function login($login, $password) {
+        $this->controller->connect();
             $login = $this->controller->clear($login);
             $password = $this->controller->clear($password);
             $result = $this->controller->validationLoginAdmin($login, $password);
@@ -107,9 +93,10 @@ class User implements IUser{
 		$_SESSION['acces_right'] = "admin";
                 $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
 		$_SESSION['user'] = serialize(new Admin(new Controller(), $u = $row['admin_id']));
-                $this->controller->insertTableRecordValue("sessions", 
+                $this->controller->insertTableRecordValue(false,"sessions", 
                         array("session_id", "session_ip", "session_user", "session_user_agent","session_logged", "session_acces_right"),
                         array(session_id(), $_SESSION['ip'], $row['admin_id'],$_SESSION['user_agent'], 1, "admin" ));
+                $this->controller->close();
                 return '<p>Witaj jesteś adminem, zostałeś poprawnie zalogowany! Możesz teraz przejść na <a href="'.backToFuture().'Library/index.php">stronę główną</a>.</p>';
             }
             else{
@@ -121,18 +108,21 @@ class User implements IUser{
                     $_SESSION['acces_right'] = "reader";
                     $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
                     $_SESSION['user'] = serialize(new Reader($this->isActive($row['reader_id']), new Controller(), $u = $row['reader_id']));
-                    $this->controller->insertTableRecordValue("sessions", 
+                    $this->controller->insertTableRecordValue(false,"sessions", 
                             array("session_id", "session_ip","session_user_agent", "session_user", "session_logged", "session_acces_right"),
                             array(session_id(), $_SESSION['ip'], $_SESSION['user_agent'], $row['reader_id'], 1, "reader" ));
+                    $this->controller->close();
                     return '<p>Witaj jesteś czytelnikiem, zostałeś poprawnie zalogowany! Możesz teraz przejść na <a href="'.backToFuture().'Library/index.php">stronę główną</a>.</p>';
 		}
                 else{
+                    $this->controller->close();
                     return '<p>Podany login i/lub hasło jest nieprawidłowe.</p>';
 		}
             }
         }
     public function search($isbn, $title, $publisher_house, $edition, $premiere, $author){
             $books = "";
+            $this->controller->connect();
             $authorDetail = array();
             $authorDetail[0] = "%".$authorDetail[0]."%";
             $authorDetail[1] = "%".$authorDetail[1]."%";  
@@ -159,7 +149,7 @@ class User implements IUser{
             $premiere = $this->controller->clear($premiere);
             $author =  $this->controller->clear($author);
             
-            $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("full_books", 
+            $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "full_books", 
                     null,
                     null,
                     array(
@@ -173,7 +163,7 @@ class User implements IUser{
             
             $bool = false;
             while($rowB = mysqli_fetch_assoc($resultBook)){
-                $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors",
+                $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors",
                         null,null,
                         array(
                             array("authors.author_name","LIKE",$authorDetail[0],"AND"),
@@ -181,7 +171,7 @@ class User implements IUser{
                             ),
                     null,null,null);
                 while($rowA = mysqli_fetch_assoc($resultAuthor)){
-                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors_books",null,null,
+                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors_books",null,null,
                             array(array("author_id","=",$rowA['author_id'],"AND"),
                                 array("book_id","=",$rowB['book_id'],"")
                                 ),null,null,null); 
@@ -191,7 +181,7 @@ class User implements IUser{
                 }
                 if($bool){
                     $bool = false;
-                    $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
+                    $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
                             null,
                             array(
                                 array("authors_books", "authors_books.author_id", "authors.author_id"),
@@ -217,11 +207,14 @@ class User implements IUser{
                     }
                 }
             }
+            $this->controller->close();
             return $books;
         }
     public function checkSession(){
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("sessions", null, null, 
+            $this->controller->connect();
+            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "sessions", null, null, 
                     array(array("session_id", "=" , session_id(),"")));
+            $this->controller->close();
             if(mysqli_num_rows($result) != 1){
                 return false;
             }
@@ -260,7 +253,9 @@ class User implements IUser{
 				</ul>';
 	}
     public function showNews(){
-                $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("news");
+        $this->controller->connect();
+                $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "news");
+                $this->controller->close();
 		$news = '<p>';
 		if(mysqli_num_rows($result) == 0) {
                     $news = $news.'Brak newsów';
@@ -272,6 +267,7 @@ class User implements IUser{
                     }
                 }
 		$news = $news.'</p>';
+                
 		return $news;
 	}
     public function showLogged(){
@@ -317,12 +313,13 @@ class User implements IUser{
             return 'Brak dostepu';
         }
     public function showBook($bookID, $active = "disabled") {
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("books", 
+        $this->controller->connect();
+            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "books", 
                     array("books.*", "publisher_houses.publisher_house_name"),
                     array(array("publisher_houses", "publisher_houses.publisher_house_id", "books.book_publisher_house_id")),
                     array(array("books.book_id","=", $bookID, "")));
             $row = mysqli_fetch_assoc($result);
-            $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
+            $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
                             array("authors.*"),
                             array(
                                         array("authors_books", "authors_books.author_id", "authors.author_id"),
@@ -332,7 +329,7 @@ class User implements IUser{
                                         array("books.book_id","=", $row['book_id'], "")
                                         )
                             );
-            $resultFreeBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("free_books", 
+            $resultFreeBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "free_books", 
                         array("*"),
                         null,
                         array(
@@ -345,6 +342,7 @@ class User implements IUser{
             else{
                 $freeBook = $rowFreeBook['free_books'];
             }
+            $this->controller->close();
             return '<p>
 					ISBN: '.$row['book_isbn'].'<br>
 					Tytuł: '.$row['book_title'].'<br>
@@ -361,12 +359,13 @@ class User implements IUser{
 				</p>';
         }
     public function showBookLight($bookID) {
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("books", 
+        $this->controller->connect();
+            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "books", 
                     array("books.*", "publisher_houses.publisher_house_name"),
                     array(array("publisher_houses", "publisher_houses.publisher_house_id", "books.book_publisher_house_id")),
                     array(array("books.book_id","=", $bookID, "")));
             $row = mysqli_fetch_assoc($result);
-            $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("authors", 
+            $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
                             array("authors.*"),
                             array(
                                         array("authors_books", "authors_books.author_id", "authors.author_id"),
@@ -376,6 +375,7 @@ class User implements IUser{
                                         array("books.book_id","=", $row['book_id'], "")
                                         )
                             );
+            $this->controller->close();
             return '<p>
 					ID: '.$row['book_id'].'<br>
 					ISBN: '.$row['book_isbn'].'<br>
@@ -393,13 +393,13 @@ class User implements IUser{
     public function showMyBorrows(){
             return "Brak dostepu";
         }
-    public function addReader($login, $email, $name, $surname, $password1, $password2, $adres){
+    public function addReader($login, $email, $name, $surname, $password1, $password2, $country, $city, $street, $post_code, $nr_house){
             return 'Brak dostępu';
 	}
     public function editReader($id, $login, $email, $name, $surname, $adres) {
             return "Brak dostępu";
         }
-    public function addBook($isbn, $title, $publisher_house, $nr_page, $edition, $premiere, $number, $author) {
+    public function addBook($isbn, $original_title, $title, $original_punblisher_house, $original_country,  $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $author, $translator) {
             return 'Brak dostepu';
         }
     public function addAdmin($name, $surname, $password1, $password2, $email, $login) {
@@ -412,10 +412,12 @@ class User implements IUser{
             return "Brak dostępu";
         }
     public function isActive($ID){
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit("readers",
+        $this->controller->connect();
+            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "readers",
                     array("acces_right_name"),
                     array(array("acces_rights", "acces_rights.acces_right_id", "readers.reader_acces_right_id")),
                     array(array("readers.reader_id", "=", $ID, "")));
+            $this->controller->close();
             $row = mysqli_fetch_array($result);
             if($row['acces_right_name'] == 'activeReader')
                 return 1;
@@ -426,7 +428,7 @@ class User implements IUser{
             return "Brak dostepu";
         }
     public function getData($ID){
-		return $this->Data;
+            return $this->Data;
 	}
 
     public function editAdmin($id, $name, $surname, $email, $login) {
