@@ -41,7 +41,7 @@ interface IUser{
     public function showBorrow($borrowID);
     public function showMyBorrows();
     public function addReader($login, $email, $name, $surname, $password1, $password2, $country, $city, $street, $post_code, $nr_house);
-    public function editReader($id, $login, $email, $name, $surname, $adres);
+    public function editReader($id, $login, $email, $name, $surname, $country, $city, $street, $post_code, $nr_house);
     public function addBook($isbn, $original_title, $title, $original_punblisher_house, $original_country,  $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $author, $translator);
     public function editBook($id,$isbn, $title, $publisher_house, $nr_page, $edition, $premiere, $number, $author);
     public function addAdmin($name, $surname, $password1, $password2, $email, $login);
@@ -53,5 +53,14 @@ interface IUser{
     public function getData($ID);
     public function changePassForm();
     public function changePass($oldPass, $newPass);
+    public function deleteBorrow($id);
+    public function deleteReader($id);
+    public function deleteBook($id);
+    public function deleteAdmin($id);
+    public function generateNewPas();
+    public function extendAccount($id);
+    public function receiveBook($id);
+    
+    
     }
 ?>

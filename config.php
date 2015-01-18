@@ -17,9 +17,6 @@ include backToFuture()."Library/Classes/Controller.php";
 include backToFuture()."Library/Classes/Admin.php";
 include backToFuture()."Library/Classes/Reader.php";
 
-function Codepass($password) {
-    return sha1(md5($password).'#!%Rgd64');
-}
 
 function CreateOwner(){
 	$controller = new Controller();
@@ -35,7 +32,7 @@ function CreateOwner(){
 
             $controller->insertTableRecordValue(false,"admins",
                     array("admin_login", "admin_password", "admin_email", "admin_name", "admin_surname", "admin_acces_right_id"),
-                    array("dslusarz", Codepass('wiosna'), "slusarz.dominik@gmail.com", "Dominik", "Ślusarz", $row['acces_right_id']));
+                    array("dslusarz", $controller->codepass('wiosna'), "slusarz.dominik@gmail.com", "Dominik", "Ślusarz", $row['acces_right_id']));
         }
         $controller->close();
 }
@@ -56,13 +53,13 @@ function templateTable($controller, $array, $arrayTable, $table, $tableStyle, $l
             }
             while($row = mysqli_fetch_array($result)) {
                 if($link == null){
-                   $return = $return.'<tr>'.$row['reader_id'].'</tr>';
+                   $return = $return.'<tr>';
                 }
                 else{
-                    $return = $return.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/'.$link.'='.$row[0].'\'">';
+                    $return = $return.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/'.$link.'='.$controller->clear($row[0]).'\'">';
                 }
 		for($i = 0; $i< count($array); $i++){
-                    $return = $return.'<td>'.$row[$arrayTable[$i]].'</td>';
+                    $return = $return.'<td>'.$controller->clear($row[$arrayTable[$i]]).'</td>';
                 }
                 $return = $return.'<tr>';
             }

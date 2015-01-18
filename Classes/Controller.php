@@ -20,7 +20,6 @@ class Controller{
     }
     
     public function doQuery($query){
-        //echo $query;
         $result = mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
         return $result;
     }
@@ -108,6 +107,8 @@ class Controller{
     }
     
     public function clear($text){
+        
+        if(empty($text)) return $text;
 	if(get_magic_quotes_gpc()) {
             $text = stripslashes($text);
 	}
@@ -116,13 +117,18 @@ class Controller{
 	$text = htmlspecialchars($text);
 	return $text;
     }
+    
+    function codepass($password) {
+        return sha1(md5($password).'#!%Rgd64');
+    }
+    
     public function validationLoginAdmin($login, $password){
-	$query = 'SELECT admin_id FROM admins WHERE admin_login = "'.$login.'" AND admin_password = "'.Codepass($password).'" LIMIT 1;';
+	$query = 'SELECT admin_id FROM admins WHERE admin_login = "'.$login.'" AND admin_password = "'.$this->codepass($password).'" LIMIT 1;';
         $result = mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
 	return $result;
 	}
     public function validationLoginReader($login, $password){
-        $query = 'SELECT reader_id FROM readers WHERE reader_login = "'.$login.'" AND reader_password = "'.Codepass($password).'" LIMIT 1;';
+        $query = 'SELECT reader_id FROM readers WHERE reader_login = "'.$login.'" AND reader_password = "'.$this->codepass($password).'" LIMIT 1;';
 	$result = mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
 	return $result;
 	}

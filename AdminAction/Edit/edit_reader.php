@@ -5,8 +5,18 @@
     function Content(){
         $user = unserialize($_SESSION['user']);
         if(isset($_POST['edit'])){
-            echo '<div id="content">'.$user->editReader($_POST['edit'], $_POST['login'],
-                    $_POST['email'], $_POST['name'], $_POST['surname'], $_POST['address']).'</div>';
+            var_dump($_POST);
+            echo '<div id="content">'.$user->editReader(
+                    $_POST['edit'], 
+                    $_POST['login'],
+                    $_POST['email'],
+                    $_POST['name'],
+                    $_POST['surname'],
+                    $_POST['country'],
+                    $_POST['city'],
+                    $_POST['street'],
+                    $_POST['post_code'],
+                    $_POST['nr_house']).'</div>';
         }
         else
             echo '<div id="content">'.$user->showEditReader($_GET['id']).'</div>';

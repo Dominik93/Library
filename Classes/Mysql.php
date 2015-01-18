@@ -21,8 +21,10 @@ class Mysql{
     }
 	
     public function Close(){
-        if(!mysqli_commit($this->baseLink));
+        if(!mysqli_commit($this->baseLink)){
             mysqli_rollback($this->baseLink);
+            echo "Commit nieudany, nastepuje rollback";
+        }
 	mysqli_close($this->baseLink);
     }
 }
