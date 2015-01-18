@@ -5,7 +5,7 @@
 	function Content(){
             $user = unserialize($_SESSION['user']);
             echo '<div id="content">';
-            echo $user->showRegistrationAdmin();
+            echo $user->showAddAdminForm();
             if(isset($_POST['login'])){
                 echo $user->addAdmin($_POST['name'], $_POST['surname'], $_POST['password1'], $_POST['password2'], $_POST['email'], $_POST['login']);
             }

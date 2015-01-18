@@ -4,9 +4,7 @@
 
     function Content(){
         $user = unserialize($_SESSION['user']);
-        var_dump($_POST);
         if(isset($_POST['edit'])){
-            echo 'd';
             echo '<div id="content">'.$user->editAdmin($_POST['edit'],
                     $_POST['name'],
                     $_POST['surname'],

@@ -20,7 +20,7 @@
                                         $_POST['nr_house']).'</div>';			
             }
             else{
-                echo '<div id="content">'.$user->showRegistrationReader().'</div>';
+                echo '<div id="content">'.$user->showAddReaderForm().'</div>';
             }
 	}
 ?>
