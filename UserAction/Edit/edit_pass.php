@@ -9,7 +9,7 @@
                     echo '<div id="content">'.$user->changePass($_POST['oldPassword'], $_POST['newPassword1'], $_POST['newPassword2']).'</div>';
                 }
                 else {
-                    echo '<div id="content">'.$user->changePassForm().'</div>';
+                    echo '<div id="content">'.$user->showChangePassForm().'</div>';
                 }
                 
 	}

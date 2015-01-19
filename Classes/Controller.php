@@ -19,6 +19,10 @@ class Controller{
         $this->mysql->Close();
     }
     
+    public function commit(){
+        $this->mysql->commit();
+    }
+    
     public function doQuery($query){
         $result = mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
         return $result;
@@ -104,6 +108,22 @@ class Controller{
         if($test)
         echo $query.'<br>';
 	mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
+    }
+    
+    public function clearArray($array){
+        for($i = 0; $i < count($array); $i++){
+            if(empty($array[$i])){
+                $array[$i] = "NULL";
+            }
+            if(get_magic_quotes_gpc()) {
+                $array[$i] = stripslashes($array[$i]);
+            }
+            $array[$i] = trim($array[$i]);
+            $array[$i] = mysqli_real_escape_string($this->mysql->baseLink,$array[$i]) or die(mysqli_error($this->mysql->baseLink));
+            $array[$i] = htmlspecialchars($array[$i]);
+        }
+        
+	return $array;
     }
     
     public function clear($text){

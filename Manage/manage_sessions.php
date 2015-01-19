@@ -3,7 +3,7 @@
 
 	function Content(){
 		$user = unserialize($_SESSION['user']);
-		echo '<div id="content">'.$user->showLogged().'</div>';
+		echo '<div id="content">'.$user->showAllLogged().'</div>';
 	}
 ?>
 

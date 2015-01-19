@@ -6,7 +6,7 @@
 	function Content(){
             $user = unserialize($_SESSION['user']);
             if(@$_POST['orderHidden'] == 1){
-                echo '<div id="content">'.$user->orderBook(@$_POST['orderHidden']).'</div>';
+                echo '<div id="content">'.$user->addBorrow(@$_POST['orderHidden']).'</div>';
             }
             else{
                 echo '<div id="content">'.$user->showBook($_GET['book']).'</div>';

@@ -27,5 +27,14 @@ class Mysql{
         }
 	mysqli_close($this->baseLink);
     }
+    
+    public function commit(){
+        if(!mysqli_commit($this->baseLink)){
+            mysqli_rollback($this->baseLink);
+            echo "Commit nieudany, nastepuje rollback";
+        }else{
+            echo "Commit udany";
+        }
+    }
 }
 ?>

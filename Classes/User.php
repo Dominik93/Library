@@ -10,6 +10,7 @@ class User implements IUser{
 		$this->userID = $u;
 		$this->controller = $c;
 	}
+        
     public function showMainPage(){
         return '<p>Witaj na stronie Biblioteki PAI!<br> Życzymy miłej zabawy z książkami☺</p>';
     }
@@ -37,6 +38,8 @@ class User implements IUser{
                 <button id="advancedSearch">Szukanie zaawansowane</button>
 	</div>';
 	}
+    public function showAdvancedSearch() {
+    }
     public function showContact(){
 		return '<p>
 					Biblioteka PAI<br>
@@ -53,24 +56,134 @@ class User implements IUser{
                 . '<li>4. Za opóźnienie w oddaniu książki naliczana jest kara, 0,25 gr za dzień</li>'
                 . '</ul></p>';
     }
-    public function showLogin(){
-        return '<div align="center" id="login">' 
-                    . '<form action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'" method="post">'
-                        . '<table>'
-                            . '<tr align="center">'
-                                . '<td>LOGOWANIE</td>'
-                            . '</tr>'
-                            . '<tr>'
-                                . '<td><input type="text" required placeholder="Login" name="login" value=""></td>'
-                            . '</tr>'
-                            . '<tr>'
-                                . '<td><input type="password" required placeholder="Hasło" name="password" value=""></td>'
-                            . '</tr>'
-                        . '</table>'
-                        . '<input type="submit" value="Zaloguj się">'
-                    . '</form>'
-                . '</div>';
+    public function showOptionPanel(){
+		return '
+			<div id="panelName">Panel użytkownika</div>
+				<p align="center">
+					Nie jesteś zalogowany!
+				</p>
+				<ul>
+					<li><a href="'.  backToFuture().'Library/UserAction/login.php">Zaloguj się</a></li>
+				</ul>';
 	}
+    public function showNews(){
+        $this->controller->connect();
+                $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "news");
+                
+		$news = '';
+		if(mysqli_num_rows($result) == 0) {
+                    $news = $news.'Brak newsów';
+		}
+                else{
+                    while($row = mysqli_fetch_assoc($result)) {
+                        $news .= '<div align="center"><table>'
+                                . '<tr>'
+                                . '<td align="center">'.$row['new_title'].'</td>'
+                                . '<td align="right">'.$row['new_date'].'</td>'
+                                . '</tr>'
+                                . '<tr>'
+                                . '<td colspan="2">'.$row['new_text'].'</td>'
+                                . '</tr></table></div>';
+                    }
+                }
+                $this->controller->close(); 
+		return $news;
+	}
+   
+    public function search($isbn, $title, $publisher_house, $edition, $premiere, $author){
+            $books = "";
+            $this->controller->connect();
+            $authorDetail = array();
+            $authorDetail[0] = "%".$authorDetail[0]."%";
+            $authorDetail[1] = "%".$authorDetail[1]."%";  
+            
+            if(empty($isbn)) $isbn = "%";
+            else $isbn = '%'.$isbn.'%';
+            if(empty($title)) $title = "%";
+            else $title = '%'.$title.'%';
+            if(empty($publisher_house)) $publisher_house = "%";
+            else $publisher_house = '%'.$publisher_house.'%';
+            if(empty($edition)) $edition = "%";
+            if(empty($premiere)) $premiere = "%";
+            if(empty($author)) $author = "%";
+            else{
+                $authorDetail = explode(" ", $author);
+                $authorDetail[0] = "%".$authorDetail[0]."%";
+                $authorDetail[1] = "%".$authorDetail[1]."%";    
+            }
+            
+            $isbn = $this->controller->clear($isbn);
+            $title = $this->controller->clear($title);
+            $publisher_house = $this->controller->clear($publisher_house);
+            $edition = $this->controller->clear($edition);
+            $premiere = $this->controller->clear($premiere);
+            $author =  $this->controller->clear($author);
+            
+            $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
+                    null,
+                    null,
+                    array(
+                        array("book_isbn","LIKE",$isbn,"AND"),
+                        array("book_title","LIKE",$title,"AND"),
+                        array("publisher_house_name","LIKE",$publisher_house,"AND"),
+                        array("book_premiere","LIKE",$premiere,"AND"),
+                        array("book_edition","LIKE",$edition,"")
+                    ),
+                    null,null,null);
+            
+            $bool = false;
+            while($rowB = mysqli_fetch_assoc($resultBook)){
+                $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors",
+                        null,null,
+                        array(
+                            array("authors.author_name","LIKE",$authorDetail[0],"AND"),
+                            array("authors.author_surname","LIKE",$authorDetail[1],"")
+                            ),
+                    null,null,null);
+                while($rowA = mysqli_fetch_assoc($resultAuthor)){
+                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors_books",null,null,
+                            array(array("author_id","=",$rowA['author_id'],"AND"),
+                                array("book_id","=",$rowB['book_id'],"")
+                                ),null,null,null); 
+                    if(mysqli_num_rows($result)>0){
+                        $bool = true;
+                    }
+                }
+                if($bool){
+                    $bool = false;
+                    $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
+                            null,
+                            array(
+                                array("authors_books", "authors_books.author_id", "authors.author_id"),
+                                array("books", "books.book_id", "authors_books.book_id")
+                                ),
+                            array(
+                                array("books.book_id","=", $rowB['book_id'], " ")
+                                ),null,null,null);
+                    if(mysqli_num_rows($resultA) == 0) {
+                        die('Brak autorów bład');
+                    }
+                    else{	
+                        $books .= '<p>
+                        ISBN: '.$rowB['book_isbn'].'<br>
+                        Autor: '.$this->controller->authorsToString($resultA).'<br>
+                        Tytuł: '.$rowB['book_title'].'<br>
+                        Wydawca: '.$rowB['publisher_house_name'].'<br>
+                        Ilość stron: '.$rowB['book_nr_page'].'<br>
+                        Wydanie: '.$rowB['book_edition'].'<br>
+                        Rok wydania: '.$rowB['book_premiere'].'<br>
+                        <a href="'.backToFuture().'Library/UserAction/book.php?book='.$rowB['book_id'].'">Przejdź do książki</a>
+                        </p>';
+                    }
+                }
+            }
+            $this->controller->close();
+            return $books;
+        }
+    public function advancedSearch() {
+        
+    }
+    
     public function logout(){
         $this->controller->connect();
         $this->controller->deleteTableWhere(false,"sessions", array(array("session_id","=", session_id(), "")));
@@ -162,99 +275,12 @@ class User implements IUser{
 		}
             }
         }
-    public function search($isbn, $title, $publisher_house, $edition, $premiere, $author){
-            $books = "";
-            $this->controller->connect();
-            $authorDetail = array();
-            $authorDetail[0] = "%".$authorDetail[0]."%";
-            $authorDetail[1] = "%".$authorDetail[1]."%";  
-            
-            if(empty($isbn)) $isbn = "%";
-            else $isbn = '%'.$isbn.'%';
-            if(empty($title)) $title = "%";
-            else $title = '%'.$title.'%';
-            if(empty($publisher_house)) $publisher_house = "%";
-            else $publisher_house = '%'.$publisher_house.'%';
-            if(empty($edition)) $edition = "%";
-            if(empty($premiere)) $premiere = "%";
-            if(empty($author)) $author = "%";
-            else{
-                $authorDetail = explode(" ", $author);
-                $authorDetail[0] = "%".$authorDetail[0]."%";
-                $authorDetail[1] = "%".$authorDetail[1]."%";    
-            }
-            
-            $isbn = $this->controller->clear($isbn);
-            $title = $this->controller->clear($title);
-            $publisher_house = $this->controller->clear($publisher_house);
-            $edition = $this->controller->clear($edition);
-            $premiere = $this->controller->clear($premiere);
-            $author =  $this->controller->clear($author);
-            
-            $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
-                    null,
-                    null,
-                    array(
-                        array("book_isbn","LIKE",$isbn,"AND"),
-                        array("book_title","LIKE",$title,"AND"),
-                        array("publisher_house_name","LIKE",$publisher_house,"AND"),
-                        array("book_premiere","LIKE",$premiere,"AND"),
-                        array("book_edition","LIKE",$edition,"")
-                    ),
-                    null,null,null);
-            
-            $bool = false;
-            while($rowB = mysqli_fetch_assoc($resultBook)){
-                $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors",
-                        null,null,
-                        array(
-                            array("authors.author_name","LIKE",$authorDetail[0],"AND"),
-                            array("authors.author_surname","LIKE",$authorDetail[1],"")
-                            ),
-                    null,null,null);
-                while($rowA = mysqli_fetch_assoc($resultAuthor)){
-                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors_books",null,null,
-                            array(array("author_id","=",$rowA['author_id'],"AND"),
-                                array("book_id","=",$rowB['book_id'],"")
-                                ),null,null,null); 
-                    if(mysqli_num_rows($result)>0){
-                        $bool = true;
-                    }
-                }
-                if($bool){
-                    $bool = false;
-                    $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
-                            null,
-                            array(
-                                array("authors_books", "authors_books.author_id", "authors.author_id"),
-                                array("books", "books.book_id", "authors_books.book_id")
-                                ),
-                            array(
-                                array("books.book_id","=", $rowB['book_id'], " ")
-                                ),null,null,null);
-                    if(mysqli_num_rows($resultA) == 0) {
-                        die('Brak autorów bład');
-                    }
-                    else{	
-                        $books .= '<p>
-                        ISBN: '.$rowB['book_isbn'].'<br>
-                        Autor: '.$this->controller->authorsToString($resultA).'<br>
-                        Tytuł: '.$rowB['book_title'].'<br>
-                        Wydawca: '.$rowB['publisher_house_name'].'<br>
-                        Ilość stron: '.$rowB['book_nr_page'].'<br>
-                        Wydanie: '.$rowB['book_edition'].'<br>
-                        Rok wydania: '.$rowB['book_premiere'].'<br>
-                        <a href="'.backToFuture().'Library/UserAction/book.php?book='.$rowB['book_id'].'">Przejdź do książki</a>
-                        </p>';
-                    }
-                }
-            }
-            $this->controller->close();
-            return $books;
-        }
+        
+    public function session(){
+    }    
     public function checkSession(){
-        $this->controller->connect();
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "sessions", null, null, 
+            $this->controller->connect();
+            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(true, "sessions", null, null, 
                     array(array("session_id", "=" , session_id(),"")));
             
             if(mysqli_num_rows($result) != 1){
@@ -273,9 +299,6 @@ class User implements IUser{
             $this->controller->close();
             return true;
         }
-    public function session(){
-            
-    }
     public function timeOut(){
             $_SESSION['id'] = session_regenerate_id(true);
             $_SESSION['logged'] = false;
@@ -286,45 +309,67 @@ class User implements IUser{
             $_SESSION['user'] = serialize(new User(new Controller()));
         }
 
-    public function showOptionPanel(){
-		return '
-			<div id="panelName">Panel użytkownika</div>
-				<p align="center">
-					Nie jesteś zalogowany!
-				</p>
-				<ul>
-					<li><a href="'.  backToFuture().'Library/UserAction/login.php">Zaloguj się</a></li>
-				</ul>';
-	}
-    public function showNews(){
-        $this->controller->connect();
-                $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "news");
-                
-		$news = '';
-		if(mysqli_num_rows($result) == 0) {
-                    $news = $news.'Brak newsów';
-		}
-                else{
-                    while($row = mysqli_fetch_assoc($result)) {
-                        $news .= '<div align="center"><table>'
-                                . '<tr>'
-                                . '<td align="center">'.$row['new_title'].'</td>'
-                                . '<td align="right">'.$row['new_date'].'</td>'
-                                . '</tr>'
-                                . '<tr>'
-                                . '<td colspan="2">'.$row['new_text'].'</td>'
-                                . '</tr></table></div>';
-                    }
-                }
-                $this->controller->close(); 
-		return $news;
-	}
-    public function showLogged(){
+    public function showAccount(){
             return '<p>Brak dostępu</p>';
 	}
+    public function extendAccount($id) {
+        return '<p>Brak dostępu</p>';
+    }
+    
+    public function showLoginForm(){
+        return '<div align="center" id="login">' 
+                    . '<form action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'" method="post">'
+                        . '<table>'
+                            . '<tr align="center">'
+                                . '<td>Logowanie</td>'
+                            . '</tr>'
+                            . '<tr>'
+                                . '<td><input type="text" required placeholder="Login" name="login" value=""></td>'
+                            . '</tr>'
+                            . '<tr>'
+                                . '<td><input type="password" required placeholder="Hasło" name="password" value=""></td>'
+                            . '</tr>'
+                        . '</table>'
+                        . '<input type="submit" value="Zaloguj się">'
+                    . '</form>'
+                . '</div>';
+	}    
+    public function showAddBookForm() {
+            return '<p>Brak dostępu</p>';
+        }
+    public function showAddNewsForm(){
+            return '<p>Brak dostępu</p>';
+        }
+    public function showAddReaderForm(){
+        return '<p>Brak dostępu</p>';
+    }
+    public function showAddAdminForm() {
+        return '<p>Brak dostępu</p>';
+    }
+    
+    public function showAllReaders($id, $login, $email, $name, $surname) {
+            return '<p>Brak dostępu</p>';
+        }
+    public function showAllBooks($id, $isbn, $title, $publisher_house, $premiere, $edition) {
+            return '<p>Brak dostępu</p>';
+        }
+    public function showAllAdmins($id, $login, $email, $name, $surname) {
+            return '<p>Brak dostępu</p>';
+        }
+    public function showAllBorrows($id, $bookId, $readerId, $dateBorrow, $dateReturn){
+            return '<p>Brak dostępu</p>';
+        }
+    public function showAllLogged(){
+        return '<p>Brak dostępu</p>';
+    }
+    
     public function showAdmin($adminID){
             return '<p>Brak dostępu</p>';
         }
+    public function showEditAdmin($readerID) {
+        return '<p>Brak dostępu</p>';
+    }
+    
     public function showReader($readerID){
             return '<p>Brak dostępu</p>';
         } 
@@ -334,33 +379,7 @@ class User implements IUser{
     public function showEditReader($readerID){
             return '<p>Brak dostępu</p>';
         }
-    public function showRegistrationReader(){
-            return '<p>Brak dostępu</p>';
-	}
-    public function showRegistrationAdmin() {
-            return '<p>Brak dostępu</p>';
-        }
-    public function showAccount(){
-            return '<p>Brak dostępu</p>';
-	}
-    public function showAddBookForm() {
-            return '<p>Brak dostępu</p>';
-        }
-    public function showAddNewsForm(){
-            return '<p>Brak dostępu</p>';
-        }
-    public function showAllUsers() {
-            return '<p>Brak dostępu</p>';
-        }
-    public function showAllBooks() {
-            return '<p>Brak dostępu</p>';
-        }
-    public function showAllAdmins() {
-            return '<p>Brak dostępu</p>';
-        }
-    public function showAllBorrows(){
-            return '<p>Brak dostępu</p>';
-        }
+    
     public function showBook($bookID, $active = "disabled") {
         $this->controller->connect();
             $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "books", 
@@ -378,18 +397,12 @@ class User implements IUser{
                                         array("books.book_id","=", $row['book_id'], "")
                                         )
                             );
-            $resultFreeBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "free_books", 
-                        array("*"),
-                        null,
-                        array(
-                              array("book_id","=", $bookID, " ")
-                              ));
-            $rowFreeBook = mysqli_fetch_assoc($resultFreeBook);
-            if($rowFreeBook['free_books'] == null){
+
+            if($row['free_books'] == null){
                 $freeBook = $row['book_number'];
             }
             else{
-                $freeBook = $rowFreeBook['free_books'];
+                $freeBook = $row['free_books'];
             }
             
             $return = '<p>
@@ -409,6 +422,9 @@ class User implements IUser{
             $this->controller->close();
             return $return;
         }
+    public function showEditBook($bookID) {
+        return '<p>Brak dostępu</p>';
+    }
     public function showBookLight($bookID) {
             $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "books", 
                     array("books.*", "publisher_houses.publisher_house_name"),
@@ -433,30 +449,61 @@ class User implements IUser{
 					Wydawnictwo: '.$this->controller->clear($row['publisher_house_name']).'<br>
 				</p>';
         }
+        
     public function showBorrow($borrowID){
             return '<p>Brak dostępu</p>';
         }
     public function showMyBorrows(){
             return '<p>Brak dostępu</p>';
         }
+        
     public function addReader($login, $email, $name, $surname, $password1, $password2, $country, $city, $street, $post_code, $nr_house){
             return '<p>Brak dostępu</p>';
 	}
     public function editReader($id, $login, $email, $name, $surname, $country, $city, $street, $post_code, $nr_house) {
             return '<p>Brak dostępu</p>';
         }
-    public function addBook($isbn, $original_title, $title, $original_punblisher_house, $original_country,  $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $author, $translator) {
+    public function deleteReader($id) {
+        return '<p>Brak dostępu</p>';
+    }
+        
+    public function addBook($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname) {
             return '<p>Brak dostępu</p>';
         }
+    public function editBook($id, $isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname) {
+        return '<p>Brak dostępu</p>';
+    }
+    public function deleteBook($id) {
+        return '<p>Brak dostępu</p>';
+    }
+    
     public function addAdmin($name, $surname, $password1, $password2, $email, $login) {
             return '<p>Brak dostępu</p>';
         }
+    public function editAdmin($id, $name, $surname, $email, $login) {
+        return '<p>Brak dostępu</p>';
+    }
+    public function deleteAdmin($id) {
+        return '<p>Brak dostępu</p>';
+    }
+    
     public function addNews($title, $text){
             return '<p>Brak dostępu</p>';
         }
     public function deleteNews($id){
             return '<p>Brak dostępu</p>';
         }
+    
+    public function addBorrow($bookID) {
+            return '<p>Brak dostępu</p>';
+        }
+    public function deleteBorrow($id) {
+        return '<p>Brak dostępu</p>';
+    }
+    public function receiveBorrow($id) {
+        return '<p>Brak dostępu</p>';
+    }    
+   
     public function isActive($ID){
         $this->controller->connect();
             $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "readers",
@@ -470,56 +517,18 @@ class User implements IUser{
             else
                 return 0;
         }
-    public function orderBook($bookID) {
-            return '<p>Brak dostępu</p>';
-        }
+        
     public function getData($ID){
             return $this->Data;
 	}
-    public function editAdmin($id, $name, $surname, $email, $login) {
-        return '<p>Brak dostępu</p>';
-    }
-    public function showEditAdmin($readerID) {
-        return '<p>Brak dostępu</p>';
-    }
-    public function editBook($id, $isbn, $title, $publisher_house, $nr_page, $edition, $premiere, $number, $author) {
-        return '<p>Brak dostępu</p>';
-    }
-    public function showEditBook($bookID) {
-        return '<p>Brak dostępu</p>';
-    }
+    
     public function changePass($oldPass, $newPass) {
         return '<p>Brak dostępu</p>';
     }
-    public function changePassForm() {
+    public function showChangePassForm() {
         return '<p>Brak dostępu</p>';
     }
-
-    public function deleteAdmin($id) {
-        return '<p>Brak dostępu</p>';
-    }
-
-    public function deleteBook($id) {
-        return '<p>Brak dostępu</p>';
-    }
-
-    public function deleteBorrow($id) {
-        return '<p>Brak dostępu</p>';
-    }
-
-    public function deleteReader($id) {
-        return '<p>Brak dostępu</p>';
-    }
-
-    public function extendAccount($id) {
-        return '<p>Brak dostępu</p>';
-    }
-
-    public function generateNewPas() {
-        return '<p>Brak dostępu</p>';
-    }
-
-    public function receiveBook($id) {
+    public function generateNewPas($id) {
         return '<p>Brak dostępu</p>';
     }
 

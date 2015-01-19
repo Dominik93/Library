@@ -173,82 +173,27 @@ if(isset($_POST['deleteBorrow'])){
 }
 
 if(isset($_POST['deleteReader'])){
-    
-    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "borrows",
-            null, null, array(array("borrow_reader_id","=",$_POST['deleteReader'],"")));
-    if(mysqli_num_rows($result) > 0){
-        echo "<p>Nie można usunąć czytelnika</p>";
-    }
-    else{
-        $controller->deleteTableWhere(false,"readers", array(array("reader_id", "=", $_POST['deleteReader'], "")));
-        echo "<p>Usunięto czytelnika</p>";
-    }
-    
+    echo $user->deleteReader($_POST['deleteReader']);
 }
 
 if(isset($_POST['deleteBook'])){
-    
-    $result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "borrows",
-            null, null, array(array("borrow_book_id","=",$_POST['deleteBook'],"")));
-    if(mysqli_num_rows($result) > 0){
-        echo "<p>Nie można usunąć książki</p>";
-    }
-    else{
-        $controller->deleteTableWhere(false,"authors_books", array(array("book_id", "=", $_POST['deleteBook'], "")));
-        $controller->deleteTableWhere(false,"books", array(array("book_id", "=", $_POST['deleteBook'], "")));
-        echo "<p>Usunięto książke</p>";
-    }
-    
+    echo $user->deleteBook($_POST['deleteBook']);
 }
 
 if(isset($_POST['deleteAdmin'])){
-    
-    $controller->deleteTableWhere(false,"admins", array(array("admin_id", "=", $_POST['deleteAdmin'], "")));
-    
-    echo "<p>Usunięto admina</p>";
+    echo $user->deleteAdmin($_POST['deleteAdmin']);
 }
 
 if(isset($_POST['newPassword'])){
-    
-    $pass = uniqid("reader".$_POST['newPassword'].'');
-    $controller->updateTableRecordValuesWhere(false,"readers",
-            array(array("reader_password", $controller->codepass($pass))),
-            array(array("reader_id", "=", $_POST['newPassword'], "")));
-    
-    echo "<p>Nowe hasło to: ".$pass.'</p>';
+    echo $user->generateNewPas($_POST['newPassword']);
 }
 
 if(isset($_POST['extendAccount'])){
-    
-    $date = date_create(date('Y-m-d'));
-    date_add($date, date_interval_create_from_date_string('365 days')); 
-    $resultAccessRgihts = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "acces_rights", 
-                            array("*"),
-                            null,
-                            array(array("acces_right_name","=", "activeReader", "")));
-    if(mysqli_num_rows($resultAccessRgihts) == 0) {
-        die('<p>Błąd</p>');
-    }
-    $rowAR = mysqli_fetch_assoc($resultAccessRgihts);
-    $controller->updateTableRecordValuesWhere(false,"readers",
-            array(array("reader_acces_right_id", $rowAR['acces_right_id'] )),
-            array(array("reader_id", "=", $_POST['extendAccount'], ""))
-            );
-    $controller->updateTableRecordValuesWhere(false,"readers", 
-            array(array("reader_active_account", date_format($date,"y-m-d"))),
-            array(array("reader_id", "=", $_POST['extendAccount'], ""))
-            );
-    
-    echo "<p>Przedłużono konto</p>";
+    echo $user->extendAccount($_POST['extendAccount']);
 }
 
 if(isset($_POST['receiveBorrow'])){
-    
-    $controller->updateTableRecordValuesWhere(false,"borrows",
-            array(array("borrow_received", "1")),
-            array(array("borrow_id", "=", $_POST['receiveBorrow'], "")));
-    
-    echo "<p>Odebrano książke<p>";
+    echo $user->receiveBook($_POST['receiveBorrow']);
 }
 
 if(isset($_POST['login'])){
