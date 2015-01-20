@@ -271,12 +271,8 @@ class Admin extends User{
 		return $news;
 	}
     
-    public function search($isbn, $title, $publisher_house, $edition, $premiere, $author){
+    public function search($isbn, $title, $publisher_house, $edition, $premiere, $authorName, $authorSurname){
             $books = "";
-            $authorDetail = array();
-            $authorDetail[0] = "%".$authorDetail[0]."%";
-            $authorDetail[1] = "%".$authorDetail[1]."%";  
-            
             if(empty($isbn)) $isbn = "%";
             else $isbn = '%'.$isbn.'%';
             if(empty($title)) $title = "%";
@@ -285,20 +281,18 @@ class Admin extends User{
             else $publisher_house = '%'.$publisher_house.'%';
             if(empty($edition)) $edition = "%";
             if(empty($premiere)) $premiere = "%";
-            if(empty($author)) $author = "%";
-            else{
-                $authorDetail = explode(" ", $author);
-                $authorDetail[0] = "%".$authorDetail[0]."%";
-                $authorDetail[1] = "%".$authorDetail[1]."%";    
-            }
+            if(empty($authorName)) $authorName = "%";
+            else $authorName = '%'.$authorName.'%';
+            if(empty($authorSurname)) $authorSurname = "%";
+            else $authorSurname = '%'.$authorSurname.'%';
             $this->controller->connect();
             $isbn = $this->controller->clear($isbn);
             $title = $this->controller->clear($title);
             $publisher_house = $this->controller->clear($publisher_house);
             $edition = $this->controller->clear($edition);
             $premiere = $this->controller->clear($premiere);
-            $author =  $this->controller->clear($author);
-            
+            $authorName =  $this->controller->clear($authorName);
+            $authorSurname =  $this->controller->clear($authorSurname);
             $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
                     null,
                     null,
@@ -316,8 +310,8 @@ class Admin extends User{
                 $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors",
                         null,null,
                         array(
-                            array("authors.author_name","LIKE",$authorDetail[0],"AND"),
-                            array("authors.author_surname","LIKE",$authorDetail[1],"")
+                            array("authors.author_name","LIKE",$authorName,"AND"),
+                            array("authors.author_surname","LIKE",$authorSurname,"")
                             ),
                     null,null,null);
                 while($rowA = mysqli_fetch_assoc($resultAuthor)){
@@ -359,11 +353,13 @@ class Admin extends User{
                     }
                 }
             }
+            if($books == "")
+                return '<p>Brak książke dla zapytania</p>';
             $this->controller->close();
             return $books;
     }
-    public function advancedSearch() {
-        
+    public function advancedSearch($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname) {
+        return parent::advancedSearch($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname);
     }
     
     public function logout(){
@@ -540,52 +536,52 @@ class Admin extends User{
     public function showAddBookForm() {
         $this->controller->connect();
         $form =  '<div id="add_book" align="center">
-		<form action"'.htmlspecialchars($_SERVER["PHP_SELF"]).'" method="post">
+		<form action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'" method="post">
 			<table>
 				<tr>
                                     <td colspan="3" align="center">Dodaj książke:</td>
                                 </tr>
 				<tr>
                                     <td>ISBN:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['isbn']).'" name="isbn" placeholder="ISBN" required/></td>
+                                    <td><input type="text" value="" name="isbn" placeholder="ISBN" required/></td>
                                 </tr>
 				<tr>
                                     <td>Oryginalny tytuł:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['original_title']).'" name="original_title" placeholder="Oryginalny tytuł" required/></td>
+                                    <td><input type="text" value="" name="original_title" placeholder="Oryginalny tytuł" required/></td>
                                 </tr>
 				<tr>
                                     <td>Tytuł:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['title']).'" name="title" placeholder="Tytuł" required/></td>
+                                    <td><input type="text" value="" name="title" placeholder="Tytuł" required/></td>
                                 </tr>
                                 <tr>
                                     <td>Oryginalny wydawca:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['original_publisher_house']).'" name="original_publisher_house" placeholder="Oryginalny wydawca" required/></td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['country_original_publisher_house']).'" name="country_original_publisher_house" placeholder="Kraj" required/></td>
+                                    <td><input type="text" value="" name="original_publisher_house" placeholder="Oryginalny wydawca" required/></td>
+                                    <td><input type="text" value="" name="country_original_publisher_house" placeholder="Kraj" required/></td>
                                 </tr>        
 				<tr>
                                     <td>Wydawca:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['publisher_house']).'" name="publisher_house" placeholder="Wydawca" required/></td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['country_publisher_house']).'" name="country_publisher_house" placeholder="Kraj" required/></td>
+                                    <td><input type="text" value="" name="publisher_house" placeholder="Wydawca" required/></td>
+                                    <td><input type="text" value="" name="country_publisher_house" placeholder="Kraj" required/></td>
                                 </tr>
 				<tr>
                                     <td>Ilość stron:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['nr_page']).'" name="nr_page" placeholder="Ilość stron" required/></td>
+                                    <td><input type="text" value="" name="nr_page" placeholder="Ilość stron" required/></td>
                                 </tr>
 				<tr>
                                     <td>Wydanie:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['edition']).'" name="edition" placeholder="Wydanie" required/></td>
+                                    <td><input type="text" value="" name="edition" placeholder="Wydanie" required/></td>
                                 </tr>
 				<tr>
                                     <td>Rok wydania:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['premiere']).'" name="premiere" placeholder="Rok Wydania" required/></td>
+                                    <td><input type="text" value="" name="premiere" placeholder="Rok Wydania" required/></td>
                                 </tr>
                                 <tr>
                                     <td>Okładka:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['cover']).'" name="cover" placeholder="Okładka" required/></td>
+                                    <td><input type="text" value="" name="cover" placeholder="Okładka" required/></td>
                                 </tr>
 				<tr>
                                     <td>Ilość egzemplarzy:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['number']).'" name="number" placeholder="Ilość egzemplarzy" required/></td>
+                                    <td><input type="text" value="" name="number" placeholder="Ilość egzemplarzy" required/></td>
                                 </tr>
 				
 			</table>   
@@ -595,8 +591,8 @@ class Admin extends User{
                                     <td align="center" colspan="5">Autorzy</td>
                                 </tr>
                                 <tr>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['authorName[0]']).'" name="authorName[0]" placeholder="Imie" required/></td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['authorSurname[0]']).'" name="authorSurname[0]" placeholder="Nazwisko" required/></td>
+                                    <td><input type="text" value="" name="authorName[0]" placeholder="Imie" required/></td>
+                                    <td><input type="text" value="" name="authorSurname[0]" placeholder="Nazwisko" required/></td>
                                 </tr>
                                 </tbody></table>
                                 <button type="button" id="addTranslator">Dodaj translatora</button>
@@ -606,8 +602,8 @@ class Admin extends User{
                                     <td align="center" colspan="5">Translatorzy</td>
                                 </tr>
                                 <tr>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['translatorName[0]']).'" name="translatorName[0]" placeholder="Imie"/></td>
-                                    <td><input type="text" value="'.@$this->controller->clear($_POST['translatorSurname[0]']).'" name="translatorSurname[0]" placeholder="Nazwisko"/></td>
+                                    <td><input type="text" value="" name="translatorName[0]" placeholder="Imie"/></td>
+                                    <td><input type="text" value="" name="translatorSurname[0]" placeholder="Nazwisko"/></td>
                                 </tr>
                                 </tbody>
                                 </table>                        
@@ -886,7 +882,7 @@ class Admin extends User{
         return $return;
     }
     
-    public function showBook($bookID, $active = "disabled") {
+    public function showBook($bookID) {
         $this->controller->connect();
             $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
                     null,
@@ -1256,7 +1252,7 @@ class Admin extends User{
                             $number,
                             $cover));
                     
-		$result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(true, "books", array("*"),
+		$result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "books", array("*"),
                         null,
                         array(array("books.book_isbn","=", $isbn, "")));
                 

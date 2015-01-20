@@ -161,7 +161,7 @@ class Reader extends User{
 					Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
 					<form align="center" action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'?book='.$row['book_id'].'" method="post">
                                         <p><input type="hidden" name="orderHidden" value="'.$row['book_id'].'" />		
-                                        <input type="submit" name="order" '.$active.' value="Zamów">
+                                        <input type="submit" name="order" '.$this->active.' value="Zamów">
 					</form>
 				</p>';
             $this->controller->close();

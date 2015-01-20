@@ -1,14 +1,26 @@
 <?php
 
 function backToFuture(){
-    $future= "";
-    $pathExplode = explode("/", getcwd());
-    $i = count($pathExplode) - 1;
+    if($_SERVER['REMOTE_ADDR'] == "::1" || $_SERVER['REMOTE_ADDR'] == "127.0.0.1"){
+        $future= "";
+        $pathExplode = explode("\\", getcwd());
+        $i = count($pathExplode) - 1;
+        while($pathExplode[$i] != "dominik"){
+            array_pop($pathExplode);
+            $future.="../";
+            $i--;
+        }
+    }
+    else{
+        $future= "";
+        $pathExplode = explode("/", getcwd());
+        $i = count($pathExplode) - 1;
         while($pathExplode[$i] != "public_html"){
             array_pop($pathExplode);
             $future.="../";
             $i--;
         }
+    }
     return $future;
 }
 

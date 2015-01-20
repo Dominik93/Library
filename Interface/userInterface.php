@@ -11,8 +11,8 @@ interface IUser{
     public function showOptionPanel();
     public function showNews();
     
-    public function search($isbn, $title, $publisher_house, $edition, $premiere, $author);
-    public function advancedSearch();
+    public function search($isbn, $title, $publisher_house, $edition, $premiere, $authorName, $authorSurname);
+    public function advancedSearch($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname);
     
     public function logout();
     public function login($login, $password);

@@ -21,24 +21,101 @@ class User implements IUser{
 		Nd: Nieczynne</p>';
     }
     public function showSearch(){
-            return '<div id="search" align="center">
+        $return =  '<div id="search" align="center">
 		<form action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'" method="post">
 			<table>
-				<tr> <td colspan = 2 align="center">Szukaj książki:</td><tr>
-				<tr><td>ISBN:</td><td><input type="text" value="'.@$_POST['isbn'].'" name="isbn" placeholder="ISBN"/></td></tr>
-				<tr><td>Tytuł:</td><td><input type="text" value="'.@$_POST['title'].'" name="title" placeholder="Tytuł"/></td></tr>
-				<tr><td>Wydawca:</td><td><input type="text" value="'.@$_POST['publisher_house'].'" name="publisher_house" placeholder="Wydawca"/></td></tr>
-				<tr><td>Wydanie:</td><td><input type="text" value="'.@$_POST['edition'].'" name="edition" placeholder="Wydanie"/></td></tr>
-				<tr><td>Rok wydania:</td><td><input type="text" value="'.@$_POST['premiere'].'" name="premiere" placeholder="Rok Wydania"/></td></tr>
-				<tr><td>Autor:</td><td><input type="text" value="'.@$_POST['author'].'" name="author" placeholder="Imie Nazwisko"/></td></tr>
+				<tr> <td colspan = 3 align="center">Szukaj książki:</td><tr>
+				<tr>
+                                <td>ISBN:</td>
+                                <td><input type="text" value="'.@$_POST['isbn'].'" name="isbn" placeholder="ISBN"/></td></tr>
+				<tr>
+                                <td>Tytuł:</td>
+                                <td><input type="text" value="'.@$_POST['title'].'" name="title" placeholder="Tytuł"/></td></tr>
+				<tr>
+                                <td>Wydawca:</td>
+                                <td><input type="text" value="'.@$_POST['publisher_house'].'" name="publisher_house" placeholder="Wydawca"/></td></tr>
+				<tr>
+                                <td>Wydanie:</td>
+                                <td><input type="text" value="'.@$_POST['edition'].'" name="edition" placeholder="Wydanie"/></td></tr>
+				<tr>
+                                <td>Rok wydania:</td>
+                                <td><input type="text" value="'.@$_POST['premiere'].'" name="premiere" placeholder="Rok Wydania"/></td></tr>
+				<tr>
+                                <td>Autor:</td>
+                                <td><input type="text" value="'.@$_POST['authorName'].'" name="authorName" placeholder="Imie"/></td>
+                                <td><input type="text" value="'.@$_POST['authorSurname'].'" name="authorSurname" placeholder="Nazwisko"/></td></tr>
 			</table>
 			<input type="submit" value="Szukaj ksiażki">
                         
 		</form>
                 <button id="advancedSearch">Szukanie zaawansowane</button>
 	</div>';
+        return $return;
 	}
     public function showAdvancedSearch() {
+        $this->controller->connect();
+        $form =  '<div id="advancedSearch" align="center">
+		<form action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'" method="post">
+			<table>
+				<tr>
+                                    <td colspan="3" align="center">Szukaj:</td>
+                                </tr>
+				<tr>
+                                    <td>ISBN:</td>
+                                    <td><input type="text" value="" name="isbn" placeholder="ISBN"/></td>
+                                </tr>
+				<tr>
+                                    <td>Oryginalny tytuł:</td>
+                                    <td><input type="text" value="" name="original_title" placeholder="Oryginalny tytuł"/></td>
+                                </tr>
+				<tr>
+                                    <td>Tytuł:</td>
+                                    <td><input type="text" value="" name="title" placeholder="Tytuł"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Oryginalny wydawca:</td>
+                                    <td><input type="text" value="" name="original_publisher_house" placeholder="Oryginalny wydawca"/></td>
+                                    <td><input type="text" value="" name="country_original_publisher_house" placeholder="Kraj"/></td>
+                                </tr>        
+				<tr>
+                                    <td>Wydawca:</td>
+                                    <td><input type="text" value="" name="publisher_house" placeholder="Wydawca"/></td>
+                                    <td><input type="text" value="" name="country_publisher_house" placeholder="Kraj"/></td>
+                                </tr>
+				<tr>
+                                    <td>Ilość stron:</td>
+                                    <td><input type="text" value="" name="nr_page" placeholder="Ilość stron"/></td>
+                                </tr>
+				<tr>
+                                    <td>Wydanie:</td>
+                                    <td><input type="text" value="" name="edition" placeholder="Wydanie"/></td>
+                                </tr>
+				<tr>
+                                    <td>Rok wydania:</td>
+                                    <td><input type="text" value="" name="premiere" placeholder="Rok Wydania"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Okładka:</td>
+                                    <td><input type="text" value="" name="cover" placeholder="Okładka"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Autor:</td>
+                                    <td><input type="text" value="" name="authorName[0]" placeholder="Imie"/></td>
+                                    <td><input type="text" value="" name="authorSurname[0]" placeholder="Nazwisko"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Tłumacz:</td>
+                                    <td><input type="text" value="" name="translatorName[0]" placeholder="Imie"/></td>
+                                    <td><input type="text" value="" name="translatorSurname[0]" placeholder="Nazwisko"/></td>
+                                </tr>
+                                </table>                        
+                                
+                                
+			<input type="submit" value="Szukaj">
+		</form>
+	</div>';
+        $this->controller->close();
+        return $form;
     }
     public function showContact(){
 		return '<p>
@@ -90,12 +167,8 @@ class User implements IUser{
 		return $news;
 	}
    
-    public function search($isbn, $title, $publisher_house, $edition, $premiere, $author){
-            $books = "";
-            $this->controller->connect();
-            $authorDetail = array();
-            $authorDetail[0] = "%".$authorDetail[0]."%";
-            $authorDetail[1] = "%".$authorDetail[1]."%";  
+    public function search($isbn, $title, $publisher_house, $edition, $premiere, $authorName, $authorSurname){
+            $books = ""; 
             
             if(empty($isbn)) $isbn = "%";
             else $isbn = '%'.$isbn.'%';
@@ -105,20 +178,18 @@ class User implements IUser{
             else $publisher_house = '%'.$publisher_house.'%';
             if(empty($edition)) $edition = "%";
             if(empty($premiere)) $premiere = "%";
-            if(empty($author)) $author = "%";
-            else{
-                $authorDetail = explode(" ", $author);
-                $authorDetail[0] = "%".$authorDetail[0]."%";
-                $authorDetail[1] = "%".$authorDetail[1]."%";    
-            }
-            
+            if(empty($authorName)) $authorName = "%";
+            else $authorName = '%'.$authorName.'%';
+            if(empty($authorSurname)) $authorSurname = "%";
+            else $authorSurname = '%'.$authorSurname.'%';
+            $this->controller->connect();
             $isbn = $this->controller->clear($isbn);
             $title = $this->controller->clear($title);
             $publisher_house = $this->controller->clear($publisher_house);
             $edition = $this->controller->clear($edition);
             $premiere = $this->controller->clear($premiere);
-            $author =  $this->controller->clear($author);
-            
+            $authorSurname =  $this->controller->clear($authorSurname);
+            $authorName =  $this->controller->clear($authorName);
             $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
                     null,
                     null,
@@ -136,8 +207,8 @@ class User implements IUser{
                 $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors",
                         null,null,
                         array(
-                            array("authors.author_name","LIKE",$authorDetail[0],"AND"),
-                            array("authors.author_surname","LIKE",$authorDetail[1],"")
+                            array("authors.author_name","LIKE",$authorName,"AND"),
+                            array("authors.author_surname","LIKE",$authorSurname,"")
                             ),
                     null,null,null);
                 while($rowA = mysqli_fetch_assoc($resultAuthor)){
@@ -165,23 +236,176 @@ class User implements IUser{
                     }
                     else{	
                         $books .= '<p>
-                        ISBN: '.$rowB['book_isbn'].'<br>
-                        Autor: '.$this->controller->authorsToString($resultA).'<br>
-                        Tytuł: '.$rowB['book_title'].'<br>
-                        Wydawca: '.$rowB['publisher_house_name'].'<br>
-                        Ilość stron: '.$rowB['book_nr_page'].'<br>
-                        Wydanie: '.$rowB['book_edition'].'<br>
-                        Rok wydania: '.$rowB['book_premiere'].'<br>
-                        <a href="'.backToFuture().'Library/UserAction/book.php?book='.$rowB['book_id'].'">Przejdź do książki</a>
+                        ISBN: '.$this->controller->clear($rowB['book_isbn']).'<br>
+                        Autor: '.$this->controller->clear($this->controller->authorsToString($resultA)).'<br>
+                        Tytuł: '.$this->controller->clear($rowB['book_title']).'<br>
+                        Wydawca: '.$this->controller->clear($rowB['publisher_house_name']).'<br>
+                        Wydanie: '.$this->controller->clear($rowB['book_edition']).'<br>
+                        Rok wydania: '.$this->controller->clear($rowB['book_premiere']).'<br>
+                        <a href="'.backToFuture().'Library/UserAction/book.php?book='.$this->controller->clear($rowB['book_id']).'">Przejdź do książki</a>
                         </p>';
                     }
                 }
             }
+            if($books == "")
+                return '<p>Brak książke dla zapytania</p>';
             $this->controller->close();
             return $books;
         }
-    public function advancedSearch() {
-        
+    public function advancedSearch($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country,
+            $nr_page, $edition, $premiere, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname) {
+        $books = ""; 
+            
+            if(empty($isbn)) $isbn = "%";
+            
+            if(empty($original_title)) $original_title = "%";
+            else $original_title = '%'.$original_title.'%';
+            if(empty($title)) $title = "%";
+            else $title = '%'.$title.'%';
+            
+            if(empty($original_punblisher_house)) $original_punblisher_house = "%";
+            else $original_punblisher_house = '%'.$original_punblisher_house.'%';
+            if(empty($original_country)) $original_country = "%";
+            else $original_country = '%'.$original_country.'%';
+            
+            if(empty($publisher_house)) $publisher_house = "%";
+            else $publisher_house = '%'.$publisher_house.'%';
+            if(empty($country)) $country = "%";
+            else $country = '%'.$country.'%';
+            
+            if(empty($nr_page)) $nr_page = "%";
+            if(empty($edition)) $edition = "%";
+            if(empty($premiere)) $premiere = "%";
+            if(empty($cover)) $cover = "%";
+            
+            if(empty($authorName[0])) $authorName[0] = "%";
+            else $authorName[0] = '%'.$authorName[0].'%';
+            if(empty($authorSurname[0])) $authorSurname[0] = "%";
+            else $authorSurname[0] = '%'.$authorSurname[0].'%';
+            
+            if(empty($translatorName[0])) $translatorName[0] = "%";
+            else $translatorName[0] = '%'.$translatorName[0].'%';
+            if(empty($translatorSurname[0])) $translatorSurname[0] = "%";
+            else $translatorSurname[0] = '%'.$translatorSurname[0].'%';
+            
+            $this->controller->connect();
+		$isbn = $this->controller->clear($isbn);
+		$title = $this->controller->clear($title);
+		$publisher_house = $this->controller->clear($publisher_house);
+		$nr_page = $this->controller->clear($nr_page);
+		$edition = $this->controller->clear($edition);
+		$premiere = $this->controller->clear($premiere);
+		$original_punblisher_house = $this->controller->clear($original_punblisher_house);
+		$cover = $this->controller->clear($cover);
+		$original_title = $this->controller->clear($original_title);
+                $country = $this->controller->clear($country);
+                $original_country = $this->controller->clear($original_country);
+                $authorName[0] = $this->controller->clear($authorName[0]);
+                $authorSurname[0] = $this->controller->clear($authorSurname[0]);
+                $translatorName[0] = $this->controller->clear($translatorName[0]);
+                $translatorSurname[0]= $this->controller->clear($translatorSurname[0]);
+            $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
+                    null,
+                    null,
+                    array(
+                        array("book_isbn","LIKE",$isbn,"AND"),
+                        array("book_title","LIKE",$title,"AND"),
+                        array("publisher_house_name","LIKE",$publisher_house,"AND"),
+                        array("book_nr_page","LIKE",$nr_page,"AND"),
+                        array("book_edition","LIKE",$edition,"AND"),
+                        array("book_premiere","LIKE",$premiere,"AND"),
+                        array("original_publisher_house_name","LIKE",$original_punblisher_house,"AND"),
+                        array("book_premiere","LIKE",$cover,"AND"),
+                        array("book_original_title","LIKE",$original_title,"AND"),
+                        array("publisher_house_country","LIKE",$country,"AND"),
+                        array("original_publisher_house_country","LIKE",$original_country,"AND"),
+                        array("book_edition","LIKE",$edition,"")
+                    ),
+                    null,null,null);
+            
+            $boolA = false;
+            $boolT = false;
+            while($rowB = mysqli_fetch_assoc($resultBook)){
+                $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors",
+                        null,null,
+                        array(
+                            array("authors.author_name","LIKE",$authorName[0],"AND"),
+                            array("authors.author_surname","LIKE",$authorSurname[0],"")
+                            ),
+                    null,null,null);
+                while($rowA = mysqli_fetch_assoc($resultAuthor)){
+                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors_books",null,null,
+                            array(array("author_id","=",$rowA['author_id'],"AND"),
+                                array("book_id","=",$rowB['book_id'],"")
+                                ),null,null,null); 
+                    if(mysqli_num_rows($result)>0){
+                        $boolA = true;
+                    }
+                }
+                $resultTranslators = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "translators",
+                        null,null,
+                        array(
+                            array("translators.translator_name","LIKE",$translatorName[0],"AND"),
+                            array("translators.translator_surname","LIKE",$translatorSurname[0],"")
+                            ),
+                    null,null,null);
+                while($rowA = mysqli_fetch_assoc($resultTranslators)){
+                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "translators_books",null,null,
+                            array(array("translator_id","=",$rowA['translator_id'],"AND"),
+                                array("book_id","=",$rowB['book_id'],"")
+                                ),null,null,null); 
+                    if(mysqli_num_rows($result)>0){
+                        $boolT = true;
+                    }
+                }
+                
+                if($boolA && $boolT){
+                    $boolA = false;
+                    $boolT = false;
+                    $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
+                            null,
+                            array(
+                                array("authors_books", "authors_books.author_id", "authors.author_id"),
+                                array("books", "books.book_id", "authors_books.book_id")
+                                ),
+                            array(
+                                array("books.book_id","=", $rowB['book_id'], " ")
+                                ),null,null,null);
+                    if(mysqli_num_rows($resultA) == 0) {
+                        die('Brak autorów bład');
+                    }
+                    $resultT = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "translators", 
+                            null,
+                            array(
+                                array("translators_books", "translators_books.translator_id", "translators.translator_id"),
+                                array("books", "books.book_id", "translators_books.book_id")
+                                ),
+                            array(
+                                array("books.book_id","=", $rowB['book_id'], " ")
+                                ),null,null,null);
+                    if(mysqli_num_rows($resultA) == 0) {
+                        die('Brak autorów bład');
+                    }
+                    else{	
+                       $books .= '<p>ISBN: '.$this->controller->clear($rowB['book_isbn']).'<br>
+                                        Oryginalny tytuł: '.$this->controller->clear($rowB['book_original_title']).'<br>
+					Tytuł: '.$this->controller->clear($rowB['book_title']).'<br>
+					Autorzy: '.$this->controller->clear($this->controller->authorsToString($resultA)).'<br>
+                                        Tłumacze: '.$this->controller->translatorsToString($resultT).'<br>
+                                        Oryginalne wydawnictwo: '.$this->controller->clear($rowB['original_publisher_house_name']).'<br>
+                                        Wydawnictwo: '.$this->controller->clear($rowB['publisher_house_name']).'<br>
+					Premiera: '.$this->controller->clear($rowB['book_premiere']).'<br>
+					Wydanie: '.$this->controller->clear($rowB['book_edition']).'<br>
+					Ilość stron: '.$this->controller->clear($rowB['book_nr_page']).'<br>
+                                        Okładka: '.$this->controller->clear($rowB['book_cover']).'<br>'
+                               . '<a href="'.backToFuture().'Library/UserAction/book.php?book='.$this->controller->clear($rowB['book_id']).'">Przejdź do książki</a></p>';
+                    }
+                }
+            }
+            if($books == "")
+                return '<p>Brak książke dla zapytania</p>';
+            $this->controller->close();
+            return $books;
     }
     
     public function logout(){
@@ -218,16 +442,16 @@ class User implements IUser{
                 $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
 		$_SESSION['user'] = serialize(new Admin(new Controller(), $u = $row['admin_id']));
                 
-                $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(TRUE,"sessions",null,null,
+                $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false,"sessions",null,null,
                         array(array("session_user","=", $row['admin_id'],"AND"),
                             array("session_acces_right","=", "admin" ,"")
                             ));
                 if(mysqli_num_rows($result) > 0){
-                    $this->controller->deleteTableWhere(true,"sessions", array(array("session_user","=", $row['admin_id'],"AND"),
+                    $this->controller->deleteTableWhere(false,"sessions", array(array("session_user","=", $row['admin_id'],"AND"),
                             array("session_acces_right","=", "admin" ,"")
                             ));
                 }
-                $this->controller->insertTableRecordValue(true,"sessions", 
+                $this->controller->insertTableRecordValue(false,"sessions", 
                         array("session_id", "session_ip", "session_user", "session_user_agent","session_logged", "session_acces_right"),
                         array(session_id(), $_SESSION['ip'], $row['admin_id'],$_SESSION['user_agent'], 1, "admin" ));
                 $this->controller->close();
@@ -253,17 +477,17 @@ class User implements IUser{
                     $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
                     $_SESSION['user'] = serialize(new Reader($this->isActive($row['reader_id']), new Controller(), $u = $row['reader_id']));
                     $this->controller->connect();
-                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(true,"sessions",null,null,
+                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false,"sessions",null,null,
                         array(array("session_user","=", $row['reader_id'],"AND"),
                             array("session_acces_right","=", "reader" ,"")
                             ));
                     if(mysqli_num_rows($result) > 0){
-                        $this->controller->deleteTableWhere(TRUE, "sessions", array(array("session_user","=", $row['reader_id'],"AND"),
+                        $this->controller->deleteTableWhere(false, "sessions", array(array("session_user","=", $row['reader_id'],"AND"),
                                 array("session_acces_right","=", "admin" ,"")
                                 ));
                     }
                     
-                    $this->controller->insertTableRecordValue(true,"sessions", 
+                    $this->controller->insertTableRecordValue(false,"sessions", 
                             array("session_id", "session_ip","session_user_agent", "session_user", "session_logged", "session_acces_right"),
                             array(session_id(), $_SESSION['ip'], $_SESSION['user_agent'], $row['reader_id'], 1, "reader" ));
                     $this->controller->close();
@@ -380,12 +604,13 @@ class User implements IUser{
             return '<p>Brak dostępu</p>';
         }
     
-    public function showBook($bookID, $active = "disabled") {
-        $this->controller->connect();
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "books", 
-                    array("books.*", "publisher_houses.publisher_house_name"),
-                    array(array("publisher_houses", "publisher_houses.publisher_house_id", "books.book_publisher_house_id")),
-                    array(array("books.book_id","=", $bookID, "")));
+    public function showBook($bookID) {
+         $this->controller->connect();
+            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
+                    null,
+                    null,
+                    array(
+                        array("book_id","=", $bookID, "")));
             $row = mysqli_fetch_assoc($result);
             $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
                             array("authors.*"),
@@ -397,7 +622,16 @@ class User implements IUser{
                                         array("books.book_id","=", $row['book_id'], "")
                                         )
                             );
-
+            $resultTranslators = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "translators", 
+                            array("translators.*"),
+                            array(
+                                        array("translators_books", "translators_books.translator_id", "translators.translator_id"),
+                                        array("books", "books.book_id", "translators_books.book_id")
+                                        ),
+                            array(
+                                        array("books.book_id","=", $row['book_id'], "")
+                                        )
+                            );
             if($row['free_books'] == null){
                 $freeBook = $row['book_number'];
             }
@@ -405,19 +639,19 @@ class User implements IUser{
                 $freeBook = $row['free_books'];
             }
             
-            $return = '<p>
-					ISBN: '.$row['book_isbn'].'<br>
-					Tytuł: '.$row['book_title'].'<br>
-					Autorzy: '.$this->controller->authorsToString($resultAuthors).'<br>
-					Wydawnictwo: '.$row['publisher_house_name'].'<br>
-					Premiera: '.$row['book_premiere'].'<br>
-					Wydanie: '.$row['book_edition'].'<br>
-					Ilość stron: '.$row['book_nr_page'].'<br>
-					Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
-					<form align="center" action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'?book='.$row['book_id'].'" method="post">
-                                        <p><input type="hidden" name="orderHidden" value="'.$row['book_id'].'" />		
-                                        <input type="submit" name="order" '.$active.' value="Zamów">
-					</form>
+            $return =  '<p>
+					ISBN: '.$this->controller->clear($row['book_isbn']).'<br>
+                                        Oryginalny tytuł: '.$this->controller->clear($row['book_original_title']).'<br>
+					Tytuł: '.$this->controller->clear($row['book_title']).'<br>
+					Autorzy: '.$this->controller->clear($this->controller->authorsToString($resultAuthors)).'<br>
+                                        Tłumacze: '.$this->controller->translatorsToString($resultTranslators).'<br>
+                                        Oryginalne wydawnictwo: '.$this->controller->clear($row['original_publisher_house_name']).'<br>
+                                        Wydawnictwo: '.$this->controller->clear($row['publisher_house_name']).'<br>
+					Premiera: '.$this->controller->clear($row['book_premiere']).'<br>
+					Wydanie: '.$this->controller->clear($row['book_edition']).'<br>
+					Ilość stron: '.$this->controller->clear($row['book_nr_page']).'<br>
+                                        Okładka: '.$this->controller->clear($row['book_cover']).'<br>
+                                        Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
 				</p>';
             $this->controller->close();
             return $return;

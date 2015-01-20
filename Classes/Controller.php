@@ -12,7 +12,9 @@ class Controller{
     }
     
     public function connect(){
-        $this->mysql->Connect();
+        if(!$this->mysql->baseLink){
+            $this->mysql->Connect();
+        }
     }
     
     public function close(){
@@ -127,7 +129,6 @@ class Controller{
     }
     
     public function clear($text){
-        
         if(empty($text)) return $text;
 	if(get_magic_quotes_gpc()) {
             $text = stripslashes($text);
