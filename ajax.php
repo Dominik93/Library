@@ -8,6 +8,10 @@ if(isset($_POST['editReader'])){
     echo $user->showEditReader($_POST['id']);
 }
 
+if(isset($_POST['orderBook'])){
+    echo $user->addBorrow($_POST['orderBook']);
+}
+
 if(isset($_POST['book'])){
     $books = "";
     $authorDetail = array();
@@ -193,7 +197,7 @@ if(isset($_POST['extendAccount'])){
 }
 
 if(isset($_POST['receiveBorrow'])){
-    echo $user->receiveBook($_POST['receiveBorrow']);
+    echo $user->receiveBorrow($_POST['receiveBorrow']);
 }
 
 if(isset($_POST['login'])){

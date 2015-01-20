@@ -452,8 +452,8 @@ class User implements IUser{
                             ));
                 }
                 $this->controller->insertTableRecordValue(false,"sessions", 
-                        array("session_id", "session_ip", "session_user", "session_user_agent","session_logged", "session_acces_right"),
-                        array(session_id(), $_SESSION['ip'], $row['admin_id'],$_SESSION['user_agent'], 1, "admin" ));
+                        array("session_id", "session_ip", "session_user", "session_user_agent", "session_acces_right"),
+                        array(session_id(), $_SESSION['ip'], $row['admin_id'],$_SESSION['user_agent'], "admin" ));
                 $this->controller->close();
                 return '<p>Witaj jesteś adminem, zostałeś poprawnie zalogowany! Możesz teraz przejść na <a href="'.backToFuture().'Library/index.php">stronę główną</a>.</p>';
             }
@@ -488,8 +488,8 @@ class User implements IUser{
                     }
                     
                     $this->controller->insertTableRecordValue(false,"sessions", 
-                            array("session_id", "session_ip","session_user_agent", "session_user", "session_logged", "session_acces_right"),
-                            array(session_id(), $_SESSION['ip'], $_SESSION['user_agent'], $row['reader_id'], 1, "reader" ));
+                            array("session_id", "session_ip","session_user_agent", "session_user", "session_acces_right"),
+                            array(session_id(), $_SESSION['ip'], $_SESSION['user_agent'], $row['reader_id'], "reader" ));
                     $this->controller->close();
                     return '<p>Witaj jesteś czytelnikiem, zostałeś poprawnie zalogowany! Możesz teraz przejść na <a href="'.backToFuture().'Library/index.php">stronę główną</a>.</p>';
 		}

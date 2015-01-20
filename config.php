@@ -41,10 +41,13 @@ function CreateOwner(){
                 die('Błąd');
             }
             $row = mysqli_fetch_assoc($result);
-
+            $result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "admins",null,null,
+                    array(array("login", "=", "dslusarz","")));
+            if(mysqli_num_rows($result) < 0){
             $controller->insertTableRecordValue(false,"admins",
                     array("admin_login", "admin_password", "admin_email", "admin_name", "admin_surname", "admin_acces_right_id"),
                     array("dslusarz", $controller->codepass('wiosna'), "slusarz.dominik@gmail.com", "Dominik", "Ślusarz", $row['acces_right_id']));
+            }
         }
         $controller->close();
 }
@@ -81,7 +84,7 @@ function templateTable($controller, $array, $arrayTable, $table, $tableStyle, $l
         }
 session_start();
 date_default_timezone_set("Europe/Warsaw");
-//CreateOwner();
+CreateOwner();
 if(!isset($_SESSION['logged'])) {
     $controller = new Controller();
     $controller->connect();

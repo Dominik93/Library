@@ -5,12 +5,7 @@
 	
 	function Content(){
             $user = unserialize($_SESSION['user']);
-            if(@$_POST['orderHidden'] == 1){
-                echo '<div id="content">'.$user->addBorrow(@$_POST['orderHidden']).'</div>';
-            }
-            else{
-                echo '<div id="content">'.$user->showBook($_GET['book']).'</div>';
-            }
+            echo '<div id="content">'.$user->showBook($_GET['book']).'</div>';
         }
 ?>
 
@@ -34,6 +29,17 @@
                        $("#deleteBook").click(function(){
                            var bookID = <?php echo json_encode($_GET); ?>;
                            $("#content").load("../ajax.php", {deleteBook: bookID['book']},
+                           function(responseTxt,statusTxt,xhr){
+                                if(statusTxt=="success"){
+                                }
+                                if(statusTxt=="error")
+                                    alert("Error: "+xhr.status+": "+xhr.statusText);
+                            });                  
+                       });
+                       
+                       $("#orderBook").click(function(){
+                           var bookID = <?php echo json_encode($_GET); ?>;
+                           $("#content").load("../ajax.php", {orderBook: bookID['book']},
                            function(responseTxt,statusTxt,xhr){
                                 if(statusTxt=="success"){
                                 }

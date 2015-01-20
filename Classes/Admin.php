@@ -380,7 +380,7 @@ class Admin extends User{
         }while(mysqli_num_rows($r) > 0);
         $_SESSION['id'] = session_id();
         */
-        $this->controller->updateTableRecordValuesWhere(false,"sessions", 
+        $this->controller->updateTableRecordValuesWhere(true,"sessions", 
                 array(
                     //array("session_id", session_id()),
                     array("session_last_action", date('Y-m-d H:i:s'))
@@ -393,7 +393,7 @@ class Admin extends User{
     }
     public function checkSession(){
             $this->controller->connect();
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "sessions", null, null, 
+            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(true, "sessions", null, null, 
                     array(array("session_id", "=" , session_id(),"")));
             
             if(mysqli_num_rows($result) != 1){
@@ -743,8 +743,8 @@ class Admin extends User{
                 '</div><p><a href="'.backToFuture().'Library/AdminAction/Add/registration_admin.php">Dodaj</a></p>';
         }
     public function showAllLogged(){
-        return '<p>'.templateTable($this->controller, array("Session ID", "IP","User Agent", "User", "Logged", "Rights", "Last action"),
-                                        array("session_id", "session_ip","session_user_agent", "session_user", "session_logged", "session_acces_right", "session_last_action"),
+        return '<p>'.templateTable($this->controller, array("Session ID", "IP","User Agent", "User", "Rights", "Last action"),
+                                        array("session_id", "session_ip","session_user_agent", "session_user", "session_acces_right", "session_last_action"),
                                         "sessions", "loggedTable", "" ).'</p>';
 	} 
     
@@ -1314,16 +1314,11 @@ class Admin extends User{
     }
     public function deleteBook($id) {
         $this->controller->connect();
-        $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "borrows",
-            null, null, array(array("borrow_book_id","=",$id,"")));
-        if(mysqli_num_rows($result) > 0){
-            $return = "<p>Nie można usunąć książki</p>";
+        if($this->controller->deleteTableWhere(false,"books", array(array("book_id", "=", $id, "")))){
+            $return = "<p>Usunięto książke</p>";
         }
         else{
-            $this->controller->deleteTableWhere(false,"authors_books", array(array("book_id", "=", $id, "")));
-            $this->controller->deleteTableWhere(false,"translators_books", array(array("book_id", "=", $id, "")));
-            $this->controller->deleteTableWhere(false,"books", array(array("book_id", "=", $id, "")));
-            $return = "<p>Usunięto książke</p>";
+            $return = "<p>Nie można usunąć książki</p>";
         }
         $this->controller->close();
         return $return;
@@ -1454,8 +1449,7 @@ class Admin extends User{
     
     public function getData($ID){
         $this->controller->connect();
-        $ID = $this->controller->clear($ID);
-        $data = $this->controller->getAdminData($ID);
+        $data = $this->controller->getAdminData($this->controller->clear($ID));
         $this->controller->close();
 	return $data;
     }

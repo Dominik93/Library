@@ -5,16 +5,13 @@ class Controller{
     private $mysql;
 
     public function __construct(){
-        if($_SERVER['REMOTE_ADDR'] == "::1" || $_SERVER['REMOTE_ADDR'] == "127.0.0.1")
-            $this->mysql = new Mysql('localhost', 'root', '', 'dslusarz_baza');
-        else
-            $this->mysql = new Mysql('localhost', 'dslusarz', 'kasztan', 'dslusarz_baza');
+        $this->mysql = new Mysql('localhost', 'dslusarz', 'kasztan', 'dslusarz_baza');
     }
     
     public function connect(){
-        if(!$this->mysql->baseLink){
+        //if(!$this->mysql->baseLink){
             $this->mysql->Connect();
-        }
+        //}
     }
     
     public function close(){
@@ -42,7 +39,7 @@ class Controller{
         $query = substr($query, 0 , strlen($query)-1).');';
         if($test)
         echo $query.'<br>';
-        mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
+        return mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
     }    
     public function deleteTableWhere($test, $table, $arrayWhere){
         $query = 'DELETE FROM '.$table.' WHERE ';
@@ -52,7 +49,7 @@ class Controller{
         $query = $query.';';
         if($test)
         echo $query.'<br>';
-        mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
+        return mysqli_query($this->mysql->baseLink, $query)/* or die(mysqli_error($this->mysql->baseLink))*/;
     }
     public function selectTableWhatJoinWhereGroupOrderLimit($test, $t, $arrayW = null, $arrayJ = null, $arrayWh = null, $groupBy = null, $orderBy = null, $limit = null){
         $query = 'SELECT ';
@@ -109,7 +106,7 @@ class Controller{
         $query = $query.';';
         if($test)
         echo $query.'<br>';
-	mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
+	return mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
     }
     
     public function clearArray($array){

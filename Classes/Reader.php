@@ -117,20 +117,11 @@ class Reader extends User{
             
     public function showBook($bookID){
         $this->controller->connect();
-            $resultFreeBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "free_books", 
-                        array("*"),
-                        null,
-                        array(
-                              array("book_id","=", $bookID, " ")
-                              ));
-            $rowFreeBook = mysqli_fetch_assoc($resultFreeBook);
-            if (($rowFreeBook['free_books'] == 0 || $this->active == 0) && $rowFreeBook['free_books'] != null){
-                $active = "disabled";
-            }
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "books", 
-                    array("books.*", "publisher_houses.publisher_house_name"),
-                    array(array("publisher_houses", "publisher_houses.publisher_house_id", "books.book_publisher_house_id")),
-                    array(array("books.book_id","=", $bookID, "")));
+            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
+                    null,
+                    null,
+                    array(
+                        array("book_id","=", $bookID, "")));
             $row = mysqli_fetch_assoc($result);
             $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
                             array("authors.*"),
@@ -142,27 +133,39 @@ class Reader extends User{
                                         array("books.book_id","=", $row['book_id'], "")
                                         )
                             );
-            
+            $resultTranslators = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "translators", 
+                            array("translators.*"),
+                            array(
+                                        array("translators_books", "translators_books.translator_id", "translators.translator_id"),
+                                        array("books", "books.book_id", "translators_books.book_id")
+                                        ),
+                            array(
+                                        array("books.book_id","=", $row['book_id'], "")
+                                        )
+                            );
             if($row['free_books'] == null){
                 $freeBook = $row['book_number'];
             }
             else{
                 $freeBook = $row['free_books'];
             }
+            if($this->active == true) $active = "";
+            else $active = "disabled";
             
             $return = '<p>
-					ISBN: '.$row['book_isbn'].'<br>
-					Tytuł: '.$row['book_title'].'<br>
-					Autorzy: '.$this->controller->authorsToString($resultAuthors).'<br>
-					Wydawnictwo: '.$row['publisher_house_name'].'<br>
-					Premiera: '.$row['book_premiere'].'<br>
-					Wydanie: '.$row['book_edition'].'<br>
-					Ilość stron: '.$row['book_nr_page'].'<br>
-					Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
-					<form align="center" action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'?book='.$row['book_id'].'" method="post">
-                                        <p><input type="hidden" name="orderHidden" value="'.$row['book_id'].'" />		
-                                        <input type="submit" name="order" '.$this->active.' value="Zamów">
-					</form>
+					ISBN: '.$this->controller->clear($row['book_isbn']).'<br>
+                                        Oryginalny tytuł: '.$this->controller->clear($row['book_original_title']).'<br>
+					Tytuł: '.$this->controller->clear($row['book_title']).'<br>
+					Autorzy: '.$this->controller->clear($this->controller->authorsToString($resultAuthors)).'<br>
+                                        Tłumacze: '.$this->controller->translatorsToString($resultTranslators).'<br>
+                                        Oryginalne wydawnictwo: '.$this->controller->clear($row['original_publisher_house_name']).'<br>
+                                        Wydawnictwo: '.$this->controller->clear($row['publisher_house_name']).'<br>
+					Premiera: '.$this->controller->clear($row['book_premiere']).'<br>
+					Wydanie: '.$this->controller->clear($row['book_edition']).'<br>
+					Ilość stron: '.$this->controller->clear($row['book_nr_page']).'<br>
+                                        Okładka: '.$this->controller->clear($row['book_cover']).'<br>
+                                        Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
+                                        <button name="orderBook" id="orderBook" '.$active.'>Zamów</button>
 				</p>';
             $this->controller->close();
             return $return;
@@ -177,6 +180,7 @@ class Reader extends User{
         if($row['borrow_delay'] > 0){
             $delay = $row['borrow_delay'];
         }
+        else $delay = 0;
         $borrow .= '<p>Data wypożyczenia: '.$row['borrow_date_borrow'].'<br>'
                 . 'Data zwrotu: '.$row['borrow_return'].'<br>'
                 . 'Opóźnienie: '.$delay.' dni<br>'
