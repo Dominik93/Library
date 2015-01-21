@@ -641,16 +641,16 @@ class User implements IUser{
         return '<p>Brak dostępu</p>';
     }
     
-    public function showAllReaders($id, $login, $email, $name, $surname) {
+    public function showAllReaders($array) {
             return '<p>Brak dostępu</p>';
         }
-    public function showAllBooks($id, $isbn, $title, $publisher_house, $premiere, $edition, $author) {
+    public function showAllBooks($array) {
             return '<p>Brak dostępu</p>';
         }
-    public function showAllAdmins($id, $login, $email, $name, $surname) {
+    public function showAllAdmins($array) {
             return '<p>Brak dostępu</p>';
         }
-    public function showAllBorrows($id, $bookId, $readerId, $dateBorrow, $dateReturn){
+    public function showAllBorrows($array){
             return '<p>Brak dostępu</p>';
         }
     public function showAllLogged(){
@@ -743,10 +743,10 @@ class User implements IUser{
             return '<p>Brak dostępu</p>';
         }
         
-    public function addReader($login, $email, $name, $surname, $password1, $password2, $country, $city, $street, $post_code, $nr_house){
+    public function addReader($array){
             return '<p>Brak dostępu</p>';
 	}
-    public function editReader($id, $login, $email, $name, $surname, $country, $city, $street, $post_code, $nr_house) {
+    public function editReader($array) {
             return '<p>Brak dostępu</p>';
         }
     public function deleteReader($id) {
@@ -763,10 +763,10 @@ class User implements IUser{
         return '<p>Brak dostępu</p>';
     }
     
-    public function addAdmin($name, $surname, $password1, $password2, $email, $login) {
+    public function addAdmin($array) {
             return '<p>Brak dostępu</p>';
         }
-    public function editAdmin($id, $name, $surname, $email, $login) {
+    public function editAdmin($array) {
         return '<p>Brak dostępu</p>';
     }
     public function deleteAdmin($id) {

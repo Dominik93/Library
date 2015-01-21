@@ -3,7 +3,7 @@
 		
 	function Content(){
             $user = unserialize($_SESSION['user']);
-		echo '<div id="content">'.$user->showAjaxAdminSearch().$user->showAllAdmins().'</div>';
+		echo '<div id="content">'.$user->showAjaxAdminSearch().$user->showAllAdmins($_POST).'</div>';
 	}
 ?>
 
@@ -21,16 +21,11 @@
                 $(document).ready(function(){
                     $("#id").change(function(){
                         var id = $("#id").val();
-                        if(id == "") id = "%";
                         var login = $("#login").val();
-                        if(login == "") login = "%";
                         var email = $("#email").val();
-                        if(email == "") email = "%";
                         var imie = $("#name").val();
-                        if(imie == "") imie = "%";
                         var nazwisko = $("#surname").val();
-                        if(nazwisko == "") nazwisko = "%";
-                        $("#table").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
+                        $("#table").load("../ajax.php", {admin:1, id: id, login: login, email: email, name: imie, surname: nazwisko},
                         function(responseTxt,statusTxt,xhr){
                             if(statusTxt=="success"){
                                 
@@ -41,66 +36,62 @@
                     });
                     $("#login").change(function(){
                         var id = $("#id").val();
-                        if(id == "") id = "%";
                         var login = $("#login").val();
-                        if(login == "") login = "%";
                         var email = $("#email").val();
-                        if(email == "") email = "%";
                         var imie = $("#name").val();
-                        if(imie == "") imie = "%";
                         var nazwisko = $("#surname").val();
-                        if(nazwisko == "") nazwisko = "%";
-                        $("#table").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
+                        $("#table").load("../ajax.php", {admin:1, id: id, login: login, email: email, name: imie, surname: nazwisko},
                         function(responseTxt,statusTxt,xhr){
-                            
+                            if(statusTxt=="success"){
+                                
+                            }
+                            if(statusTxt=="error")
+                                alert("Error: "+xhr.status+": "+xhr.statusText);
                         });
                     });
                     $("#email").change(function(){
                         var id = $("#id").val();
-                        if(id == "") id = "%";
                         var login = $("#login").val();
-                        if(login == "") login = "%";
                         var email = $("#email").val();
-                        if(email == "") email = "%";
                         var imie = $("#name").val();
-                        if(imie == "") imie = "%";
                         var nazwisko = $("#surname").val();
-                        if(nazwisko == "") nazwisko = "%";
-                        $("#table").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
+                        $("#table").load("../ajax.php", {admin:1, id: id, login: login, email: email, name: imie, surname: nazwisko},
                         function(responseTxt,statusTxt,xhr){
-                            
+                            if(statusTxt=="success"){
+                                
+                            }
+                            if(statusTxt=="error")
+                                alert("Error: "+xhr.status+": "+xhr.statusText);
                         });
                     });
                     $("#name").change(function(){
                         var id = $("#id").val();
-                        if(id == "") id = "%";
                         var login = $("#login").val();
-                        if(login == "") login = "%";
                         var email = $("#email").val();
-                        if(email == "") email = "%";
                         var imie = $("#name").val();
-                        if(imie == "") imie = "%";
                         var nazwisko = $("#surname").val();
-                        if(nazwisko == "") nazwisko = "%";
-                        $("#table").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
+                        $("#table").load("../ajax.php", {admin:1, id: id, login: login, email: email, name: imie, surname: nazwisko},
                         function(responseTxt,statusTxt,xhr){
-                            
+                            if(statusTxt=="success"){
+                                
+                            }
+                            if(statusTxt=="error")
+                                alert("Error: "+xhr.status+": "+xhr.statusText);
                         });
                     });
                     $("#surname").change(function(){
                         var id = $("#id").val();
-                        if(id == "") id = "%";
                         var login = $("#login").val();
-                        if(login == "") login = "%";
                         var email = $("#email").val();
-                        if(email == "") email = "%";
                         var imie = $("#name").val();
-                        if(imie == "") imie = "%";
                         var nazwisko = $("#surname").val();
-                        if(nazwisko == "") nazwisko = "%";
-                        $("#table").load("../ajax.php", {admin:1, ID: id, L : login, E: email, I: imie, N: nazwisko},
+                        $("#table").load("../ajax.php", {admin:1, id: id, login: login, email: email, name: imie, surname: nazwisko},
                         function(responseTxt,statusTxt,xhr){
-                            
+                            if(statusTxt=="success"){
+                                
+                            }
+                            if(statusTxt=="error")
+                                alert("Error: "+xhr.status+": "+xhr.statusText);
                         });
                     });
 		});

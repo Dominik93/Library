@@ -7,17 +7,7 @@
             $user = unserialize($_SESSION['user']);
             if(isset($_POST['login'])) {
                 var_dump($_POST);
-                echo '<div id="content">'.$user->addReader($_POST['login'],
-					$_POST['email'],
-					$_POST['name'],
-					$_POST['surname'],
-					$_POST['password1'],
-					$_POST['password2'],
-					$_POST['country'],
-                                        $_POST['city'],
-                                        $_POST['street'],
-                                        $_POST['post_code'],
-                                        $_POST['nr_house']).'</div>';			
+                echo '<div id="content">'.$user->addReader($_POST).'</div>';			
             }
             else{
                 echo '<div id="content">'.$user->showAddReaderForm().'</div>';
@@ -56,7 +46,7 @@
                     var email = $("#email").val();
                     if(email.length > 4){
                     $("#status_email").html('Sprawdzanie dostępności.');
-                    $("#status_email").load("../../ajax.php",{ email:email },
+                    $("#status_email").load("../../ajax.php",{ checkEmail:email },
                                             function(responseTxt,statusTxt,xhr){
                                                 if(statusTxt=="success"){
                                                     if(responseTxt == "OK"){
@@ -92,7 +82,7 @@
 				var login = $("#login").val();
 				if(login.length > 4){
 					$("#status_login").html('Sprawdzanie dostępności.');
-                                        $("#status_login").load("../../ajax.php",{ login: login },
+                                        $("#status_login").load("../../ajax.php",{ checkLogin: login },
                                             function(responseTxt,statusTxt,xhr){
                                                 if(statusTxt=="success"){
                                                     if(responseTxt == "OK"){

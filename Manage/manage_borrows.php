@@ -2,7 +2,7 @@
     include "../config.php";
     function Content(){
         $user = unserialize($_SESSION['user']);
-        echo '<div id="content">'.$user->showAjaxBoorowsSearch().$user->showAllBorrows().'</div>';
+        echo '<div id="content">'.$user->showAjaxBoorowsSearch().$user->showAllBorrows($_POST).'</div>';
     }
 ?>
 
@@ -21,68 +21,78 @@
                 $(document).ready(function(){
                     $("#id").change(function(){
                         var id = $("#id").val();
-                        if(id == "") id = "%";
                         var idK = $("#id_book").val();
-                        if(idK == "") idK = "%";
                         var idC = $("#id_reader").val();
-                        if(idC == "") idC = "%";
                         var dateW = $("#date_borrow").val();
-                        if(dateW == "") dateW = "%";
                         var dateZ = $("#date_return").val();
-                        if(dateZ == "") dateZ = "%";
-                        $("#borrowsTable").load("../ajax.php", {borrows:1, ID: id, IDK : idK, IDC: idC, DW: dateW, DZ: dateZ},function(responseTxt,statusTxt,xhr){});
+                        $("#borrowsTable").load("../ajax.php", {borrows:1, id: id, bookId: idK, $readerId: idC, $dateBorrow: dateW, $dateReturn: dateZ},
+                        function(responseTxt,statusTxt,xhr){
+                            if(statusTxt=="success"){
+                                
+                            }
+                            if(statusTxt=="error")
+                                alert("Error: "+xhr.status+": "+xhr.statusText);
+                        });
                     });
                     $("#id_book").change(function(){
                         var id = $("#id").val();
-                        if(id == "") id = "%";
                         var idK = $("#id_book").val();
-                        if(idK == "") idK = "%";
                         var idC = $("#id_reader").val();
-                        if(idC == "") idC = "%";
                         var dateW = $("#date_borrow").val();
-                        if(dateW == "") dateW = "%";
                         var dateZ = $("#date_return").val();
-                        if(dateZ == "") dateZ = "%";
-                        $("#borrowsTable").load("../ajax.php", {borrows:1, ID: id, IDK : idK, IDC: idC, DW: dateW, DZ: dateZ},function(responseTxt,statusTxt,xhr){});
+                        $("#borrowsTable").load("../ajax.php", {borrows:1, id: id, bookId: idK, $readerId: idC, $dateBorrow: dateW, $dateReturn: dateZ},
+                        function(responseTxt,statusTxt,xhr){
+                            if(statusTxt=="success"){
+                                
+                            }
+                            if(statusTxt=="error")
+                                alert("Error: "+xhr.status+": "+xhr.statusText);
+                        });
                     });
                     $("#id_reader").change(function(){
                         var id = $("#id").val();
-                        if(id == "") id = "%";
                         var idK = $("#id_book").val();
-                        if(idK == "") idK = "%";
                         var idC = $("#id_reader").val();
-                        if(idC == "") idC = "%";
                         var dateW = $("#date_borrow").val();
-                        if(dateW == "") dateW = "%";
                         var dateZ = $("#date_return").val();
-                        if(dateZ == "") dateZ = "%";
-                        $("#borrowsTable").load("../ajax.php", {borrows:1, ID: id, IDK : idK, IDC: idC, DW: dateW, DZ: dateZ},function(responseTxt,statusTxt,xhr){});
+                        $("#borrowsTable").load("../ajax.php", {borrows:1, id: id, bookId: idK, $readerId: idC, $dateBorrow: dateW, $dateReturn: dateZ},
+                        function(responseTxt,statusTxt,xhr){
+                            if(statusTxt=="success"){
+                                
+                            }
+                            if(statusTxt=="error")
+                                alert("Error: "+xhr.status+": "+xhr.statusText);
+                        });
                     });
                     $("#date_borrow").change(function(){
                         var id = $("#id").val();
-                        if(id == "") id = "%";
                         var idK = $("#id_book").val();
-                        if(idK == "") idK = "%";
                         var idC = $("#id_reader").val();
-                        if(idC == "") idC = "%";
                         var dateW = $("#date_borrow").val();
-                        if(dateW == "") dateW = "%";
                         var dateZ = $("#date_return").val();
-                        if(dateZ == "") dateZ = "%";
-                        $("#borrowsTable").load("../ajax.php", {borrows:1, ID: id, IDK : idK, IDC: idC, DW: dateW, DZ: dateZ},function(responseTxt,statusTxt,xhr){});
+                        $("#borrowsTable").load("../ajax.php", {borrows:1, id: id, bookId: idK, $readerId: idC, $dateBorrow: dateW, $dateReturn: dateZ},
+                        function(responseTxt,statusTxt,xhr){
+                            if(statusTxt=="success"){
+                                
+                            }
+                            if(statusTxt=="error")
+                                alert("Error: "+xhr.status+": "+xhr.statusText);
+                        });
                     });
                     $("#date_return").change(function(){
                         var id = $("#id").val();
-                        if(id == "") id = "%";
                         var idK = $("#id_book").val();
-                        if(idK == "") idK = "%";
                         var idC = $("#id_reader").val();
-                        if(idC == "") idC = "%";
                         var dateW = $("#date_borrow").val();
-                        if(dateW == "") dateW = "%";
                         var dateZ = $("#date_return").val();
-                        if(dateZ == "") dateZ = "%";
-                        $("#borrowsTable").load("../ajax.php", {borrows:1, ID: id, IDK : idK, IDC: idC, DW: dateW, DZ: dateZ},function(responseTxt,statusTxt,xhr){});
+                        $("#borrowsTable").load("../ajax.php", {borrows:1, id: id, bookId: idK, $readerId: idC, $dateBorrow: dateW, $dateReturn: dateZ},
+                        function(responseTxt,statusTxt,xhr){
+                            if(statusTxt=="success"){
+                                
+                            }
+                            if(statusTxt=="error")
+                                alert("Error: "+xhr.status+": "+xhr.statusText);
+                        });
                     });
 		});
                 </script>

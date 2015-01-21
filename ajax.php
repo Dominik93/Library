@@ -4,28 +4,30 @@ include 'config.php';
 $user = unserialize($_SESSION['user']);
 $controller = new Controller();
 $controller->connect();
+/*
 if(isset($_POST['editReader'])){
     echo $user->showEditReader($_POST['id']);
 }
+ */
 
 if(isset($_POST['orderBook'])){
     echo $user->addBorrow($_POST['orderBook']);
 }
 
 if(isset($_POST['book'])){
-    echo $user->showAllBooks($_POST['ID'],$_POST['ISBN'],$_POST['T'],$_POST['PH'],$_POST['E'],$_POST['P'],$_POST['A']);
+    echo $user->showAllBooks($_POST);
 }
 
 if(isset($_POST['borrows'])){
-    echo $user->showAllBorrows($_POST["ID"],$_POST["IDK"],$_POST["IDC"],$_POST["DW"],$_POST["DZ"]);
+    echo $user->showAllBorrows($_POST);
 }
 
 if (isset($_POST['reader'])){
-    echo  $user->showAllReaders($_POST['ID'],$_POST['L'],$_POST['E'],$_POST['I'],$_POST['N']);
+    echo  $user->showAllReaders($_POST);
 }
 
 if (isset($_POST['admin'])){
-    echo  $user->showAlladmins($_POST['ID'],$_POST['L'],$_POST['E'],$_POST['I'],$_POST['N']);
+    echo  $user->showAlladmins($_POST);
 }
 
 if(isset($_POST['deleteBorrow'])){
@@ -56,9 +58,8 @@ if(isset($_POST['receiveBorrow'])){
     echo $user->receiveBorrow($_POST['receiveBorrow']);
 }
 
-if(isset($_POST['login'])){
-    
-	$login = $_POST['login'];
+if(isset($_POST['checkLogin'])){
+	$login = $_POST['checkLogin'];
 	$login = $controller->clear($login);
 	$dostepny = true;
 	$result = $controller->selectTableWhatJoinWhereGroupOrderLimit(false, "readers", null, null,
@@ -80,8 +81,8 @@ if(isset($_POST['login'])){
 	}
 }
 
-if(isset($_POST['email'])){
-	$email = $_POST['email'];
+if(isset($_POST['checkEmail'])){
+	$email = $_POST['checkEmail'];
 	$email = $controller->clear($email);
 	$dostepny = true;
 	$poprawny = true;

@@ -5,11 +5,7 @@
     function Content(){
         $user = unserialize($_SESSION['user']);
         if(isset($_POST['edit'])){
-            echo '<div id="content">'.$user->editAdmin($_POST['edit'],
-                    $_POST['name'],
-                    $_POST['surname'],
-                    $_POST['email'], 
-                    $_POST['login']).'</div>';
+            echo '<div id="content">'.$user->editAdmin($_POST).'</div>';
         }
         else{
             echo '<div id="content">'.$user->showEditAdmin($_GET['id']).'</div>';

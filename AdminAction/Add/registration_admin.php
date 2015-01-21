@@ -7,7 +7,7 @@
             echo '<div id="content">';
             echo $user->showAddAdminForm();
             if(isset($_POST['login'])){
-                echo $user->addAdmin($_POST['name'], $_POST['surname'], $_POST['password1'], $_POST['password2'], $_POST['email'], $_POST['login']);
+                echo $user->addAdmin($_POST);
             }
             
             echo '</div>';
@@ -42,7 +42,7 @@
                     var email = $("#email").val();
                     if(email.length > 4){
                         $("#status_email").html('Sprawdzanie dostępności.');
-                        $("#status_email").load("../../ajax.php",{ email:email },
+                        $("#status_email").load("../../ajax.php",{ checkEmail:email },
                                             function(responseTxt,statusTxt,xhr){
                                                 if(statusTxt=="success"){
                                                     if(responseTxt == "OK"){
@@ -77,7 +77,7 @@
 				var login = $("#login").val();
 				if(login.length > 4){
 					$("#status_login").html('Sprawdzanie dostępności.');
-                                        $("#status_login").load("../../ajax.php",{ login: login },
+                                        $("#status_login").load("../../ajax.php",{ checkLogin: login },
                                             function(responseTxt,statusTxt,xhr){
                                                 if(statusTxt=="success"){
                                                     if(responseTxt == "OK"){
