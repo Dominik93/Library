@@ -3,7 +3,7 @@
 		
 	function Content(){
             $user = unserialize($_SESSION['user']);
-		echo '<div id="content">'.$user->showAllAdmins().'</div>';
+		echo '<div id="content">'.$user->showAjaxAdminSearch().$user->showAllAdmins().'</div>';
 	}
 ?>
 

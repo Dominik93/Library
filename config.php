@@ -71,7 +71,7 @@ function templateTable($controller, $array, $arrayTable, $table, $tableStyle, $l
                    $return = $return.'<tr>';
                 }
                 else{
-                    $return = $return.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/'.$link.'='.$controller->clear($row[0]).'\'">';
+                    $return = $return.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/'.$link.'='.$controller->clear($row[0]).'\'">';
                 }
 		for($i = 0; $i< count($array); $i++){
                     $return = $return.'<td>'.$controller->clear($row[$arrayTable[$i]]).'</td>';

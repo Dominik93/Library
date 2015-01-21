@@ -37,8 +37,9 @@ class Controller{
             $query = $query.'"'.$arrayValues[$i].'",';
         }
         $query = substr($query, 0 , strlen($query)-1).');';
-        if($test)
-        echo $query.'<br>';
+        if($test){
+            echo $query.'<br>';
+        }
         return mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
     }    
     public function deleteTableWhere($test, $table, $arrayWhere){
@@ -47,8 +48,9 @@ class Controller{
             $query = $query.' ('.$arrayWhere[$i][0].' '.$arrayWhere[$i][1].'"'.$arrayWhere[$i][2].'") '.$arrayWhere[$i][3];
         }
         $query = $query.';';
-        if($test)
-        echo $query.'<br>';
+        if($test){
+            echo $query.'<br>';
+        }
         return mysqli_query($this->mysql->baseLink, $query)/* or die(mysqli_error($this->mysql->baseLink))*/;
     }
     public function selectTableWhatJoinWhereGroupOrderLimit($test, $t, $arrayW = null, $arrayJ = null, $arrayWh = null, $groupBy = null, $orderBy = null, $limit = null){
@@ -84,8 +86,9 @@ class Controller{
             $query = $query.' LIMIT '.$limit;
         }
         $query = $query.';';
-        if($test)
-        echo $query.'<br>';
+        if($test){
+            echo $query.'<br>';
+        }
 	$result = mysqli_query($this->mysql->baseLink, $query)
                 or die(mysqli_error($this->mysql->baseLink));
 	return $result;
@@ -104,29 +107,29 @@ class Controller{
             }
         }
         $query = $query.';';
-        if($test)
-        echo $query.'<br>';
+        if($test){
+            echo $query.'<br>';
+        }
 	return mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
     }
     
-    public function clearArray($array){
-        for($i = 0; $i < count($array); $i++){
-            if(empty($array[$i])){
-                $array[$i] = "NULL";
+    public function clearArray($arrayVal, $arrayKey){
+        for($i = 0; $i < count($arrayVal); $i++){
+            if(!empty($arrayVal[$arrayKey[$i]])){
+                if(get_magic_quotes_gpc()){
+                    $arrayVal[$arrayKey[$i]] = stripslashes($arrayVal[$arrayKey[$i]]);
+                }
+                $arrayVal[$arrayKey[$i]] = trim($arrayVal[$arrayKey[$i]]);
+                $arrayVal[$arrayKey[$i]] = mysqli_real_escape_string($this->mysql->baseLink,$arrayVal[$arrayKey[$i]]) or die(mysqli_error($this->mysql->baseLink));
+                $arrayVal[$arrayKey[$i]] = htmlspecialchars($arrayVal[$arrayKey[$i]]);
             }
-            if(get_magic_quotes_gpc()) {
-                $array[$i] = stripslashes($array[$i]);
-            }
-            $array[$i] = trim($array[$i]);
-            $array[$i] = mysqli_real_escape_string($this->mysql->baseLink,$array[$i]) or die(mysqli_error($this->mysql->baseLink));
-            $array[$i] = htmlspecialchars($array[$i]);
         }
-        
-	return $array;
+	return $arrayVal;
     }
     
     public function clear($text){
-        if(empty($text)) return $text;
+        if(empty($text)) 
+            return $text;
 	if(get_magic_quotes_gpc()) {
             $text = stripslashes($text);
 	}
@@ -185,11 +188,12 @@ class Controller{
     }   
     public function authorsToString($resultAuthors){
         $autorzy = "";
-	if(mysqli_num_rows($resultAuthors) == 0) {
+	if(mysqli_num_rows($resultAuthors) == 0){
             die('Brak autorów bład');
 	}
         else{		
-            while($rowA = mysqli_fetch_assoc($resultAuthors)) {
+            while($rowA = mysqli_fetch_assoc($resultAuthors)){
+                $this->clearArray($rowA, array_keys($rowA));
 		$autorzy = $autorzy.''.$rowA['author_name'].' '.$rowA['author_surname'].', ';
             }
         }
@@ -197,11 +201,12 @@ class Controller{
     }
     public function translatorsToString($resultTranslators){
         $transtalors = "";
-	if(mysqli_num_rows($resultTranslators) == 0) {
+	if(mysqli_num_rows($resultTranslators) == 0){
             return "";
 	}
         else{		
-            while($rowT = mysqli_fetch_assoc($resultTranslators)) {
+            while($rowT = mysqli_fetch_assoc($resultTranslators)){
+                $this->clearArray($rowT, array_keys($rowT));
 		$transtalors .= $rowT['translator_name'].' '.$rowT['translator_surname'].', ';
             }
         }

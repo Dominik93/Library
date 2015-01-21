@@ -2,6 +2,10 @@
 
 interface IUser{
     
+    public function showAjaxBooksSearch();
+    public function showAjaxBoorowsSearch();
+    public function showAjaxAdminSearch();
+    
     public function showMainPage();
     public function showHours();
     public function showSearch();
@@ -11,7 +15,7 @@ interface IUser{
     public function showOptionPanel();
     public function showNews();
     
-    public function search($isbn, $title, $publisher_house, $edition, $premiere, $authorName, $authorSurname);
+    public function search($search);
     public function advancedSearch($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname);
     
     public function logout();
@@ -34,7 +38,7 @@ interface IUser{
     public function showAllReaders($id, $login, $email, $name, $surname);
     public function showAllAdmins($id, $login, $email, $name, $surname);
     public function showAllBorrows($id, $bookId, $readerId, $dateBorrow, $dateReturn);
-    public function showAllBooks($id, $isbn, $title, $publisher_house, $premiere, $edition);
+    public function showAllBooks($id, $isbn, $title, $publisher_house, $premiere, $edition, $author);
     public function showAllLogged(); 
     
     public function showAdmin($adminID);

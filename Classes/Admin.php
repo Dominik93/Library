@@ -31,7 +31,7 @@ class Admin extends User{
     }
     private function addAuthors($authorName, $authorSurname, $bookId){
             $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
-                                array("*"), null,
+                                null, null,
                                 array(
                                     array("author_name","=", $authorName, "AND"),
                                     array("author_surname","=", $authorSurname, "")
@@ -43,9 +43,8 @@ class Admin extends User{
                     $this->controller->insertTableRecordValue(false,"authors",
                             array("author_name", "author_surname",),
                             array($authorName, $authorSurname));
-                    //$this->controller->commit();
                     $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
-                                        array("*"), null,
+                                        null, null,
                                         array(
                                             array("author_name","=", $authorName, "AND"),
                                             array("author_surname","=", $authorSurname, "")
@@ -82,7 +81,7 @@ class Admin extends User{
                     array("translator_id", "book_id"), 
                     array($rowA[0], $bookId));
         }
-    private function addAddress($country, $city,$postCode ,$street, $houseNumber){
+    private function addAddress($country, $city, $postCode ,$street, $houseNumber){
         $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_addresses", null,null,
                 array(
                     array("street_name","=",$street,"AND"),
@@ -208,6 +207,112 @@ class Admin extends User{
         return $row[0];
     }
     
+    private function bookLight($rowBookClean, $resultAuthors){
+        return '<p>
+                        ID: '.$rowBookClean['book_id'].'<br>
+                        ISBN: '.$rowBookClean['book_isbn'].'<br>
+                        Autor: '.$this->controller->authorsToString($resultAuthors).'<br>
+                        Tytuł: '.$rowBookClean['book_title'].'<br>
+                        Wydawca: '.$rowBookClean['publisher_house_name'].'<br>
+                        Wydanie: '.$rowBookClean['book_edition'].'<br>
+                        Rok wydania: '.$rowBookClean['book_premiere'].'<br>
+                        <a href="'.backToFuture().'Library/UserAction/book.php?book='.$rowBookClean['book_id'].'">Przejdź do książki</a>
+                </p>';
+    }
+    private function book($rowBookClean, $resultAuthors, $resultTranslators){
+        if($rowBookClean['free_books'] == null){
+            $freeBook = $rowBookClean['book_number'];
+        }
+        else{
+            $freeBook = $rowBookClean['free_books'];
+        }
+        return '<p>
+			ID: '.$rowBookClean['book_id'].'<br>
+			ISBN: '.$rowBookClean['book_isbn'].'<br>
+                        Oryginalny tytuł: '.$rowBookClean['book_original_title'].'<br>
+			Tytuł: '. $rowBookClean['book_title'].'<br>
+			Autorzy: '. $this->controller->authorsToString($resultAuthors).'<br>
+                        Tłumacze: '.$this->controller->translatorsToString($resultTranslators).'<br>
+                        Oryginalne wydawnictwo: '. $rowBookClean['original_publisher_house_name'].'<br>
+                        Wydawnictwo: '. $rowBookClean['publisher_house_name'].'<br>
+			Premiera: '. $rowBookClean['book_premiere'].'<br>
+			Wydanie: '. $rowBookClean['book_edition'].'<br>
+			Ilość stron: '. $rowBookClean['book_nr_page'].'<br>
+                        Okładka: '. $rowBookClean['book_cover'].'<br>
+                        Ilość wszsytkich egzemplarzy: '. $rowBookClean['book_number'].'<br>
+			Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
+                        <button id="editBook">Edytuj</button>
+                        <button id="deleteBook">Usuń</button>
+		</p>';
+    }
+    private function acountAdmin($userDataClean){
+        return '<p>
+                            ID: '.$userDataClean['admin_id'].'<br>
+                            Imie: '.$userDataClean['admin_name'].'<br>
+                            Nazwisko: '.$userDataClean['admin_surname'].'<br>
+                            Login: '.$userDataClean['admin_login'].'<br>
+                            Email: '.$userDataClean['admin_email'].'<br>
+                            Prawa: '.$userDataClean['acces_right_name'].'<br>
+                            
+                </p>';
+    }
+    private function acountReader($userDataClean){
+        return '<p>
+                    ID: '.$userDataClean['reader_id'].'<br>
+                    Imie: '.$userDataClean['reader_name'].'<br>
+                    Nazwisko: '.$userDataClean['reader_surname'].'<br>
+                    Login: '.$userDataClean['reader_login'].'<br>
+                    Email: '.$userDataClean['reader_email'].'<br>
+                    Konto aktywne do: '.$userDataClean['reader_active_account'].'<br>
+                    Adres: '.$userDataClean['country_name'].', '.$userDataClean['city_name'].' '.$userDataClean['post_code_name'].', ul. '.$userDataClean['street_name'].' '.$userDataClean['house_number_name'].'<br>	
+                    Prawa: '.$userDataClean['acces_right_name'].'<br>
+                    <button id="extendAccount">Przedłuż konto</button>
+                    <button id="deleteReader">Usuń czytelnika</button> 
+                    <button id="editReader">Edytuj</button> 
+                    <button id="newPassword">Wygeneruj nowe hasło</button> 
+                </p>';
+       
+    }
+    
+    public function showAjaxBooksSearch(){
+        return '<div id="search" align="center"><table><tr>'
+                . '<td><input placeholder="ID" style="width: 60%;" type="text" id="id"></td>'
+                . '<td><input placeholder="ISBN" style="width: 60%;" type="text" id="isbn"></td>'
+                . '<td><input placeholder="Tytuł" style="width: 60%;" type="text" id="title"></td>'
+                . '<td><input placeholder="Autor" style="width: 60%;" type="text" id="authors"></td>'
+                . '<td><input placeholder="Wydawca" style="width: 60%;" type="text" id="publisher_house"></td>'
+                . '<td><input placeholder="Wydanie" style="width: 60%;" type="text" id="edition"></td>'
+                . '<td><input placeholder="Premiera" style="width: 60%;" type="text" id="premiere"></td>' 
+                . '</tr></table></div>';
+    }
+    public function showAjaxBoorowsSearch(){
+        return '<div id="search" align="center"><table><tr>'
+                . '<td><input placeholder="ID" style="width: 60%;" type="text" id="id"></td>'
+                . '<td><input placeholder="ID książki" style="width: 60%;" type="text" id="id_book"></td>'
+                . '<td><input placeholder="ID czytelnika" style="width: 60%;" type="text" id="id_reader"></td>'
+                . '<td><input placeholder="Data wypożyczenia" style="width: 60%;" type="text" id="date_borrow"></td>'
+                . '<td><input placeholder="Data zwrotu" style="width: 60%;" type="text" id="date_return"></td>'
+                . '</tr></table></div>';
+    }
+    public function showAjaxReadersSearch(){
+        return '<div id="search" align="center"><table><tr>'
+                . '<td><input placeholder="ID" style="width: 60%;" type="text" id="id"></td>'
+                . '<td><input placeholder="Login" style="width: 60%;" type="text" id="login"></td>'
+                . '<td><input placeholder="Email" style="width: 60%;" type="text" id="email"></td>'
+                . '<td><input placeholder="Imie" style="width: 60%;" type="text" id="name"></td>'
+                . '<td><input placeholder="Nazwisko" style="width: 60%;" type="text" id="surname"></td>'
+                . '</tr></table></div>';
+    }
+    public function showAjaxAdminSearch(){
+        return '<div id="search" align="center"><table><tr>'
+                . '<td><input placeholder="ID" style="width: 60%;" type="text" id="id"></td>'
+                . '<td><input placeholder="Login" style="width: 60%;" type="text" id="login"></td>'
+                . '<td><input placeholder="Email" style="width: 60%;" type="text" id="email"></td>'
+                . '<td><input placeholder="Imie" style="width: 60%;" type="text" id="name"></td>'
+                . '<td><input placeholder="Nazwisko" style="width: 60%;" type="text" id="surname"></td>'
+                . '</tr></table></div><div id="table">';
+    }
+    
     public function showMainPage(){
         return parent::showMainPage();
     }
@@ -229,12 +334,11 @@ class Admin extends User{
     public function showOptionPanel(){
         if(!$this->checkSession()){
             $this->timeOut();
-            echo "session time out";
             return parent::showOptionPanel();
         }
         $this->session();
-		$userData = $this->getData($this->userID);
-		return '<div id="panelName">Panel admina</div><p align="center">Witamy '.$userData['admin_name'].'!</p>
+	$userData = $this->getData($this->userID);
+	return '<div id="panelName">Panel admina</div><p align="center">Witamy '.$userData['admin_name'].'!</p>
 			<ul>
 				<li><a href="'.backToFuture().'Library/UserAction/profile.php">Twój profil</a></li>
 				<li><a href="'.backToFuture().'Library/AdminAction/Add/add_news.php">Dodaj news</a></li>
@@ -250,114 +354,132 @@ class Admin extends User{
 	}
     public function showNews(){
         $this->controller->connect();
-		$result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "news");
-		$news = "";
-		if(mysqli_num_rows($result) == 0) {
-				$news = $news.'Brak newsów';
-		}else{
-			while($row = mysqli_fetch_assoc($result)) {
-                            $news .= '<div align="center"><table>'
+	$result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "news");
+	$news = "";
+	if(mysqli_num_rows($result) == 0) {
+            $news = $news.'Brak newsów';
+	}
+        else{
+            while($row = mysqli_fetch_assoc($result)){
+                $rowClean = $this->controller->clearArray($row, array_keys($row));
+                $news .= '<div align="center"><table>'
                                 . '<tr>'
-                                . '<td align="center">'.$this->controller->clear($row['new_title']).'</td>'
-                                . '<td align="right">'.$this->controller->clear($row['new_date']).'</td>'
-                                . '<td><a href="'.backToFuture().'Library/Menu/news.php?id='.$row['new_id'].'">Usuń</a></td>'
+                                . '<td align="center">'.$rowClean['new_title'].'</td>'
+                                . '<td align="right">'.$rowClean['new_date'].'</td>'
+                                . '<td><a href="'.backToFuture().'Library/Menu/news.php?id='.$rowClean['new_id'].'">Usuń</a></td>'
                                 . '</tr>'
                                 . '<tr>'
-                                . '<td colspan="3">'.$this->controller->clear($row['new_text']).'</td>'
-                                . '</tr></table></div>';
-                        }
-                }
-                $this->controller->close();
-		return $news;
-	}
+                                . '<td colspan="3">'.$rowClean['new_text'].'</td>'
+                        . '</tr></table></div>';
+            }
+        }
+        $this->controller->close();
+	return $news;
+    }
     
-    public function search($isbn, $title, $publisher_house, $edition, $premiere, $authorName, $authorSurname){
-            $books = "";
-            if(empty($isbn)) $isbn = "%";
-            else $isbn = '%'.$isbn.'%';
-            if(empty($title)) $title = "%";
-            else $title = '%'.$title.'%';
-            if(empty($publisher_house)) $publisher_house = "%";
-            else $publisher_house = '%'.$publisher_house.'%';
-            if(empty($edition)) $edition = "%";
-            if(empty($premiere)) $premiere = "%";
-            if(empty($authorName)) $authorName = "%";
-            else $authorName = '%'.$authorName.'%';
-            if(empty($authorSurname)) $authorSurname = "%";
-            else $authorSurname = '%'.$authorSurname.'%';
-            $this->controller->connect();
-            $isbn = $this->controller->clear($isbn);
-            $title = $this->controller->clear($title);
-            $publisher_house = $this->controller->clear($publisher_house);
-            $edition = $this->controller->clear($edition);
-            $premiere = $this->controller->clear($premiere);
-            $authorName =  $this->controller->clear($authorName);
-            $authorSurname =  $this->controller->clear($authorSurname);
-            $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
+    public function search($search){
+        $this->controller->connect();
+        $searchClean = $this->controller->clearArray($search, array_keys($search));
+        $books = "";
+        if(empty($searchClean["isbn"])){
+            $searchClean['isbn'] = "%";
+        }
+        else{
+            $searchClean['isbn'] = '%'.$searchClean['isbn'].'%';
+        }
+        if(empty($searchClean['title'])){ 
+            $searchClean['title'] = "%";
+        }
+        else{
+            $searchClean['title'] = '%'.$searchClean['title'].'%';
+        }
+        if(empty($searchClean['publisher_house'])){
+            $searchClean['publisher_house'] = "%";
+        }
+        else{
+            $searchClean['publisher_house'] = '%'.$searchClean['publisher_house'].'%';
+        }
+        if(empty($searchClean['edition'])){
+            $searchClean['edition'] = "%";
+        }    
+        if(empty($searchClean['premiere'])){
+            $searchClean['premiere'] = "%";
+        }
+        if(empty($searchClean['authorName'])){
+            $searchClean['authorName'] = "%";
+        }
+        else{
+            $searchClean['authorName'] = '%'.$searchClean['authorName'].'%';
+        }
+        if(empty($searchClean['authorSurname'])){
+            $searchClean['authorSurname'] = "%";
+        }
+        else{
+            $searchClean['authorSurname'] = '%'.$searchClean['authorSurname'].'%';
+        }    
+        $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false,
+                    "view_books", 
                     null,
                     null,
                     array(
-                        array("book_isbn","LIKE",$isbn,"AND"),
-                        array("book_title","LIKE",$title,"AND"),
-                        array("publisher_house_name","LIKE",$publisher_house,"AND"),
-                        array("book_premiere","LIKE",$premiere,"AND"),
-                        array("book_edition","LIKE",$edition,"")
+                        array("book_isbn","LIKE",$searchClean["isbn"],"AND"),
+                        array("book_title","LIKE",$searchClean['title'],"AND"),
+                        array("publisher_house_name","LIKE",$searchClean['publisher_house'],"AND"),
+                        array("book_premiere","LIKE",$searchClean['premiere'],"AND"),
+                        array("book_edition","LIKE",$searchClean['edition'],"")
                     ),
                     null,null,null);
-            
-            $bool = false;
-            while($rowB = mysqli_fetch_assoc($resultBook)){
-                $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors",
-                        null,null,
+        $bool = false;
+        while($rowBook = mysqli_fetch_assoc($resultBook)){
+            $rowBookClean = $this->controller->clearArray($rowBook, array_keys($rowBook));
+            $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, 
+                        "authors",
+                        null,
+                        null,
                         array(
-                            array("authors.author_name","LIKE",$authorName,"AND"),
-                            array("authors.author_surname","LIKE",$authorSurname,"")
-                            ),
-                    null,null,null);
-                while($rowA = mysqli_fetch_assoc($resultAuthor)){
-                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors_books",null,null,
-                            array(array("author_id","=",$rowA['author_id'],"AND"),
-                                array("book_id","=",$rowB['book_id'],"")
-                                ),null,null,null); 
-                    if(mysqli_num_rows($result)>0){
-                        $bool = true;
-                    }
+                            array("authors.author_name","LIKE",$searchClean['authorName'],"AND"),
+                            array("authors.author_surname","LIKE",$searchClean['authorSurname'],"")
+                            ));
+            while($rowAuthor = mysqli_fetch_assoc($resultAuthor)){
+                $rowAuthorClean = $this->controller->clearArray($rowAuthor, array_keys($rowAuthor));
+                $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false,
+                            "authors_books",
+                            null,
+                            null,
+                            array(array("author_id","=",$rowAuthorClean['author_id'],"AND"),
+                                array("book_id","=",$rowBookClean['book_id'],"")
+                                )); 
+                if(mysqli_num_rows($result)>0){
+                    $bool = true;
                 }
-                if($bool){
-                    $bool = false;
-                    $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
+            }
+            if($bool){
+                $bool = false;
+                $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false,
+                            "authors", 
                             null,
                             array(
                                 array("authors_books", "authors_books.author_id", "authors.author_id"),
                                 array("books", "books.book_id", "authors_books.book_id")
                                 ),
                             array(
-                                array("books.book_id","=", $rowB['book_id'], " ")
-                                ),null,null,null);
-                    if(mysqli_num_rows($resultA) == 0) {
-                        die('Brak autorów bład');
-                    }
-                    else{	
-                        $books .= '<p>
-                        ID: '.$this->controller->clear($rowB['book_id']).'<br>
-                        ISBN: '.$this->controller->clear($rowB['book_isbn']).'<br>
-                        Autor: '.$this->controller->clear($this->controller->authorsToString($resultA)).'<br>
-                        Tytuł: '.$this->controller->clear($rowB['book_title']).'<br>
-                        Wydawca: '.$this->controller->clear($rowB['publisher_house_name']).'<br>
-                        Ilość stron: '.$this->controller->clear($rowB['book_nr_page']).'<br>
-                        Wydanie: '.$this->controller->clear($rowB['book_edition']).'<br>
-                        Rok wydania: '.$this->controller->clear($rowB['book_premiere']).'<br>
-                        Ilość sztuk: '.$this->controller->clear($rowB['book_number']).'<br>
-                        <a href="'.backToFuture().'Library/UserAction/book.php?book='.$this->controller->clear($rowB['book_id']).'">Przejdź do książki</a>
-                        </p>';
-                    }
+                                array("books.book_id","=", $rowBookClean['book_id'], " ")
+                                ));
+                if(mysqli_num_rows($resultA) == 0){
+                    $this->controller->close();
+                    return 'Błąd przy wykonywaniu zapytania';
+                }
+                else{	
+                    $books .= $this->bookLight($rowBookClean, $resultA);
                 }
             }
-            if($books == "")
-                return '<p>Brak książke dla zapytania</p>';
-            $this->controller->close();
-            return $books;
-    }
+        }
+        $this->controller->close();
+        if($books == ""){
+            return '<p>Brak książke dla zapytania</p>';
+        }
+        return $books;
+    }    
     public function advancedSearch($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname) {
         return parent::advancedSearch($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname);
     }
@@ -382,7 +504,6 @@ class Admin extends User{
         */
         $this->controller->updateTableRecordValuesWhere(true,"sessions", 
                 array(
-                    //array("session_id", session_id()),
                     array("session_last_action", date('Y-m-d H:i:s'))
                     ),
                 array(
@@ -401,11 +522,12 @@ class Admin extends User{
                 return false;
             }
             $row = mysqli_fetch_assoc($result);
-            if($row['session_ip'] != $_SERVER['REMOTE_ADDR']){
+            $rowClean = $this->controller->clearArray($row, array_keys($row));
+            if($rowClean['session_ip'] != $_SERVER['REMOTE_ADDR']){
                 $this->controller->close();
                 return false;
             }
-            if($row['session_user_agent'] != $_SERVER['HTTP_USER_AGENT']){
+            if($rowClean['session_user_agent'] != $_SERVER['HTTP_USER_AGENT']){
                 $this->controller->close();
                 return false;
             }
@@ -425,20 +547,14 @@ class Admin extends User{
     public function showAccount(){
         $userData = $this->getData($this->userID);
         $this->controller->connect();
-	$return = '<p>
-                            ID: '.$this->controller->clear($userData['admin_id']).'<br>
-                            Imie: '.$this->controller->clear($userData['admin_name']).'<br>
-                            Nazwisko: '.$this->controller->clear($userData['admin_surname']).'<br>
-                            Login: '.$this->controller->clear($userData['admin_login']).'<br>
-                            Email: '.$this->controller->clear($userData['admin_email']).'<br>
-                            Prawa: '.$this->controller->clear($userData['acces_right_name']).'<br>
-                            <button id="changePassword">Zmien hasło</button>
-                            </p>';
+        $userDataClean = $this->controller->clearArray($userData, array_keys($userData));
+	$return = $this->acountAdmin($userDataClean).'<p><button id="changePassword">Zmien hasło</button></p>';
         $this->controller->close();
         return $return;
 	}
     public function extendAccount($id) {
         $this->controller->connect();
+        $idClean = $this->controller->clear($id);
         $date = date_create(date('Y-m-d'));
         date_add($date, date_interval_create_from_date_string('365 days')); 
         $resultAccessRgihts = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "acces_rights", 
@@ -446,14 +562,15 @@ class Admin extends User{
                                 null,
                                 array(array("acces_right_name","=", "activeReader", "")));
         if(mysqli_num_rows($resultAccessRgihts) == 0) {
-            die('<p>Błąd</p>');
+            return '<p>Błąd</p>';
         }
         $rowAR = mysqli_fetch_assoc($resultAccessRgihts);
+        $rowARClean = $this->controller->clearArray($rowAR, array_keys($rowAR));
         $this->controller->updateTableRecordValuesWhere(false,"readers",
                 array(
                     array("reader_active_account", date_format($date,"y-m-d")),
-                    array("reader_acces_right_id", $rowAR['acces_right_id'])),
-                array(array("reader_id", "=", $id, ""))
+                    array("reader_acces_right_id", $rowARClean['acces_right_id'])),
+                array(array("reader_id", "=", $idClean, ""))
                 );
         $return = "<p>Przedłużono konto</p>";
         $this->controller->close();
@@ -577,7 +694,12 @@ class Admin extends User{
                                 </tr>
                                 <tr>
                                     <td>Okładka:</td>
-                                    <td><input type="text" value="" name="cover" placeholder="Okładka" required/></td>
+                                    <td>
+                                        <select name="cover">
+                                            <option value="Miękka">Miękka</option>
+                                            <option value="Twarda">Twarda</option>
+                                        </select>
+                                    </td>
                                 </tr>
 				<tr>
                                     <td>Ilość egzemplarzy:</td>
@@ -641,12 +763,12 @@ class Admin extends User{
     public function showLoginForm(){
         return "<p>Jesteś już zalogowany!</p>";
     }
-    public function showchangePassForm(){
+    public function showChangePassForm(){
         $this->controller->connect();
         $return = '<div id="changePass" align="center">
 			<form action="'.backToFuture().'Library/UserAction/Edit/edit_pass.php" method="post">
 				<table>
-					<tr><td>Aktualne hasło:</td><td><input id="oldPassword" type="password" value="" name="oldPassword"  required/><span id="status_email"></span></td></tr>
+					<tr><td>Aktualne hasło:</td><td><input id="oldPassword" type="password" value="" name="oldPassword"  required/></td></tr>
 					<tr><td>Nowe hasło:</td><td><input id="newPassword1" type="password" value="" name="newPassword1" required/></td></tr>
 					<tr><td>Powtórz nowe hasło:</td><td><input id="newPassword2" type="password" value="" name="newPassword2" required/><span id="status_password"></span></td></tr>
 				</table>
@@ -658,89 +780,152 @@ class Admin extends User{
     }
     
     public function showAllReaders($id = "%", $login = "%", $email = "%", $name = "%", $surname = "%") {
-        return '<div id="search" align="center"><table><tr>'
-                . '<td><input placeholder="ID" style="width: 60%;" type="text" id="id"></td>'
-                . '<td><input placeholder="Login" style="width: 60%;" type="text" id="login"></td>'
-                . '<td><input placeholder="Email" style="width: 60%;" type="text" id="email"></td>'
-                . '<td><input placeholder="Imie" style="width: 60%;" type="text" id="name"></td>'
-                . '<td><input placeholder="Nazwisko" style="width: 60%;" type="text" id="surname"></td>'
-                . '</tr></table></div>'.templateTable($this->controller, array("ID", "Login", "Email", "Imie", "Nazwisko"),
+        return '<p>'.templateTable($this->controller, array("ID", "Login", "Email", "Imie", "Nazwisko"),
                                         array("reader_id", "reader_login", "reader_email", "reader_name", "reader_surname"),
-                                        "readers", "usersTable", "profile_readers.php?id" ).
-                '<p><a href="'.backToFuture().'Library/AdminAction/Add/registration_reader.php">Dodaj</a></p>';
+                                        "readers", "usersTable",'AdminAction/profile_readers.php?id', null, null,
+            array(
+                array("reader_id","like",$id,"and"),
+                array("reader_login","like",$login,"and"),
+                array("reader_email","like",$email,"and"),
+                array("reader_name","like",$name,"and"),
+                array("reader_surname","like",$surname,"")
+            )).'<p><a href="'.backToFuture().'<p>Library/AdminAction/register_reader.php">Dodaj</a></p></p>';
         }
     public function showAllBorrows($id = "%", $bookId = "%", $readerId = "%", $dateBorrow = "%", $dateReturn = "%"){
-        return '<div id="search" align="center"><table><tr>'
-                . '<td><input placeholder="ID" style="width: 60%;" type="text" id="id"></td>'
-                . '<td><input placeholder="ID książki" style="width: 60%;" type="text" id="id_book"></td>'
-                . '<td><input placeholder="ID czytelnika" style="width: 60%;" type="text" id="id_reader"></td>'
-                . '<td><input placeholder="Data wypożyczenia" style="width: 60%;" type="text" id="date_borrow"></td>'
-                . '<td><input placeholder="Data zwrotu" style="width: 60%;" type="text" id="date_return"></td>'
-                . '</tr></table></div>'.templateTable($this->controller, array('ID','ID książki','ID czytelnika', 'Data wypożyczenia', 'Odebrano?', 'Data zwrotu'),
-                                    array('borrow_id','borrow_book_id','borrow_reader_id', 'borrow_date_borrow', 'borrow_received', 'borrow_return'),
-                                    "borrows", "borrowsTable", backToFuture().'Library/AdminAction/borrow.php?id');
-    }
-    public function showAllBooks($id = "%", $isbn = "%", $title = "%", $publisher_house = "%", $premiere = "%", $edition = "%") {
+        return '<p>'.templateTable($this->controller, array('ID','ID książki','ID czytelnika', 'Data wypożyczenia', 'Data zwrotu'),
+                              array('borrow_id','borrow_book_id','borrow_reader_id', 'borrow_date_borrow', 'borrow_return'),
+                                    "borrows", "borrowsTable",'AdminAction/borrow.php?id', null, null,
+            array(
+                array("borrow_id", "like", $id, "and"),
+                array("borrow_book_id", "like", $bookId, "and"),
+                array("borrow_reader_id", "like", $readerId, "and"),
+                array("borrow_date_borrow", "like", $dateBorrow, "and"),
+                array("borrow_return", "like", $dateReturn, "")
+                )).'</p>';
+        }
+    public function showAllBooks($id = "%", $isbn = "%", $title = "%", $publisher_house = "%", $premiere = "%", $edition = "%", $author = "%") {
             $books = "";
-            $this->controller->connect();
-            $books .= '<div id="search" align="center"><table><tr>'
-                . '<td><input placeholder="ID" style="width: 60%;" type="text" id="id"></td>'
-                . '<td><input placeholder="ISBN" style="width: 60%;" type="text" id="isbn"></td>'
-                . '<td><input placeholder="Tytuł" style="width: 60%;" type="text" id="title"></td>'
-                . '<td><input placeholder="Autor" style="width: 60%;" type="text" id="authors"></td>'
-                . '<td><input placeholder="Wydawca" style="width: 60%;" type="text" id="publisher_house"></td>'
-                . '<td><input placeholder="Ilość stron" style="width: 60%;" type="text" id="number_page"></td>'
-                . '<td><input placeholder="Wydanie" style="width: 60%;" type="text" id="edition"></td>'
-                . '<td><input placeholder="Premiera" style="width: 60%;" type="text" id="premiere"></td>' 
-                . '</tr></table></div>';
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books",
-                    array("*"));
-            if(mysqli_num_rows($result) == 0) {
-			$books = $books.'Brak książek';
-            }
-            else{
-			$books = $books.'
+            
+        $this->controller->connect();
+        $authorDetail = array();
+        $authorDetail[0] = "%".$authorDetail[0]."%";
+        $authorDetail[1] = "%".$authorDetail[1]."%"; 
+        if(empty($id)) 
+            $id = "%";
+        else 
+            $id = $id;
+        if(empty($isbn)) 
+            $isbn = "%";
+        else 
+            $isbn = '%'.$isbn.'%';
+        if(empty($title)) 
+            $title = "%";
+        else 
+            $title = '%'.$title.'%';
+        if(empty($publisher_house)) 
+            $publisher_house = "%";
+        else 
+            $publisher_house = '%'.$publisher_house.'%';
+        if(empty($edition)) 
+            $edition = "%";
+        else
+            $edition = $edition;
+        if(empty($premiere)) 
+            $premiere = "%";
+        else 
+            $premiere = '%'.$premiere.'%';
+        if(empty($author))
+            $author = "%";
+        else{
+            $authorDetail = explode(" ", $author);
+            $authorDetail[0] = "%".$authorDetail[0]."%";
+            $authorDetail[1] = "%".$authorDetail[1]."%";    
+        }
+        $isbn = $this->controller->clear($isbn);
+        $title = $this->controller->clear($title);
+        $publisher_house = $this->controller->clear($publisher_house);
+        $edition = $this->controller->clear($edition);
+        $premiere = $this->controller->clear($premiere);
+
+            $resultBook = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
+                    null,
+                    null,
+                    array(
+                        array("book_id","LIKE",$id,"AND"),
+                        array("book_isbn","LIKE",$isbn,"AND"),
+                        array("book_title","LIKE",$title,"AND"),
+                        array("publisher_house_name","LIKE",$publisher_house,"AND"),
+                        array("book_premiere","LIKE",$premiere,"AND"),
+                        array("book_edition","LIKE",$edition,"")
+                    ),
+                    null,null,null);
+            
+            $bool = false;
+            $books = $books.'
 				<div id="booksTable" align="center">
 				<p><table>
-					<tr> <td>ID</td> <td>ISBN</td> <td>Tytył</td> <td>Autorzy</td> <td>Wydawca</td> <td>Wydanie</td> <td>Premiera</td></tr>
+					<tr> <td>ID</td> <td>ISBN</td> <td>Tytył</td> <td>Autorzy</td> <td>Wydawca</td> <td>Ilość stron</td> <td>Wydanie</td> <td>Premiera</td></tr>
 				';
-			while($row = mysqli_fetch_assoc($result)) {
-				$resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
-                                    array("authors.*"),
-                                    array(
-                                                array("authors_books", "authors_books.author_id", "authors.author_id"),
-                                                array("books", "books.book_id", "authors_books.book_id")
-                                                ),
-                                    array(
-                                                array("books.book_id", "=", $row['book_id'], "")
-                                                )
-                                    );
-				$books = $books.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$this->controller->clear($row['book_id']).'\'" /> '
-                                                    . '<td>'.$this->controller->clear($row['book_id']).'</td> '
-                                                    . '<td>'.$this->controller->clear($row['book_isbn']).'</td> '
-                                                    . '<td>'.$this->controller->clear($row['book_title']).'</td> '
-                                                    . '<td>'.$this->controller->clear($this->controller->authorsToString($resultAuthors)).'</td> '
-                                                    . '<td>'.$this->controller->clear($row['publisher_house_name']).', '.$this->controller->clear($row['publisher_house_country']).'</td>'
-                                                    . '<td>'.$this->controller->clear($row['book_edition']).'</td> '
-                                                    . '<td>'.$this->controller->clear($row['book_premiere']).'</td>'
+            while($rowB = mysqli_fetch_assoc($resultBook)){
+                $resultAuthor = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors",
+                        null,null,
+                        array(
+                            array("authors.author_name","LIKE",$authorDetail[0],"AND"),
+                            array("authors.author_surname","LIKE",$authorDetail[1],"")
+                            ),
+                    null,null,null,true);
+                while($rowA = mysqli_fetch_assoc($resultAuthor)){
+                    $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors_books",null,null,
+                            array(array("author_id","=",$rowA['author_id'],"AND"),
+                                array("book_id","=",$rowB['book_id'],"")
+                                ),null,null,null,true); 
+                    if(mysqli_num_rows($result)>0){
+                        $bool = true;
+                    }
+                }
+                if($bool){
+                    $bool = false;
+                    $resultA = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
+                            null,
+                            array(
+                                array("authors_books", "authors_books.author_id", "authors.author_id"),
+                                array("books", "books.book_id", "authors_books.book_id")
+                                ),
+                            array(
+                                array("books.book_id","=", $rowB['book_id'], " ")
+                                ),null,null,null,true);
+                    if(mysqli_num_rows($resultA) == 0) {
+                        die('Brak autorów bład');
+                    }
+                    else{	
+                        $books = $books.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$rowB['book_id'].'\'" > '
+                                                    . '<td>'.$rowB['book_id'].'</td> '
+                                                    . '<td>'.$rowB['book_isbn'].'</td> '
+                                                    . '<td>'.$rowB['book_title'].'</td> '
+                                                    . '<td>'.$this->controller->authorsToString($resultA).'</td> '
+                                                    . '<td>'.$rowB['publisher_house_name'].'</td>'
+                                                    . '<td>'.$rowB['book_nr_page'].'</td>'
+                                                    . '<td>'.$rowB['book_edition'].'</td> '
+                                                    . '<td>'.$rowB['book_premiere'].'</td>'
                                                 . ' </tr>';
-			}
-			$books = $books.'</table><p><a href="'.backToFuture().'Library/AdminAction/Add/add_book.php">Dodaj</a></p></div>';
-		}     
-                $this->controller->close();
-            return $books; 
+                    }
+                }
+            }
+            $books = $books.'</table><a href="'.backToFuture().'Library/AdminAction/add_book.php">Dodaj</a></p></div>';
+		$this->controller->close();
+            return $books;
         }
     public function showAllAdmins($id = "%", $login = "%", $email = "%", $name = "%", $surname = "%"){
-        return '<div id="search" align="center"><table><tr>'
-                . '<td><input placeholder="ID" style="width: 60%;" type="text" id="id"></td>'
-                . '<td><input placeholder="Login" style="width: 60%;" type="text" id="login"></td>'
-                . '<td><input placeholder="Email" style="width: 60%;" type="text" id="email"></td>'
-                . '<td><input placeholder="Imie" style="width: 60%;" type="text" id="name"></td>'
-                . '<td><input placeholder="Nazwisko" style="width: 60%;" type="text" id="surname"></td>'
-                . '</tr></table></div><div id="table">'.templateTable($this->controller, array("ID", "Login", "Email", "Imie", "Nazwisko"),
-                                    array("admin_id", "admin_login", "admin_email", "admin_name", "admin_surname"),
-                                    "admins", "usersTable", backToFuture().'Library/AdminAction/profile_admins.php?id').
-                '</div><p><a href="'.backToFuture().'Library/AdminAction/Add/registration_admin.php">Dodaj</a></p>';
+        return '<p>'.templateTable($this->controller, array("ID", "Login", "Email", "Imie", "Nazwisko"),
+                                        array("admin_id", "admin_login", "admin_email", "admin_name", "admin_surname"),
+                                        "admins", "usersTable", 'AdminAction/profile_admins.php?id', null, null,
+            array(
+                array("admin_id","like",$id,"and"),
+                array("admin_login","like",$login,"and"),
+                array("admin_email","like",$email,"and"),
+                array("admin_name","like",$name,"and"),
+                array("admin_surname","like",$surname,"")
+            )).'<p><a href="'.backToFuture().'Library/AdminAction/register_admin.php">Dodaj</a></p></p>';
         }
     public function showAllLogged(){
         return '<p>'.templateTable($this->controller, array("Session ID", "IP","User Agent", "User", "Rights", "Last action"),
@@ -751,70 +936,50 @@ class Admin extends User{
     public function showAdmin($adminID){
         $userData =  $this->getData($adminID);
         $this->controller->connect();
-	$return = '<p>
-                            ID: '.$this->controller->clear($userData['admin_id']).'<br>
-                            Imie: '.$this->controller->clear($userData['admin_name']).'<br>
-                            Nazwisko: '.$this->controller->clear($userData['admin_surname']).'<br>
-                            Login: '.$this->controller->clear($userData['admin_login']).'<br>
-                            Email: '.$this->controller->clear($userData['admin_email']).'<br>
-                            Prawa: '.$this->controller->clear($userData['acces_right_name']).'<br>
-                                <button id="editAdmin">Edytuj</button>
-                                <button id="deleteAdmin">Usuń</button>
-                        </p>';
+        $userDataClean = $this->controller->clearArray($userData, array_keys($userData));
+        $return = $this->acountAdmin($userDataClean);
         $this->controller->close();
         return $return;
         }
     public function showEditAdmin($adminID){
         $this->controller->connect();
-        $userData =  $this->controller->getAdminData($adminID);
+        $userData = $this->controller->getAdminData($adminID);
+        $userDataClean = $this->controller->clearArray($userData, array_keys($userData));
         $return = '<div align="center">
-            <form action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'?id='.$this->controller->clear($userData['admin_id']).'" method="post">
+            <form action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'?id='.$userDataClean['admin_id'].'" method="post">
                 <table>
                     <tr align="center">
-                        <td colspan="2">Edytowanie admina o '.$this->controller->clear($userData['admin_id']).'</td>
+                        <td colspan="2">Edytowanie admina o '.$userDataClean['admin_id'].'</td>
                     </tr>
                     <tr>
                         <td>Imie:</td>
-                        <td><input type="text" id="name" name="name" value="'.$this->controller->clear($userData['admin_name']).'"/></td>
+                        <td><input type="text" id="name" name="name" value="'.$userDataClean['admin_name'].'"/></td>
                     </tr>
                     <tr>
                         <td>Nazwisko:</td>
-                        <td><input type="text" id="surname" name="surname" value="'.$this->controller->clear($userData['admin_surname']).'"/></td>
+                        <td><input type="text" id="surname" name="surname" value="'.$userDataClean['admin_surname'].'"/></td>
                     </tr>
                     <tr>
                         <td>Login:</td>
-                        <td><input type="text" id="login" name="login" value="'.$this->controller->clear($userData['admin_login']).'"/></td>
+                        <td><input type="text" id="login" name="login" value="'.$userDataClean['admin_login'].'"/></td>
                     </tr>
                     <tr>
                         <td>Email:</td>
-                        <td><input type="email" id="email" name="email" value="'.$this->controller->clear($userData['admin_email']).'"/></td>
+                        <td><input type="email" id="email" name="email" value="'.$userDataClean['admin_email'].'"/></td>
                     </tr>
                 </table>
-                <input type="hidden" id="edit" name="edit" value="'.$this->controller->clear($userData['admin_id']).'"/>
+                <input type="hidden" id="edit" name="edit" value="'.$userDataClean['admin_id'].'"/>
                 <input type="submit" id="submit" value="Zapisz zmiany"/>
             </form></div>';
         $this->controller->close();
         return $return;
-        } 
+    } 
         
     public function showReader($readerID){
         $this->controller->connect();
         $userData = $this->controller->getReaderData($readerID);
-
-        $return = '<p>
-            ID: '.$this->controller->clear($userData['reader_id']).'<br>
-            Imie: '.$this->controller->clear($userData['reader_name']).'<br>
-            Nazwisko: '.$this->controller->clear($userData['reader_surname']).'<br>
-            Login: '.$this->controller->clear($userData['reader_login']).'<br>
-            Email: '.$this->controller->clear($userData['reader_email']).'<br>
-            Konto aktywne do: '.$this->controller->clear($userData['reader_active_account']).'<br>
-            Adres: '.$this->controller->clear($userData['country_name']).', '.$this->controller->clear($userData['city_name']).' '.$this->controller->clear($userData['post_code_name']).', ul. '.$this->controller->clear($userData['street_name']).' '.$this->controller->clear($userData['house_number_name']).'<br>	
-            Prawa: '.$this->controller->clear($userData['acces_right_name']).'<br>
-            <button id="extendAccount">Przedłuż konto</button>
-            <button id="deleteReader">Usuń czytelnika</button> 
-            <button id="editReader">Edytuj</button> 
-            <button id="newPassword">Wygeneruj nowe hasło</button> 
-	</p>';
+        $userDataClean = $this->controller->clearArray($userData, array_keys($userData));
+        $return = $this->acountReader($userDataClean);
         $this->controller->close();
         return $return;
     }
@@ -832,11 +997,12 @@ class Admin extends User{
     public function showEditReader($readerID){
         $this->controller->connect();
         $userData = $this->controller->getReaderData($readerID);
+        $userDataClean = $this->controller->clearArray($userData, array_keys($userData));
         $return = '<div id="registration" align="center">
-			<form action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'?id='.$this->controller->clear($userData['reader_id']).'" method="post">
+			<form action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'?id='.$userDataClean['reader_id'].'" method="post">
 				<table>
                                         <tr align="center">
-                                            <td colspan="4">Edytowanie czytelnika o id '.$this->controller->clear($userData['reader_id']).'</td>
+                                            <td colspan="4">Edytowanie czytelnika o id '.$userDataClean['reader_id'].'</td>
                                         </tr>
                                         <tr align="center">
                                             <td colspan="2">Dane</td>
@@ -844,37 +1010,37 @@ class Admin extends User{
                                         </tr>
 					<tr>
                                             <td>Login:</td>
-                                            <td><input id="login" type="text" value="'.$this->controller->clear($userData['reader_login']).'" name="login" placeholder="Login" required/><span id="status_login"></span></td>
+                                            <td><input id="login" type="text" value="'.$userDataClean['reader_login'].'" name="login" placeholder="Login" required/><span id="status_login"></span></td>
                                             <td>Kraj:</td>
-                                            <td><input id="country" type="text" value="'.$this->controller->clear($userData['country_name']).'" name="country" placeholder="Kraj" required/></td>
+                                            <td><input id="country" type="text" value="'.$userDataClean['country_name'].'" name="country" placeholder="Kraj" required/></td>
                                         
                                         </tr>
 					<tr>
                                             <td>E-mail:</td>
-                                            <td><input id="email" type="email" value="'.$this->controller->clear($userData['reader_email']).'" name="email" placeholder="E-mail" required/><span id="status_email"></span>
+                                            <td><input id="email" type="email" value="'.$userDataClean['reader_email'].'" name="email" placeholder="E-mail" required/><span id="status_email"></span>
                                             <td>Miasto:</td>
-                                            <td><input id="city" type="text" value="'.$this->controller->clear($userData['reader_login']).'" name="city" placeholder="Misto" required/></td>
+                                            <td><input id="city" type="text" value="'.$userDataClean['reader_login'].'" name="city" placeholder="Misto" required/></td>
                                         </td></tr>
 					<tr>
                                             <td>Imie:</td>
-                                            <td><input id="name" type="text" value="'.$this->controller->clear($userData['reader_name']).'" name="name" placeholder="Imie" required/></td>
+                                            <td><input id="name" type="text" value="'.$userDataClean['reader_name'].'" name="name" placeholder="Imie" required/></td>
                                             <td>Kod pocztowy:</td>
-                                            <td><input id="post_code" type="text" value="'.$this->controller->clear($userData['post_code_name']).'" name="post_code" placeholder="Kod pocztowy" required/></td>
+                                            <td><input id="post_code" type="text" value="'.$userDataClean['post_code_name'].'" name="post_code" placeholder="Kod pocztowy" required/></td>
                                         </tr>
 					<tr>
                                             <td>Nazwisko:</td>
-                                            <td><input id="surname" type="text" value="'.$this->controller->clear($userData['reader_surname']).'" name="surname" placeholder="Nazwisko" required/></td>
+                                            <td><input id="surname" type="text" value="'.$userDataClean['reader_surname'].'" name="surname" placeholder="Nazwisko" required/></td>
                                             <td>Ulica:</td>
-                                            <td><input id="street" type="text" value="'.$this->controller->clear($userData['street_name']).'" name="street" placeholder="Ulica" required/></td>
+                                            <td><input id="street" type="text" value="'.$userDataClean['street_name'].'" name="street" placeholder="Ulica" required/></td>
                                         </tr>
 					<tr>
                                             <td></td>
                                             <td></td>
                                             <td>Nr mieszkania/domu:</td>
-                                            <td><input id="nr_house" type="text" value="'.$this->controller->clear($userData['house_number_name']).'" name="nr_house" placeholder="Nr mieszkania/domu" required/></td>
+                                            <td><input id="nr_house" type="text" value="'.$userDataClean['house_number_name'].'" name="nr_house" placeholder="Nr mieszkania/domu" required/></td>
                                         </tr>
 				</table>
-                                <input type="hidden" id="edit" name="edit" value="'.$this->controller->clear($userData['reader_id']).'"/>
+                                <input type="hidden" id="edit" name="edit" value="'.$userDataClean['reader_id'].'"/>
 				<input type="submit" id="submit" value="Zapisz zmiany">
 			</form>
 		</div>';
@@ -884,66 +1050,44 @@ class Admin extends User{
     
     public function showBook($bookID) {
         $this->controller->connect();
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
+        $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
                     null,
                     null,
                     array(
                         array("book_id","=", $bookID, "")));
-            $row = mysqli_fetch_assoc($result);
-            $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
+        $row = mysqli_fetch_assoc($result);
+        $rowClean= $this->controller->clearArray($row, array_keys($row));
+        $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
                             array("authors.*"),
                             array(
                                         array("authors_books", "authors_books.author_id", "authors.author_id"),
                                         array("books", "books.book_id", "authors_books.book_id")
                                         ),
                             array(
-                                        array("books.book_id","=", $row['book_id'], "")
+                                        array("books.book_id","=", $rowClean['book_id'], "")
                                         )
                             );
-            $resultTranslators = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "translators", 
+        $resultTranslators = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "translators", 
                             array("translators.*"),
                             array(
                                         array("translators_books", "translators_books.translator_id", "translators.translator_id"),
                                         array("books", "books.book_id", "translators_books.book_id")
                                         ),
                             array(
-                                        array("books.book_id","=", $row['book_id'], "")
+                                        array("books.book_id","=", $rowClean['book_id'], "")
                                         )
                             );
-            if($row['free_books'] == null){
-                $freeBook = $row['book_number'];
-            }
-            else{
-                $freeBook = $row['free_books'];
-            }
-            
-            $return =  '<p>
-					ID: '.$this->controller->clear($row['book_id']).'<br>
-					ISBN: '.$this->controller->clear($row['book_isbn']).'<br>
-                                        Oryginalny tytuł: '.$this->controller->clear($row['book_original_title']).'<br>
-					Tytuł: '.$this->controller->clear($row['book_title']).'<br>
-					Autorzy: '.$this->controller->clear($this->controller->authorsToString($resultAuthors)).'<br>
-                                        Tłumacze: '.$this->controller->translatorsToString($resultTranslators).'<br>
-                                        Oryginalne wydawnictwo: '.$this->controller->clear($row['original_publisher_house_name']).'<br>
-                                        Wydawnictwo: '.$this->controller->clear($row['publisher_house_name']).'<br>
-					Premiera: '.$this->controller->clear($row['book_premiere']).'<br>
-					Wydanie: '.$this->controller->clear($row['book_edition']).'<br>
-					Ilość stron: '.$this->controller->clear($row['book_nr_page']).'<br>
-                                        Okładka: '.$this->controller->clear($row['book_cover']).'<br>
-                                        Ilość wszsytkich egzemplarzy: '.$this->controller->clear($row['book_number']).'<br>
-					Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
-                                        <button id="editBook">Edytuj</button>
-                                        <button id="deleteBook">Usuń</button>
-				</p>';
-            $this->controller->close();
-            return $return;
-        }
+        $return = $this->book($rowClean, $resultAuthors, $resultTranslators);
+        $this->controller->close();
+        return $return;
+    }
     public function showEditBook($bookID){
         $this->controller->connect();
         $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "view_books", 
                     null,null,
                     array(array("book_id","=", $bookID, "")));
         $row = mysqli_fetch_assoc($result);
+        $rowClean= $this->controller->clearArray($row, array_keys($row));
         $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
                             array("authors.*"),
                             array(
@@ -965,52 +1109,52 @@ class Admin extends User{
                                         )
                             );
         $return = '<div align="center">
-		<form action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'?id='.$this->controller->clear($row['book_id']).'" method="post">
+		<form action="'.htmlspecialchars($_SERVER["PHP_SELF"]).'?id='.$this->controller->clear($rowClean['book_id']).'" method="post">
 			<table>
 				<tr>
                                     <td colspan="3" align="center">Edytuj książke:</td>
                                 </tr>
 				<tr>
                                     <td>ISBN:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['book_isbn']).'" name="isbn" placeholder="ISBN" required/></td>
+                                    <td><input type="text" value="'.$rowClean['book_isbn'].'" name="isbn" placeholder="ISBN" required/></td>
                                 </tr>
 				<tr>
                                     <td>Oryginalny tytuł:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['book_original_title']).'" name="original_title" placeholder="Oryginalny tytuł" required/></td>
+                                    <td><input type="text" value="'.$rowClean['book_original_title'].'" name="original_title" placeholder="Oryginalny tytuł" required/></td>
                                 </tr>
 				<tr>
                                     <td>Tytuł:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['book_title']).'" name="title" placeholder="Tytuł" required/></td>
+                                    <td><input type="text" value="'.$rowClean['book_title'].'" name="title" placeholder="Tytuł" required/></td>
                                 </tr>
                                 <tr>
                                     <td>Oryginalny wydawca:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['original_publisher_house_name']).'" name="original_publisher_house" placeholder="Oryginalny wydawca" required/></td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['original_publisher_house_country']).'" name="country_original_publisher_house" placeholder="Kraj" required/></td>
+                                    <td><input type="text" value="'.$rowClean['original_publisher_house_name'].'" name="original_publisher_house" placeholder="Oryginalny wydawca" required/></td>
+                                    <td><input type="text" value="'.$rowClean['original_publisher_house_country'].'" name="country_original_publisher_house" placeholder="Kraj" required/></td>
                                 </tr>        
 				<tr>
                                     <td>Wydawca:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['publisher_house_name']).'" name="publisher_house" placeholder="Wydawca" required/></td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['publisher_house_country']).'" name="country_publisher_house" placeholder="Kraj" required/></td>
+                                    <td><input type="text" value="'.$rowClean['publisher_house_name'].'" name="publisher_house" placeholder="Wydawca" required/></td>
+                                    <td><input type="text" value="'.$rowClean['publisher_house_country'].'" name="country_publisher_house" placeholder="Kraj" required/></td>
                                 </tr>
 				<tr>
                                     <td>Ilość stron:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['book_nr_page']).'" name="nr_page" placeholder="Ilość stron" required/></td>
+                                    <td><input type="text" value="'.$rowClean['book_nr_page'].'" name="nr_page" placeholder="Ilość stron" required/></td>
                                 </tr>
 				<tr>
                                     <td>Wydanie:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['book_edition']).'" name="edition" placeholder="Wydanie" required/></td>
+                                    <td><input type="text" value="'.$rowClean['book_edition'].'" name="edition" placeholder="Wydanie" required/></td>
                                 </tr>
 				<tr>
                                     <td>Rok wydania:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['book_premiere']).'" name="premiere" placeholder="Rok Wydania" required/></td>
+                                    <td><input type="text" value="'.$rowClean['book_premiere'].'" name="premiere" placeholder="Rok Wydania" required/></td>
                                 </tr>
                                 <tr>
                                     <td>Okładka:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['book_cover']).'" name="cover" placeholder="Okładka" required/></td>
+                                    <td><input type="text" value="'.$rowClean['book_cover'].'" name="cover" placeholder="Okładka" required/></td>
                                 </tr>
 				<tr>
                                     <td>Ilość egzemplarzy:</td>
-                                    <td><input type="text" value="'.@$this->controller->clear($row['book_number']).'" name="number" placeholder="Ilość egzemplarzy" required/></td>
+                                    <td><input type="text" value="'.$rowClean['book_number'].'" name="number" placeholder="Ilość egzemplarzy" required/></td>
                                 </tr>
 			</table>            
                                 <table><tbody id="authotsTable">
@@ -1019,13 +1163,14 @@ class Admin extends User{
                                 </tr>';
                                 $i = 0;
                                 while($rowA = mysqli_fetch_array($resultAuthors)){
+                                    $rowAClean= $this->controller->clearArray($rowA, array_keys($rowA));
                                     if($i == 0){
-                                        $return .= '<tr><td><input type="text" value="'.@$this->controller->clear($rowA['author_name']).'" name="authorName['.$i.']" placeholder="Imie" required/></td>';
-                                        $return .= '<td><input type="text" value="'.@$this->controller->clear($rowA['author_surname']).'" name="authorSurname['.$i.']" placeholder="Nazwisko" required/></td></tr>';
+                                        $return .= '<tr><td><input type="text" value="'.$rowAClean['author_name'].'" name="authorName['.$i.']" placeholder="Imie" required/></td>';
+                                        $return .= '<td><input type="text" value="'.$rowAClean['author_surname'].'" name="authorSurname['.$i.']" placeholder="Nazwisko" required/></td></tr>';
                                     }
                                     else{
-                                        $return .= '<tr><td><input type="text" value="'.@$this->controller->clear($rowA['author_name']).'" name="authorName['.$i.']" placeholder="Imie" /></td>';
-                                        $return .= '<td><input type="text" value="'.@$this->controller->clear($rowA['author_surname']).'" name="authorSurname['.$i.']" placeholder="Nazwisko" /></td></tr>';
+                                        $return .= '<tr><td><input type="text" value="'.$rowAClean['author_name'].'" name="authorName['.$i.']" placeholder="Imie" /></td>';
+                                        $return .= '<td><input type="text" value="'.$rowAClean['author_surname'].'" name="authorSurname['.$i.']" placeholder="Nazwisko" /></td></tr>';
                                     }
                                     $i++;
                                 }
@@ -1036,11 +1181,12 @@ class Admin extends User{
                                 <tr>
                                     <td align="center" colspan="5">Translatorzy</td>
                                 </tr>';
-                                $i = 0;
+                                $j = 0;
                                 while($rowT = mysqli_fetch_array($resultTranslators)){
-                                    $return .= '<tr><td><input type="text" value="'.@$this->controller->clear($rowT['translator_name']).'" name="translatorName['.$i.']" placeholder="Imie"/></td>';
-                                    $return .= '<td><input type="text" value="'.@$this->controller->clear($rowT['translator_surname']).'" name="translatorSurname['.$i.']" placeholder="Nazwisko"/></td></tr>';
-                                    $i++;
+                                    $rowTClean= $this->controller->clearArray($rowT, array_keys($rowT));
+                                    $return .= '<tr><td><input type="text" value="'.$rowTClean['translator_name'].'" name="translatorName['.$j.']" placeholder="Imie"/></td>';
+                                    $return .= '<td><input type="text" value="'.$rowTClean['translator_surname'].'" name="translatorSurname['.$j.']" placeholder="Nazwisko"/></td></tr>';
+                                    $j++;
                                 }
                                 $return .= '
                                 </tbody>
@@ -1052,8 +1198,24 @@ class Admin extends User{
         $this->controller->close();
         return $return;
     }
-    public function showBookLight($bookID){
-        return parent::showBookLight($bookID);
+    public function showBookLight($bookID) {
+        $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "books", 
+                    array("books.*", "publisher_houses.publisher_house_name"),
+                    array(array("publisher_houses", "publisher_houses.publisher_house_id", "books.book_publisher_house_id")),
+                    array(array("books.book_id","=", $bookID, "")));
+        $row = mysqli_fetch_assoc($result);
+        $rowClean= $this->controller->clearArray($row, array_keys($row));
+        $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
+                            array("authors.*"),
+                            array(
+                                        array("authors_books", "authors_books.author_id", "authors.author_id"),
+                                        array("books", "books.book_id", "authors_books.book_id")
+                                        ),
+                            array(
+                                        array("books.book_id","=", $rowClean['book_id'], "")
+                                        )
+                            );
+        return $this->bookLight($rowClean, $resultAuthors);
     }
     
     public function showBorrow($borrowID){
@@ -1176,14 +1338,12 @@ class Admin extends User{
     }
     public function deleteReader($id) {
         $this->controller->connect();
-        $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "borrows",
-            null, null, array(array("borrow_reader_id","=",$id,"")));
-        if(mysqli_num_rows($result) > 0){
-            $return = "<p>Nie można usunąć czytelnika</p>";
+        $idClean = $this->controller->clear($id);
+        if($this->controller->deleteTableWhere(false,"readers", array(array("reader_id", "=", $idClean, "")))){
+            $return = "<p>Usunięto czytelnika</p>";
         }
         else{
-            $this->controller->deleteTableWhere(false,"readers", array(array("reader_id", "=", $id, "")));
-            $return = "<p>Usunięto czytelnika</p>";
+            $return = "<p>Nie można usunąć czytelnika</p>";
         }
         $this->controller->close();
         return $return;
@@ -1392,8 +1552,13 @@ class Admin extends User{
     }
     public function deleteAdmin($id) {
         $this->controller->connect();
-        $this->controller->deleteTableWhere(false,"admins", array(array("admin_id", "=", $_POST['deleteAdmin'], "")));
-        $return = "<p>Usunięto admina</p>";
+        $idClean = $this->controller->clear($id);
+        if($this->controller->deleteTableWhere(false,"admins", array(array("admin_id", "=", $idClean, "")))){
+            $return = "<p>Usunięto admina</p>";
+        }
+        else{
+            $return = "<p>Nie można usunąć admina</p>";
+        }
         $this->controller->close();
         return $return;
     }
@@ -1417,8 +1582,12 @@ class Admin extends User{
     }
     public function deleteNews($id){
         $this->controller->connect();
-        $id = $this->controller->clear($id);
-        $this->controller->deleteTableWhere(false,"news", array(array("new_id","=",$id,"")));
+        $idClean = $this->controller->clear($id);
+        if($this->controller->deleteTableWhere(false,"news", array(array("new_id","=",$idClean,"")))){
+            $return = "<p>Usunięto news</p>";
+        }else{
+            $return = "<p>Błąd! Nie usinięto newsa</p>";
+        }
         $this->controller->close();
     } 
     
@@ -1427,8 +1596,13 @@ class Admin extends User{
     }
     public function deleteBorrow($id) {
         $this->controller->connect();
-        $this->controller->deleteTableWhere(false,"borrows", array(array("borrow_id", "=", $id, "")));
-        $return = "<p>Książka została zwrócona</p>";
+        $idClean = $this->controller->clear($id);
+        if($this->controller->deleteTableWhere(false,"borrows", array(array("borrow_id", "=", $idClean, "")))){
+            $return = "<p>Książka została zwrócona</p>";
+        }
+        else{
+             $return = "<p>Błąd! Książka nie została zwrócona</p>";
+        }
         $this->controller->close();
         return $return;
     }
@@ -1436,7 +1610,7 @@ class Admin extends User{
         $this->controller->connect();
         $this->controller->updateTableRecordValuesWhere(false,"borrows",
             array(array("borrow_received", "1")),
-            array(array("borrow_id", "=", $id, "")));
+            array(array("borrow_id", "=", $this->controller->clear($id), "")));
     
         $return = "<p>Odebrano książke<p>";
         $this->controller->close();
@@ -1456,26 +1630,27 @@ class Admin extends User{
     
     public function changePass($oldPass, $newPass){
         $this->controller->connect();
+        $oldPassClean = $this->controller->clear($oldPass);
+        $newPassClean = $this->controller->clear($newPass);
         $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, 
                 "admins",array("admin_password"),null,
                 array(array("admin_id","=",$this->userID,"")),null,null,null,True);
         $row = mysqli_fetch_assoc($result);
-        if($row["admin_password"] != $this->controller->codepass($oldPass)){
+        if($row["admin_password"] != $this->controller->codepass($oldPassClean)){
             return "<p>Podano błedne hasło<p>";
         }
         $this->controller->updateTableRecordValuesWhere(false,"admins",
-                array(array("admin_password", $this->controller->codepass($newPass))),
+                array(array("admin_password", $this->controller->codepass($newPassClean))),
                 array(array("admin_id","=",$this->userID,"")),true);
         $this->controller->close();
         return "<p>Zmieniono hasło<p>";
-        
     }
     public function generateNewPas($id) {
         $this->controller->connect();
         $pass = uniqid("reader");
         $this->controller->updateTableRecordValuesWhere(false,"readers",
                 array(array("reader_password", $this->controller->codepass($pass))),
-                array(array("reader_id", "=", $id, "")));
+                array(array("reader_id", "=", $this->controller->clear($id), "")));
 
         $return = "<p>Nowe hasło to: ".$pass.'</p>';
         $this->controller->close();

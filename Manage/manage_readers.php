@@ -3,7 +3,7 @@
 	
 	function Content(){
                 $user = unserialize($_SESSION['user']);
-		echo '<div id="content">'.$user->showAllReaders().'</div>';
+		echo '<div id="content">'.$user->showAjaxReadersSearch().$user->showAllReaders().'</div>';
 	}
 ?>
 

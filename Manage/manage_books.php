@@ -2,7 +2,7 @@
     include "../config.php";
 	function Content(){
             $user = unserialize($_SESSION['user']);
-            echo '<div id="content">'.$user->showAllBooks().'</div>';  
+            echo '<div id="content">'.$user->showAjaxBooksSearch().$user->showAllBooks().'</div>';  
         }
 ?>
 
