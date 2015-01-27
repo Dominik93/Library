@@ -5,7 +5,10 @@ class Controller{
     private $mysql;
 
     public function __construct(){
-        $this->mysql = new Mysql('localhost', 'dslusarz', 'kasztan', 'dslusarz_baza');
+        if($_SERVER['REMOTE_ADDR'] == "::1" || $_SERVER['REMOTE_ADDR'] == "127.0.0.1")
+            $this->mysql = new Mysql('localhost', 'root', '', 'dslusarz_baza');
+        else
+            $this->mysql = new Mysql('localhost', 'dslusarz', 'kasztan', 'dslusarz_baza');
     }
     
     public function connect(){
@@ -40,7 +43,7 @@ class Controller{
         if($test){
             echo $query.'<br>';
         }
-        return mysqli_query($this->mysql->baseLink, $query) or die(mysqli_error($this->mysql->baseLink));
+        return mysqli_query($this->mysql->baseLink, $query);// or die(mysqli_error($this->mysql->baseLink));
     }    
     public function deleteTableWhere($test, $table, $arrayWhere){
         $query = 'DELETE FROM '.$table.' WHERE ';

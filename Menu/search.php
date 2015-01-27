@@ -20,14 +20,7 @@
 		<script src="<?php echo backToFuture() ?>Library/jquery-2.1.3.min.js" type="text/javascript"></script>
                 <title>Biblioteka PAI</title>
                 
-                <script type="text/javascript">
-               
-                $(document).ready(function(){
-                    $("#advancedSearch").click(function(){
-                        window.location.href = "https://torus.uck.pk.edu.pl/~dslusarz/Library/Menu/advanced_search.php";
-                    });
-                });
-                </script>
+                
 	</head>
 	<body>
 		<?php
@@ -36,4 +29,13 @@
 			Canvas();
 		?>
 	</body>
+        
+        <script type="text/javascript">
+               
+                $(document).ready(function(){
+                    $("#advancedSearch").click(function(){
+                        window.location.href = "https://torus.uck.pk.edu.pl/~dslusarz/Library/Menu/advanced_search.php";
+                    });
+                });
+                </script>
 </html>

@@ -20,11 +20,22 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="<?php echo backToFuture() ?>Library/Layout/layout.css">
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.0/jquery.min.js" type="text/javascript"></script>
 		<script src="<?php echo backToFuture() ?>Library/jquery-2.1.3.min.js" type="text/javascript"></script>
                 <title>Biblioteka PAI</title>
 	
-	<script type="text/javascript">
+	
+	
+	
+	</head>
+	<body>
+		<?php
+			Logo();
+			Menu();
+			Canvas();
+		?>
+	</body>
+        
+        <script type="text/javascript">
 
 		function allFill(){
 			if( document.getElementById("surname").value != "" &&
@@ -175,14 +186,6 @@
 			});
 		});
 	</script>
-	
-	
-	</head>
-	<body>
-		<?php
-			Logo();
-			Menu();
-			Canvas();
-		?>
-	</body>
+        
+        
 </html>

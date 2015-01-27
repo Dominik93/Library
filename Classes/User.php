@@ -197,13 +197,14 @@ class User implements IUser{
 		}
                 else{
                     while($row = mysqli_fetch_assoc($result)) {
+                        $rowClean = $this->controller->clearArray($row, array_keys($row));
                         $news .= '<div align="center"><table>'
                                 . '<tr>'
-                                . '<td align="center">'.$row['new_title'].'</td>'
-                                . '<td align="right">'.$row['new_date'].'</td>'
+                                . '<td align="center">'.$rowClean['new_title'].'</td>'
+                                . '<td align="right">'.$rowClean['new_date'].'</td>'
                                 . '</tr>'
                                 . '<tr>'
-                                . '<td colspan="2">'.$row['new_text'].'</td>'
+                                . '<td colspan="2">'.$rowClean['new_text'].'</td>'
                                 . '</tr></table></div>';
                     }
                 }
@@ -491,75 +492,66 @@ class User implements IUser{
         return '<p>Zostałeś wylogowany. Przejdz na <a href="'.backToFuture().'Library/index.php">strone główną</a>.</p>';       
     }
     public function login($login, $password) {
-        $this->controller->connect();
-            $login = $this->controller->clear($login);
-            $password = $this->controller->clear($password);
-            $result = $this->controller->validationLoginAdmin($login, $password);
+            $this->controller->connect();
+            $loginClean = $this->controller->clear($login);
+            $passwordClean = $this->controller->clear($password);
+            $result = $this->controller->validationLoginAdmin($loginClean, $passwordClean);
             if(mysqli_num_rows($result) > 0) {
 		$row = mysqli_fetch_assoc($result);
-                
-                do{
-                    $r = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false,
-                            "sessions",null,null,
-                            array(
-                                array("session_id","=",  session_regenerate_id(),"")));
-                }while(mysqli_num_rows($r) > 0);
-                
-                $_SESSION['id'] = session_id();
-		$_SESSION['logged'] = true;
-		$_SESSION['user_id'] = $row['admin_id'];
-		$_SESSION['acces_right'] = "admin";
-                $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
-		$_SESSION['user'] = serialize(new Admin(new Controller(), $u = $row['admin_id']));
-                
+                $rowClean = $this->controller->clearArray($row, array_keys($row));
                 $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false,"sessions",null,null,
-                        array(array("session_user","=", $row['admin_id'],"AND"),
+                        array(array("session_user","=", $rowClean['admin_id'],"AND"),
                             array("session_acces_right","=", "admin" ,"")
                             ));
                 if(mysqli_num_rows($result) > 0){
-                    $this->controller->deleteTableWhere(false,"sessions", array(array("session_user","=", $row['admin_id'],"AND"),
+                    $this->controller->deleteTableWhere(false,"sessions", array(array("session_user","=", $rowClean['admin_id'],"AND"),
                             array("session_acces_right","=", "admin" ,"")
                             ));
                 }
-                $this->controller->insertTableRecordValue(false,"sessions", 
+                $_SESSION['logged'] = true;
+		$_SESSION['user_id'] = $rowClean['admin_id'];
+		$_SESSION['acces_right'] = "admin";
+                $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
+		$_SESSION['user'] = serialize(new Admin(new Controller(), $u = $rowClean['admin_id']));
+                
+                do{
+                    session_regenerate_id();
+                }while(!$this->controller->insertTableRecordValue(false,"sessions", 
                         array("session_id", "session_ip", "session_user", "session_user_agent", "session_acces_right"),
-                        array(session_id(), $_SESSION['ip'], $row['admin_id'],$_SESSION['user_agent'], "admin" ));
-                $this->controller->close();
+                        array(session_id(), $_SESSION['ip'], $rowClean['admin_id'],$_SESSION['user_agent'], "admin" )));
+                
+                $_SESSION['id'] = session_id();
+		$this->controller->close();
                 return '<p>Witaj jesteś adminem, zostałeś poprawnie zalogowany! Możesz teraz przejść na <a href="'.backToFuture().'Library/index.php">stronę główną</a>.</p>';
             }
             else{
-                
-		$result = $this->controller->validationLoginReader($login, $password);
+		$result = $this->controller->validationLoginReader($loginClean, $passwordClean);
 		if(mysqli_num_rows($result) > 0) {
                     $row = mysqli_fetch_assoc($result);
-                    
-                    do{
-                    $r = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false,
-                            "sessions",null,null,
-                            array(
-                                array("session_id","=",  session_regenerate_id(),"")));
-                    }while(mysqli_num_rows($r) > 0);
-                    
-                    $_SESSION['id'] = session_id();
-                    $_SESSION['logged'] = true;
-                    $_SESSION['user_id'] = $row['reader_id'];
-                    $_SESSION['acces_right'] = "reader";
-                    $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
-                    $_SESSION['user'] = serialize(new Reader($this->isActive($row['reader_id']), new Controller(), $u = $row['reader_id']));
-                    $this->controller->connect();
+                    $rowClean = $this->controller->clearArray($row, array_keys($row));
                     $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false,"sessions",null,null,
-                        array(array("session_user","=", $row['reader_id'],"AND"),
+                        array(array("session_user","=", $rowClean['reader_id'],"AND"),
                             array("session_acces_right","=", "reader" ,"")
                             ));
                     if(mysqli_num_rows($result) > 0){
-                        $this->controller->deleteTableWhere(false, "sessions", array(array("session_user","=", $row['reader_id'],"AND"),
+                        $this->controller->deleteTableWhere(false, "sessions", array(array("session_user","=", $rowClean['reader_id'],"AND"),
                                 array("session_acces_right","=", "admin" ,"")
                                 ));
                     }
+                    $_SESSION['logged'] = true;
+                    $_SESSION['user_id'] = $rowClean['reader_id'];
+                    $_SESSION['acces_right'] = "reader";
+                    $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
+                    $_SESSION['user'] = serialize(new Reader($this->isActive($row['reader_id']), new Controller(), $u = $rowClean['reader_id']));
                     
-                    $this->controller->insertTableRecordValue(false,"sessions", 
+                    
+                    do{
+                        session_regenerate_id();
+                    }while(!$this->controller->insertTableRecordValue(false,"sessions", 
                             array("session_id", "session_ip","session_user_agent", "session_user", "session_acces_right"),
-                            array(session_id(), $_SESSION['ip'], $_SESSION['user_agent'], $row['reader_id'], "reader" ));
+                            array(session_id(), $_SESSION['ip'], $_SESSION['user_agent'], $rowClean['reader_id'], "reader" )));
+                    
+                    $_SESSION['id'] = session_id();
                     $this->controller->close();
                     return '<p>Witaj jesteś czytelnikiem, zostałeś poprawnie zalogowany! Możesz teraz przejść na <a href="'.backToFuture().'Library/index.php">stronę główną</a>.</p>';
 		}
@@ -573,26 +565,7 @@ class User implements IUser{
     public function session(){
     }    
     public function checkSession(){
-            $this->controller->connect();
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(true, "sessions", null, null, 
-                    array(array("session_id", "=" , session_id(),"")));
-            
-            if(mysqli_num_rows($result) != 1){
-                $this->controller->close();
-                return false;
-            }
-            $row = mysqli_fetch_assoc($result);
-            if($row['session_ip'] != $_SERVER['REMOTE_ADDR']){
-                $this->controller->close();
-                return false;
-            }
-            if($row['session_user_agent'] != $_SERVER['HTTP_USER_AGENT']){
-                $this->controller->close();
-                return false;
-            }
-            $this->controller->close();
-            return true;
-        }
+    }
     public function timeOut(){
             $_SESSION['id'] = session_regenerate_id(true);
             $_SESSION['logged'] = false;
@@ -604,8 +577,8 @@ class User implements IUser{
         }
 
     public function showAccount(){
-            return '<p>Nie masz jeszcze konta</p>';
-	}
+        return '<p>Nie masz jeszcze konta</p>'; 
+    }
     public function extendAccount($id) {
         return '<p>Brak dostępu</p>';
     }
@@ -703,12 +676,6 @@ class User implements IUser{
                                         array("books.book_id","=", $rowClean['book_id'], "")
                                         )
                             );
-        if($row['free_books'] == null){
-            $freeBook = $row['book_number'];
-        }
-        else{
-            $freeBook = $row['free_books'];
-        }
         $return = $this->book($rowClean, $resultAuthors, $resultTranslators);
         $this->controller->close();
         return $return;
@@ -791,22 +758,12 @@ class User implements IUser{
     }    
    
     public function isActive($ID){
-        $this->controller->connect();
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "readers",
-                    array("acces_right_name"),
-                    array(array("acces_rights", "acces_rights.acces_right_id", "readers.reader_acces_right_id")),
-                    array(array("readers.reader_id", "=", $ID, "")));
-            $this->controller->close();
-            $row = mysqli_fetch_array($result);
-            if($row['acces_right_name'] == 'activeReader')
-                return 1;
-            else
-                return 0;
-        }
+        return false;
+    }
         
     public function getData($ID){
-            return $this->Data;
-	}
+        return $this->Data;
+    }
     
     public function changePass($oldPass, $newPass) {
         return '<p>Brak dostępu</p>';

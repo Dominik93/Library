@@ -9,14 +9,52 @@ class Reader extends User{
         $this->active = $a;
     }
     
+    private function book($rowBookClean, $resultAuthors, $resultTranslators){
+        if($rowBookClean['free_books'] == null){
+            $freeBook = $rowBookClean['book_number'];
+        }
+        else{
+            $freeBook = $rowBookClean['free_books'];
+        }
+        return '<p>
+			ISBN: '.$rowBookClean['book_isbn'].'<br>
+                        Oryginalny tytuł: '.$rowBookClean['book_original_title'].'<br>
+			Tytuł: '. $rowBookClean['book_title'].'<br>
+			Autorzy: '. $this->controller->authorsToString($resultAuthors).'<br>
+                        Tłumacze: '.$this->controller->translatorsToString($resultTranslators).'<br>
+                        Oryginalne wydawnictwo: '. $rowBookClean['original_publisher_house_name'].'<br>
+                        Wydawnictwo: '. $rowBookClean['publisher_house_name'].'<br>
+			Premiera: '. $rowBookClean['book_premiere'].'<br>
+			Wydanie: '. $rowBookClean['book_edition'].'<br>
+			Ilość stron: '. $rowBookClean['book_nr_page'].'<br>
+                        Okładka: '. $rowBookClean['book_cover'].'<br>
+                        Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
+                        <button id="editBook">Edytuj</button>
+                        <button id="deleteBook">Usuń</button>
+		</p>';
+    }
+    private function account($userDataClean){
+        return '<p>
+                            ID: '.$userDataClean['reader_id'].'<br>
+                            Imie: '.$userDataClean['reader_name'].'<br>
+                            Nazwisko: '.$userDataClean['reader_surname'].'<br>
+                            Login: '.$userDataClean['reader_login'].'<br>
+                            Email: '.$userDataClean['reader_email'].'<br>
+                            Konto aktywne do: '.$userDataClean['reader_active_account'].'<br>
+                            Adres: '.$userDataClean['country_name'].', '.$userDataClean['city_name'].' '.$userDataClean['post_code_name'].', ul. '.$userDataClean['street_name'].' '.$userDataClean['house_number_name'].'<br>	
+                            <button id="changePassword">Zmien hasło</button>
+			</p>';
+    }
+    
     public function showOptionPanel(){
         if(!$this->checkSession()){
             $this->timeOut();
             return parent::showOptionPanel();
         }
         $this->session();
-	$userData = $this->getData($this->userID);
-		return '<div id="panelName">Panel użytkownika</div>
+        
+        $userData = $this->getData($this->userID);
+        return '<div id="panelName">Panel użytkownika</div>
 			<p align="center">
 				Witamy '.$userData['reader_name'].'!
 			</p>
@@ -30,13 +68,18 @@ class Reader extends User{
     public function session(){
         $this->controller->connect();
         do{
-            $r = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false,
-                            "sessions",null,null,
-                            array(
-                                array("session_id","=",  session_regenerate_id(),"")));
-        }while(mysqli_num_rows($r) > 0);
+            session_regenerate_id();
+        }while(!$this->controller->updateTableRecordValuesWhere(false,"sessions", 
+                array(
+                    array("session_id", session_id())
+                    ),
+                array(
+                    array("session_user","=", $this->userID, "AND"),
+                    array("session_acces_right","=", "reader", "")
+                    )));
         $_SESSION['id'] = session_id();
-        $this->controller->updateTableRecordValuesWhere(true,"sessions", 
+        
+        $this->controller->updateTableRecordValuesWhere(false,"sessions", 
                 array(
                     array("session_id", session_id()),
                     array("session_last_action", date('Y-m-d H:i:s'))
@@ -49,7 +92,7 @@ class Reader extends User{
     }
     public function checkSession(){
             $this->controller->connect();
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(true, "sessions", null, null, 
+            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "sessions", null, null, 
                     array(array("session_id", "=" , session_id(),"")));
             
             if(mysqli_num_rows($result) != 1){
@@ -57,12 +100,16 @@ class Reader extends User{
                 return false;
             }
             $row = mysqli_fetch_assoc($result);
-            if($row['session_ip'] != $_SERVER['REMOTE_ADDR']){
+            $rowClean = $this->controller->clearArray($row, array_keys($row));
+            if($rowClean['session_ip'] != $_SERVER['REMOTE_ADDR']){
                 $this->controller->close();
                 return false;
             }
-            if($row['session_user_agent'] != $_SERVER['HTTP_USER_AGENT']){
+            if($rowClean['session_user_agent'] != $_SERVER['HTTP_USER_AGENT']){
                 $this->controller->close();
+                return false;
+            }
+            if(!$_SESSION['logged']){
                 return false;
             }
             $this->controller->close();
@@ -81,20 +128,11 @@ class Reader extends User{
     public function showAccount(){
 	$userData = $this->getData($this->userID);  
         $this->controller->connect();
-		$return = '<p>
-                            ID: '.$userData['reader_id'].'<br>
-                            Imie: '.$userData['reader_name'].'<br>
-                            Nazwisko: '.$userData['reader_surname'].'<br>
-                            Login: '.$userData['reader_login'].'<br>
-                            Email: '.$userData['reader_email'].'<br>
-                            Konto aktywne do: '.$userData['reader_active_account'].'<br>
-                            Adres: '.$this->controller->clear($userData['country_name']).', '.$this->controller->clear($userData['city_name']).' '.$this->controller->clear($userData['post_code_name']).', ul. '.$this->controller->clear($userData['street_name']).' '.$this->controller->clear($userData['house_number_name']).'<br>	
-                            Prawa: '.$userData['acces_right_name'].'<br>
-                            <button id="changePassword">Zmien hasło</button>
-			</p>';
-                $this->controller->close();
-                return $return;
-	}
+        $userDataClean = $this->controller->clearArray($userData, array_keys($userData));
+        $return = $this->account($userDataClean);
+        $this->controller->close();
+        return $return;
+    }
     
     public function showLoginForm(){
         return "<p>Jesteś już zalogowany!</p>";
@@ -123,6 +161,7 @@ class Reader extends User{
                     array(
                         array("book_id","=", $bookID, "")));
             $row = mysqli_fetch_assoc($result);
+            $rowClean = $this->controller->clearArray($row, array_keys($row));
             $resultAuthors = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors", 
                             array("authors.*"),
                             array(
@@ -130,7 +169,7 @@ class Reader extends User{
                                         array("books", "books.book_id", "authors_books.book_id")
                                         ),
                             array(
-                                        array("books.book_id","=", $row['book_id'], "")
+                                        array("books.book_id","=", $rowClean['book_id'], "")
                                         )
                             );
             $resultTranslators = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "translators", 
@@ -140,33 +179,17 @@ class Reader extends User{
                                         array("books", "books.book_id", "translators_books.book_id")
                                         ),
                             array(
-                                        array("books.book_id","=", $row['book_id'], "")
+                                        array("books.book_id","=", $rowClean['book_id'], "")
                                         )
                             );
-            if($row['free_books'] == null){
-                $freeBook = $row['book_number'];
-            }
-            else{
-                $freeBook = $row['free_books'];
-            }
-            if($this->active == true) $active = "";
-            else $active = "disabled";
             
-            $return = '<p>
-					ISBN: '.$this->controller->clear($row['book_isbn']).'<br>
-                                        Oryginalny tytuł: '.$this->controller->clear($row['book_original_title']).'<br>
-					Tytuł: '.$this->controller->clear($row['book_title']).'<br>
-					Autorzy: '.$this->controller->clear($this->controller->authorsToString($resultAuthors)).'<br>
-                                        Tłumacze: '.$this->controller->translatorsToString($resultTranslators).'<br>
-                                        Oryginalne wydawnictwo: '.$this->controller->clear($row['original_publisher_house_name']).'<br>
-                                        Wydawnictwo: '.$this->controller->clear($row['publisher_house_name']).'<br>
-					Premiera: '.$this->controller->clear($row['book_premiere']).'<br>
-					Wydanie: '.$this->controller->clear($row['book_edition']).'<br>
-					Ilość stron: '.$this->controller->clear($row['book_nr_page']).'<br>
-                                        Okładka: '.$this->controller->clear($row['book_cover']).'<br>
-                                        Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
-                                        <button name="orderBook" id="orderBook" '.$active.'>Zamów</button>
-				</p>';
+            if($this->active == true){ 
+                $active = "";
+            }
+            else{ 
+                $active = "disabled";
+            }
+            $return = $this->book($rowClean,$resultAuthors,$resultTranslators).'<button name="orderBook" id="orderBook" '.$active.'>Zamów</button>';
             $this->controller->close();
             return $return;
         }
@@ -177,15 +200,19 @@ class Reader extends User{
                 null, null,
                 array(array("borrow_id","=", $borrowID, "")));
         $row = mysqli_fetch_array($borrowResult);
+        $rowClean = $this->controller->clearArray($row, array_keys($row));
+        
         if($row['borrow_delay'] > 0){
-            $delay = $row['borrow_delay'];
+            $delay = $rowClean['borrow_delay'];
         }
-        else $delay = 0;
-        $borrow .= '<p>Data wypożyczenia: '.$row['borrow_date_borrow'].'<br>'
-                . 'Data zwrotu: '.$row['borrow_return'].'<br>'
+        else{ 
+            $delay = 0;
+        }
+        $borrow .= '<p>Data wypożyczenia: '.$rowClean['borrow_date_borrow'].'<br>'
+                . 'Data zwrotu: '.$rowClean['borrow_return'].'<br>'
                 . 'Opóźnienie: '.$delay.' dni<br>'
                 . 'Kwota do zapłaty za opóźnienie: '.$delay*0.25.' </p>';
-        $borrow .= '<div id="book" align="center">Książka:<br>'.$this->showBookLight($row['borrow_book_id']).'</div>';
+        $borrow .= '<div id="book" align="center">Książka:<br>'.$this->showBookLight($rowClean['borrow_book_id']).'</div>';
         return $borrow;
     }
     public function showMyBorrows(){
@@ -216,27 +243,45 @@ class Reader extends User{
         echo '<p>Zamówiono książke. Odbiór w najbliższych 3 dniach</p>';
         $this->controller->close();
         }
+   
+    public function isActive($ID){
+        $this->controller->connect();
+            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "readers",
+                    array("acces_right_name"),
+                    array(array("acces_rights", "acces_rights.acces_right_id", "readers.reader_acces_right_id")),
+                    array(array("readers.reader_id", "=", $ID, "")));
+            $this->controller->close();
+            $row = mysqli_fetch_array($result);
+            $rowClean = $this->controller->clearArray($row, array_keys($row));
+            if($rowClean['acces_right_name'] == 'activeReader'){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }    
         
     public function getData($ID){
         $this->controller->connect();
         $ID = $this->controller->clear($ID);
         $data = $this->controller->getReaderData($ID);
+        $dateClear = $this->controller->clearArray($data, array_keys($data));
         $this->controller->close();
-	return $data;
+	return $dateClear;
         
     }
     
     public function changePass($oldPass, $newPass){
         $this->controller->connect();
         $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "readers",array("reader_password"),null,
-                array(array("reader_id","=",$this->userID,"")),null,null,null,True);
+                array(array("reader_id","=",$this->userID,"")),null,null,null);
         $row = mysqli_fetch_assoc($result);
         if($row["reader_password"] != $this->controller->codepass($oldPass)){
             return "<p>Podano błedne hasło<p>";
         }
         $this->controller->updateTableRecordValuesWhere(false,"readers",
                 array(array("reader_password", $this->controller->codepass($newPass))),
-                array(array("reader_id","=",$this->userID,"")),true);
+                array(array("reader_id","=",$this->userID,"")));
         $this->controller->close();
         return "<p>Zmieniono hasło<p>";
     }

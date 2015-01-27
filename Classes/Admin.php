@@ -488,21 +488,24 @@ class Admin extends User{
         return parent::logout();
     }
     public function login($login, $password){
-        return parent::login($login, $password);
+        return '<p>Jesteś zalogowany</p>';
     }
     
     public function session(){
         $this->controller->connect();
-        /*
         do{
-            $r = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false,
-                            "sessions",null,null,
-                            array(
-                                array("session_id","=",  session_regenerate_id(),"")));
-        }while(mysqli_num_rows($r) > 0);
+            session_regenerate_id();
+        }while(!$this->controller->updateTableRecordValuesWhere(false,"sessions", 
+                array(
+                    array("session_id", session_id())
+                    ),
+                array(
+                    array("session_user","=", $this->userID, "AND"),
+                    array("session_acces_right","=", "admin", "")
+                    )));
         $_SESSION['id'] = session_id();
-        */
-        $this->controller->updateTableRecordValuesWhere(true,"sessions", 
+        
+        $this->controller->updateTableRecordValuesWhere(false,"sessions", 
                 array(
                     array("session_last_action", date('Y-m-d H:i:s'))
                     ),
@@ -514,7 +517,7 @@ class Admin extends User{
     }
     public function checkSession(){
             $this->controller->connect();
-            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(true, "sessions", null, null, 
+            $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "sessions", null, null, 
                     array(array("session_id", "=" , session_id(),"")));
             
             if(mysqli_num_rows($result) != 1){
@@ -529,6 +532,9 @@ class Admin extends User{
             }
             if($rowClean['session_user_agent'] != $_SERVER['HTTP_USER_AGENT']){
                 $this->controller->close();
+                return false;
+            }
+            if(!$_SESSION['logged']){
                 return false;
             }
             $this->controller->close();
@@ -819,7 +825,7 @@ class Admin extends User{
                 array("reader_email","like",$arrayClean['email'],"and"),
                 array("reader_name","like",$arrayClean['name'],"and"),
                 array("reader_surname","like",$arrayClean['surname'],"")
-            )).'<p><a href="'.backToFuture().'<p>Library/AdminAction/register_reader.php">Dodaj</a></p></p>';
+            )).'<p><a href="'.backToFuture().'Library/AdminAction/Add/registration_reader.php">Dodaj</a></p></p>';
         }
     public function showAllBorrows($array){
         $this->controller->connect();
@@ -911,13 +917,13 @@ class Admin extends User{
                             array("authors.author_name","LIKE",$arrayClean['authorName'],"AND"),
                             array("authors.author_surname","LIKE",$arrayClean['authorSurname'],"")
                             ),
-                    null,null,null,true);
+                    null,null,null);
                 while($rowA = mysqli_fetch_assoc($resultAuthor)){
                     $rowAClean = $this->controller->clearArray($rowA, array_keys($rowA));
                     $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "authors_books",null,null,
                             array(array("author_id","=",$rowAClean['author_id'],"AND"),
                                 array("book_id","=",$rowBClean['book_id'],"")
-                                ),null,null,null,true); 
+                                ),null,null,null); 
                     if(mysqli_num_rows($result)>0){
                         $bool = true;
                     }
@@ -932,7 +938,7 @@ class Admin extends User{
                                 ),
                             array(
                                 array("books.book_id","=", $rowB['book_id'], " ")
-                                ),null,null,null,true);
+                                ),null,null,null);
                     if(mysqli_num_rows($resultA) == 0) {
                         return 'Błąd w wykonaniu zapytania';
                     }
@@ -949,7 +955,7 @@ class Admin extends User{
                     }
                 }
             }
-        $books = $books.'</table><a href="'.backToFuture().'Library/AdminAction/add_book.php">Dodaj</a></p></div>';
+        $books = $books.'</table><a href="'.backToFuture().'Library/AdminAction/Add/add_book.php">Dodaj</a></p></div>';
 	$this->controller->close();
         return $books;
     }
@@ -993,7 +999,7 @@ class Admin extends User{
                 array("admin_email","like",$arrayClean['email'],"and"),
                 array("admin_name","like",$arrayClean['name'],"and"),
                 array("admin_surname","like",$arrayClean['surname'],"")
-            )).'<p><a href="'.backToFuture().'Library/AdminAction/register_admin.php">Dodaj</a></p></p>';
+            )).'<p><a href="'.backToFuture().'Library/AdminAction/Add/registration_admin.php">Dodaj</a></p></p>';
         }
     public function showAllLogged(){
         return '<p>'.templateTable($this->controller, array("Session ID", "IP","User Agent", "User", "Rights", "Last action"),
@@ -1440,10 +1446,11 @@ class Admin extends User{
 		$original_title = $this->controller->clear($original_title);
                 $country = $this->controller->clear($country);
                 $original_country = $this->controller->clear($original_country);
-                $authorName = $this->controller->clearArray($authorName);
-                $authorSurname = $this->controller->clearArray($authorSurname);
-                $translatorName = $this->controller->clearArray($translatorName);
-                $translatorSurname = $this->controller->clearArray($translatorSurname);
+                
+                $authorName = $this->controller->clearArray($authorName, array_keys($authorName));
+                $authorSurname = $this->controller->clearArray($authorSurname, array_keys($authorSurname));
+                $translatorName = $this->controller->clearArray($translatorName, array_keys($translatorName));
+                $translatorSurname = $this->controller->clearArray($translatorSurname, array_keys($translatorSurname));
                 $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "books", array("*"),
                         null,
                         array(array("books.book_isbn","=", $isbn, "")));
@@ -1478,14 +1485,15 @@ class Admin extends User{
                         array(array("books.book_isbn","=", $isbn, "")));
                 
 		$rowB = mysqli_fetch_array($result);
+                $rowBClean = $this->controller->clearArray($rowB, array_keys($rowB));
                 for($i = 0; $i < count($authorName); $i++){
                     if(!empty($authorName[$i]) && !empty($authorSurname[$i])){
-                        $this->addAuthors($authorName[$i], $authorSurname[$i], $rowB[0]);
+                        $this->addAuthors($authorName[$i], $authorSurname[$i], $rowBClean[0]);
                     }
                 }
                 for($i = 0; $i < count($translatorName); $i++){
                     if(!empty($translatorName[$i]) && !empty($translatorSurname[$i])){
-                        $this->addTranslators($translatorName[$i], $translatorSurname[$i], $rowB[0]);
+                        $this->addTranslators($translatorName[$i], $translatorSurname[$i], $rowBClean[0]);
                     }
                 }
                 
@@ -1495,8 +1503,8 @@ class Admin extends User{
         }
     public function editBook($id, $isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname){
         $this->controller->connect();
-        $this->controller->deleteTableWhere(true,"authors_books", array(array("book_id","=",$id,"")));
-        $this->controller->deleteTableWhere(true,"translators_books", array(array("book_id","=",$id,"")));
+        $this->controller->deleteTableWhere(false,"authors_books", array(array("book_id","=",$id,"")));
+        $this->controller->deleteTableWhere(false,"translators_books", array(array("book_id","=",$id,"")));
         var_dump($authorName);
         for($i = 0; $i < count($authorName); $i++){
             echo $i;
@@ -1516,7 +1524,7 @@ class Admin extends User{
                 $this->addTranslators($translatorName[$i], $translatorSurname[$i], $id);
             }
         }        
-        $this->controller->updateTableRecordValuesWhere(true,"books",
+        $this->controller->updateTableRecordValuesWhere(false,"books",
                         array(
                             array("book_isbn",$this->controller->clear($isbn)),
                             array("book_title",$this->controller->clear($title)),
@@ -1596,7 +1604,7 @@ class Admin extends User{
     public function editAdmin($array){
         $this->controller->connect();
         $arrayClean = $this->controller->clearArray($array, array_keys($array));
-        $this->controller->updateTableRecordValuesWhere(true,"admins",
+        $this->controller->updateTableRecordValuesWhere(false,"admins",
                         array(
                             array("admin_login",$arrayClean['login']),
                             array("admin_email",$arrayClean['email']),
@@ -1682,8 +1690,9 @@ class Admin extends User{
     public function getData($ID){
         $this->controller->connect();
         $data = $this->controller->getAdminData($this->controller->clear($ID));
+        $dateClear = $this->controller->clearArray($data, array_keys($data));
         $this->controller->close();
-	return $data;
+	return $dateClear;
     }
     
     public function changePass($oldPass, $newPass){
@@ -1692,14 +1701,14 @@ class Admin extends User{
         $newPassClean = $this->controller->clear($newPass);
         $result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, 
                 "admins",array("admin_password"),null,
-                array(array("admin_id","=",$this->userID,"")),null,null,null,True);
+                array(array("admin_id","=",$this->userID,"")),null,null,null);
         $row = mysqli_fetch_assoc($result);
         if($row["admin_password"] != $this->controller->codepass($oldPassClean)){
             return "<p>Podano błedne hasło<p>";
         }
         $this->controller->updateTableRecordValuesWhere(false,"admins",
                 array(array("admin_password", $this->controller->codepass($newPassClean))),
-                array(array("admin_id","=",$this->userID,"")),true);
+                array(array("admin_id","=",$this->userID,"")));
         $this->controller->close();
         return "<p>Zmieniono hasło<p>";
     }
