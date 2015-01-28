@@ -4,11 +4,6 @@ include 'config.php';
 $user = unserialize($_SESSION['user']);
 $controller = new Controller();
 $controller->connect();
-/*
-if(isset($_POST['editReader'])){
-    echo $user->showEditReader($_POST['id']);
-}
- */
 
 if(isset($_POST['orderBook'])){
     echo $user->addBorrow($_POST['orderBook']);
@@ -107,6 +102,7 @@ if(isset($_POST['checkEmail'])){
 	}else{
 		echo 'OK';
 	}
+   
 $controller->close();        
 }
 ?>

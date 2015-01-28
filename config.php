@@ -71,7 +71,11 @@ function templateTable($controller, $array, $arrayTable, $table, $tableStyle, $l
                    $return = $return.'<tr>';
                 }
                 else{
-                    $return = $return.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/'.$link.'='.$controller->clear($row[0]).'\'">';
+                    if($_SERVER['REMOTE_ADDR'] == "::1" || $_SERVER['REMOTE_ADDR'] == "127.0.0.1")
+                        $return = $return.'<tr onClick="location.href=\'http://localhost/~dominik/Library/'.$link.'='.$controller->clear($row[0]).'\'">';
+                    else
+                        $return = $return.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/'.$link.'='.$controller->clear($row[0]).'\'">';
+                    
                 }
 		for($i = 0; $i< count($array); $i++){
                     $return = $return.'<td>'.$controller->clear($row[$arrayTable[$i]]).'</td>';

@@ -7,6 +7,7 @@
             $user = unserialize($_SESSION['user']);
             echo '<div id="content">'.$user->showAddBookForm();
             if(isset($_POST['isbn'])){
+                var_dump($_POST);
                 echo $user->addBook(
                         $_POST['isbn'],
                         $_POST['original_title'],
@@ -23,7 +24,8 @@
                         $_POST['authorName'],
                         $_POST['authorSurname'],
                         $_POST['translatorName'],
-                        $_POST['translatorSurname']);
+                        $_POST['translatorSurname'],
+                        $_POST['filePath']);
             }
             echo '</div>';
 	}

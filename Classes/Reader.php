@@ -4,9 +4,9 @@ include_once "User.php";
 class Reader extends User{
     private $active;
 
-    public function __construct($a, $c, $u = -1){
+    public function __construct($c, $u = -1){
 	parent::__construct($c, $u);
-        $this->active = $a;
+        $this->active = $this->isActive($u);
     }
     
     private function book($rowBookClean, $resultAuthors, $resultTranslators){
@@ -16,7 +16,10 @@ class Reader extends User{
         else{
             $freeBook = $rowBookClean['free_books'];
         }
-        return '<p>
+        return '<div id="cover">'
+        . '<img height="300" width="200" src="'.backToFuture().'Library/getImage.php?image='.$rowBookClean['book_cover_path'].'" alt="okładka"/>
+            </div>
+            <div id="book">
 			ISBN: '.$rowBookClean['book_isbn'].'<br>
                         Oryginalny tytuł: '.$rowBookClean['book_original_title'].'<br>
 			Tytuł: '. $rowBookClean['book_title'].'<br>
@@ -28,10 +31,10 @@ class Reader extends User{
 			Wydanie: '. $rowBookClean['book_edition'].'<br>
 			Ilość stron: '. $rowBookClean['book_nr_page'].'<br>
                         Okładka: '. $rowBookClean['book_cover'].'<br>
-                        Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
+                        Ilość wszsytkich egzemplarzy: '. $rowBookClean['book_number'].'<br>
                         <button id="editBook">Edytuj</button>
                         <button id="deleteBook">Usuń</button>
-		</p>';
+		<div>';
     }
     private function account($userDataClean){
         return '<p>
@@ -250,9 +253,10 @@ class Reader extends User{
                     array("acces_right_name"),
                     array(array("acces_rights", "acces_rights.acces_right_id", "readers.reader_acces_right_id")),
                     array(array("readers.reader_id", "=", $ID, "")));
-            $this->controller->close();
+            
             $row = mysqli_fetch_array($result);
             $rowClean = $this->controller->clearArray($row, array_keys($row));
+            $this->controller->close();
             if($rowClean['acces_right_name'] == 'activeReader'){
                 return true;
             }

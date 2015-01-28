@@ -86,6 +86,23 @@ body {
 	text-align: center;
 }
 
+#cover{
+    margin-top: 5%;
+    margin-left: 10%;
+    margin-right: 5%;
+    width: 20%;
+    float: left;
+}
+
+#book{
+    text-align: center;
+    margin-top: 5%;
+    margin-left: 5%;
+    margin-right: 10%;
+    width: 40%;
+    float: left;
+}
+
 #news_input{
 	width: 180px;
 	height: 180px;

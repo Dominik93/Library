@@ -226,7 +226,11 @@ class Admin extends User{
         else{
             $freeBook = $rowBookClean['free_books'];
         }
-        return '<p>
+        
+        return '<div id="cover">'
+        . '<img id="coverBook" src="'.backToFuture().'Library/getImage.php?image='.$rowBookClean['book_cover_path'].'" height="300" width="200" alt="okładka"/>
+            </div>
+            <div id="book">
 			ID: '.$rowBookClean['book_id'].'<br>
 			ISBN: '.$rowBookClean['book_isbn'].'<br>
                         Oryginalny tytuł: '.$rowBookClean['book_original_title'].'<br>
@@ -243,7 +247,7 @@ class Admin extends User{
 			Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
                         <button id="editBook">Edytuj</button>
                         <button id="deleteBook">Usuń</button>
-		</p>';
+		<div>';
     }
     private function acountAdmin($userDataClean){
         return '<p>
@@ -707,6 +711,12 @@ class Admin extends User{
                                         </select>
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td>Zdjęcie okładki:</td>
+                                    <td>
+                                        <input type="file" name="filePath" required/>
+                                    </td>
+                                </tr>
 				<tr>
                                     <td>Ilość egzemplarzy:</td>
                                     <td><input type="text" value="" name="number" placeholder="Ilość egzemplarzy" required/></td>
@@ -942,8 +952,13 @@ class Admin extends User{
                     if(mysqli_num_rows($resultA) == 0) {
                         return 'Błąd w wykonaniu zapytania';
                     }
-                    else{	
-                        $books = $books.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$rowB['book_id'].'\'" > '
+                    else{
+                        if($_SERVER['REMOTE_ADDR'] == "::1" || $_SERVER['REMOTE_ADDR'] == "127.0.0.1")
+                            $books = $books.'<tr onClick="location.href=\'http://localhost/~dominik/Library/UserAction/book.php?book='.$rowB['book_id'].'\'" >';
+                        else
+                            $books = $books.'<tr onClick="location.href=\'https://torus.uck.pk.edu.pl/~dslusarz/Library/UserAction/book.php?book='.$rowB['book_id'].'\'" >';
+                    
+                        $books = $books.''
                                                     . '<td>'.$rowBClean['book_id'].'</td> '
                                                     . '<td>'.$rowBClean['book_isbn'].'</td> '
                                                     . '<td>'.$rowBClean['book_title'].'</td> '
@@ -1226,6 +1241,13 @@ class Admin extends User{
                                     <td>Okładka:</td>
                                     <td><input type="text" value="'.$rowClean['book_cover'].'" name="cover" placeholder="Okładka" required/></td>
                                 </tr>
+                                
+                                <td>Zdjęcie okładki:</td>
+                                    <td>
+                                        <input type="file" value="'.$rowClean['book_cover'].'" name="filePath" required/>
+                                    </td>
+                                </tr>
+
 				<tr>
                                     <td>Ilość egzemplarzy:</td>
                                     <td><input type="text" value="'.$rowClean['book_number'].'" name="number" placeholder="Ilość egzemplarzy" required/></td>
@@ -1307,8 +1329,8 @@ class Admin extends User{
                 . '<br>Odebrano: '.$this->controller->clear($row['borrow_received']).''
                 . '<br>Opóźnienie: '.$delay.'<br>Do zapłaty: '.$delay*0.25.'</p>';
         $borrow = $borrow.'<p><button id="receive">Odebrano</button> <button id="delete">Zwrócono</button></p>';
-        $borrow = $borrow.'<div id="reader" align="center">Czytelnik:<br>'.$this->showReaderLight($this->controller->clear($row['borrow_reader_id'])).'</div>';
-        $borrow = $borrow.'<div id="book" align="center">Książka:<br>'.$this->showBookLight($this->controller->clear($row['borrow_book_id'])).'</div>';
+        $borrow = $borrow.'<div id="readerBorrows" align="center">Czytelnik:<br>'.$this->showReaderLight($this->controller->clear($row['borrow_reader_id'])).'</div>';
+        $borrow = $borrow.'<div id="bookBorrows" align="center">Książka:<br>'.$this->showBookLight($this->controller->clear($row['borrow_book_id'])).'</div>';
         $this->controller->close();
         return $borrow;
     }
@@ -1416,7 +1438,7 @@ class Admin extends User{
         return $return;
     }   
     
-    public function addBook($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname) {
+    public function addBook($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname, $path) {
             if(empty($isbn) ||
 		empty($title) ||
 		empty($publisher_house) ||
@@ -1428,6 +1450,7 @@ class Admin extends User{
 		empty($number) ||
                 empty($original_title) ||
                 empty($original_punblisher_house) ||    
+                empty($path) ||   
                 empty($authorName[0]) ||  
                 empty($authorSurname[0])){
 		return '<p>Nie wypełniono pól</p>';
@@ -1441,6 +1464,7 @@ class Admin extends User{
 		$edition = $this->controller->clear($edition);
 		$premiere = $this->controller->clear($premiere);
 		$number = $this->controller->clear($number);
+                $path = $this->controller->clear($path);
 		$original_punblisher_house = $this->controller->clear($original_punblisher_house);
 		$cover = $this->controller->clear($cover);
 		$original_title = $this->controller->clear($original_title);
@@ -1468,7 +1492,8 @@ class Admin extends User{
                             "book_edition",
                             "book_premiere", 
                             "book_number", 
-                            "book_cover"),
+                            "book_cover",
+                            "book_cover_path"),
                         array($isbn,
                             $original_title,
                             $title, 
@@ -1478,7 +1503,8 @@ class Admin extends User{
                             $edition,
                             $premiere,
                             $number,
-                            $cover));
+                            $cover,
+                            $path));
                     
 		$result = $this->controller->selectTableWhatJoinWhereGroupOrderLimit(false, "books", array("*"),
                         null,
@@ -1501,7 +1527,7 @@ class Admin extends User{
 		return '<p>Dodano ksiażke.</p>';
             }
         }
-    public function editBook($id, $isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname){
+    public function editBook($id, $isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname, $path){
         $this->controller->connect();
         $this->controller->deleteTableWhere(false,"authors_books", array(array("book_id","=",$id,"")));
         $this->controller->deleteTableWhere(false,"translators_books", array(array("book_id","=",$id,"")));
@@ -1533,6 +1559,7 @@ class Admin extends User{
                             array("book_cover",$this->controller->clear($cover)),
                             array("book_premiere",$this->controller->clear($premiere)),
                             array("book_original_title",$this->controller->clear($original_title)),
+                            array("book_cover_path",$this->controller->clear($path)),
                             array("book_original_publisher_house_id",$this->addPublisherHouse($this->controller->clear($original_punblisher_house),$this->controller->clear($original_country))),
                             array("book_publisher_house_id",$this->addPublisherHouse($this->controller->clear($publisher_house),$this->controller->clear($country))),
                             array("book_number",$this->controller->clear($number))

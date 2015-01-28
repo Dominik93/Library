@@ -26,7 +26,10 @@ class User implements IUser{
         else{
             $freeBook = $rowBookClean['free_books'];
         }
-        return '<p>
+        return '<div id="cover">'
+        . '<img height="300" width="200" src="'.backToFuture().'Library/getImage.php?image='.$rowBookClean['book_cover_path'].'" alt="okładka"/>
+            </div>
+            <div id="book">
 			ISBN: '.$rowBookClean['book_isbn'].'<br>
                         Oryginalny tytuł: '.$rowBookClean['book_original_title'].'<br>
 			Tytuł: '. $rowBookClean['book_title'].'<br>
@@ -39,7 +42,9 @@ class User implements IUser{
 			Ilość stron: '. $rowBookClean['book_nr_page'].'<br>
                         Okładka: '. $rowBookClean['book_cover'].'<br>
 			Ilość dostępnych egzemplarzy: '.$freeBook.'<br>
-		</p>';
+                        <button id="editBook">Edytuj</button>
+                        <button id="deleteBook">Usuń</button>
+		<div>';
     }    
         
     public function showAjaxBooksSearch(){
@@ -542,7 +547,7 @@ class User implements IUser{
                     $_SESSION['user_id'] = $rowClean['reader_id'];
                     $_SESSION['acces_right'] = "reader";
                     $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
-                    $_SESSION['user'] = serialize(new Reader($this->isActive($row['reader_id']), new Controller(), $u = $rowClean['reader_id']));
+                    $_SESSION['user'] = serialize(new Reader(new Controller(), $u = $rowClean['reader_id']));
                     
                     
                     do{
@@ -720,10 +725,10 @@ class User implements IUser{
         return '<p>Brak dostępu</p>';
     }
         
-    public function addBook($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname) {
+    public function addBook($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname, $path) {
             return '<p>Brak dostępu</p>';
         }
-    public function editBook($id, $isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname) {
+    public function editBook($id, $isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname, $path) {
         return '<p>Brak dostępu</p>';
     }
     public function deleteBook($id) {
