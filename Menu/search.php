@@ -4,7 +4,7 @@
 	function Content(){
 		$user = unserialize($_SESSION['user']);
                 if(isset($_POST['title'])){
-                    echo '<div id="content">'.$user->search($_POST['isbn'], $_POST['title'], $_POST['publisher_house'], $_POST['edition'], $_POST['premiere'], $_POST['author']).'</div>';
+                    echo '<div id="content">'.$user->search($_POST).'</div>';
                 }
                 else{    
                     echo '<div id="content">'.$user->showSearch().'</div>';
@@ -17,7 +17,10 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="<?php echo backToFuture() ?>Library/Layout/layout.css">
-		<title>Biblioteka PAI</title>
+		<script src="<?php echo backToFuture() ?>Library/jquery-2.1.3.min.js" type="text/javascript"></script>
+                <title>Biblioteka PAI</title>
+                
+                
 	</head>
 	<body>
 		<?php
@@ -26,4 +29,13 @@
 			Canvas();
 		?>
 	</body>
+        
+        <script type="text/javascript">
+               
+                $(document).ready(function(){
+                    $("#advancedSearch").click(function(){
+                        window.location.href = "https://torus.uck.pk.edu.pl/~dslusarz/Library/Menu/advanced_search.php";
+                    });
+                });
+                </script>
 </html>

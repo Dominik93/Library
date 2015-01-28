@@ -4,7 +4,7 @@
 
     function Content(){
         $user = unserialize($_SESSION['user']);
-	echo '<div id="content">'.$user->showAdmin($_GET[id]).'</div>';
+	echo '<div id="content">'.$user->showAdmin($_GET['id']).'</div>';
     }
 ?>
 
@@ -13,14 +13,25 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="<?php echo backToFuture() ?>Library/Layout/layout.css">
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.0/jquery.min.js" type="text/javascript"></script>
-		<title>Biblioteka PAI</title>
-                <script>
+		  
+		<script src="<?php echo backToFuture() ?>Library/jquery-2.1.3.min.js" type="text/javascript"></script>
+                <title>Biblioteka PAI</title>
+                
+	</head>
+	<body>
+		<?php
+			Logo();
+			Menu();
+			Canvas();
+		?>
+	</body>
+        
+        <script>
                     
                 $(document).ready(function(){
                         $("#editAdmin").click(function(){
                             var adminID = <?php echo json_encode($_GET); ?>;
-                            window.location.href = "http://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/Edit/edit_admin.php?id="+adminID['id']+"";
+                            window.location.href = "https://torus.uck.pk.edu.pl/~dslusarz/Library/AdminAction/Edit/edit_admin.php?id="+adminID['id']+"";
                         });
                          
                        $("#deleteAdmin").click(function(){
@@ -35,12 +46,4 @@
                        });
                     });
                 </script>
-	</head>
-	<body>
-		<?php
-			Logo();
-			Menu();
-			Canvas();
-		?>
-	</body>
 </html>

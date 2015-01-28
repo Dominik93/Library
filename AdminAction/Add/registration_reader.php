@@ -6,16 +6,11 @@
 	function Content(){
             $user = unserialize($_SESSION['user']);
             if(isset($_POST['login'])) {
-                echo '<div id="content">'.$user->addReader($_POST['login'],
-					$_POST['email'],
-					$_POST['name'],
-					$_POST['surname'],
-					$_POST['password1'],
-					$_POST['password2'],
-					$_POST['adres']).'</div>';			
+                var_dump($_POST);
+                echo '<div id="content">'.$user->addReader($_POST).'</div>';			
             }
             else{
-                echo '<div id="content">'.$user->showRegistrationReader().'</div>';
+                echo '<div id="content">'.$user->showAddReaderForm().'</div>';
             }
 	}
 ?>
@@ -25,10 +20,22 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="<?php echo backToFuture() ?>Library/Layout/layout.css">
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.0/jquery.min.js" type="text/javascript"></script>
-		<title>Biblioteka PAI</title>
+		<script src="<?php echo backToFuture() ?>Library/jquery-2.1.3.min.js" type="text/javascript"></script>
+                <title>Biblioteka PAI</title>
 	
-	<script type="text/javascript">
+	
+	
+	
+	</head>
+	<body>
+		<?php
+			Logo();
+			Menu();
+			Canvas();
+		?>
+	</body>
+        
+        <script type="text/javascript">
 
 		function allFill(){
 			if( document.getElementById("surname").value != "" &&
@@ -36,8 +43,12 @@
 				document.getElementById("login").value != "" &&
 				document.getElementById("password1").value != "" &&
 				document.getElementById("password2").value != "" &&
-				document.getElementById("adres").value != "" &&
-				document.getElementById("email").value != "" 
+				document.getElementById("email").value != "" &&
+                                document.getElementById("city").value != "" &&
+				document.getElementById("country").value != "" &&
+				document.getElementById("post_code").value != "" &&
+				document.getElementById("street").value != "" &&
+				document.getElementById("nr_house").value != "" 
 				) return true;
 			return false;
 		}
@@ -46,7 +57,7 @@
                     var email = $("#email").val();
                     if(email.length > 4){
                     $("#status_email").html('Sprawdzanie dostępności.');
-                    $("#status_email").load("../ajax.php",{ email:email },
+                    $("#status_email").load("../../ajax.php",{ checkEmail:email },
                                             function(responseTxt,statusTxt,xhr){
                                                 if(statusTxt=="success"){
                                                     if(responseTxt == "OK"){
@@ -82,7 +93,7 @@
 				var login = $("#login").val();
 				if(login.length > 4){
 					$("#status_login").html('Sprawdzanie dostępności.');
-                                        $("#status_login").load("../ajax.php",{ login: login },
+                                        $("#status_login").load("../../ajax.php",{ checkLogin: login },
                                             function(responseTxt,statusTxt,xhr){
                                                 if(statusTxt=="success"){
                                                     if(responseTxt == "OK"){
@@ -120,12 +131,7 @@
 		
 			document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
 			
-			$("#surname").change(function(){
-				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
-			});
-			$("#name").change(function(){
-				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
-			});
+			
 			$("#password1").change(function(){
                                 msg = $("#status_password");
 				if(document.getElementById("password1").value == document.getElementById("password2").value){
@@ -146,7 +152,7 @@
 			});
 			$("#password2").change(function(){
 				msg = $("#status_password");
-				if(document.getElementById("password1").value == document.getElementById("password2").value){
+                                if(document.getElementById("password1").value == document.getElementById("password2").value){
 					$("#password1").removeClass("red");
 					$("#password1").addClass("green");
 					$("#password2").removeClass("red");
@@ -162,29 +168,35 @@
 				}
 				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
 			});
-			$("#adres").change(function(){
+                        $("#surname").change(function(){
 				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
 			});
-			
+			$("#name").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
+			$("#country").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
+                        $("#city").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
+                        $("#street").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
+                        $("#nr_house").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
+                        $("#post_code").change(function(){
+				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
+			});
 			$("#login").change(function(){
 				$login = !checkLogin();
 				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
 			});
-			
 			$("#email").change(function(){
 				$email = !checkEmail();
 				document.getElementById("submit").disabled = !allFill() || !$password || !$email || !$login;
 			});
 		});
 	</script>
-	
-	
-	</head>
-	<body>
-		<?php
-			Logo();
-			Menu();
-			Canvas();
-		?>
-	</body>
 </html>

@@ -9,7 +9,7 @@
                     echo '<div id="content">'.$user->login($_POST['login'], $_POST['password']).'</div>';
                 }
                 else {
-                    echo '<div id="content">'.$user->showLogin().'</div>';
+                    echo '<div id="content">'.$user->showLoginForm().'</div>';
                 }
                 
 	}

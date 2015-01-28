@@ -5,9 +5,9 @@
 	function Content(){
             $user = unserialize($_SESSION['user']);
             echo '<div id="content">';
-            echo $user->showRegistrationAdmin();
+            echo $user->showAddAdminForm();
             if(isset($_POST['login'])){
-                echo $user->addAdmin($_POST['name'], $_POST['surname'], $_POST['password1'], $_POST['password2'], $_POST['email'], $_POST['login']);
+                echo $user->addAdmin($_POST);
             }
             
             echo '</div>';
@@ -20,10 +20,22 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="<?php echo backToFuture() ?>Library/Layout/layout.css">
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.0/jquery.min.js" type="text/javascript"></script>
-		<title>Biblioteka PAI</title>
+		<script src="<?php echo backToFuture() ?>Library/jquery-2.1.3.min.js" type="text/javascript"></script>
+                <title>Biblioteka PAI</title>
 	
-	<script type="text/javascript">
+	
+	
+	
+	</head>
+	<body>
+		<?php
+			Logo();
+			Menu();
+			Canvas();
+		?>
+	</body>
+        
+        <script type="text/javascript">
 
 		function allFill(){
 			if( document.getElementById("surname").value != "" &&
@@ -41,7 +53,7 @@
                     var email = $("#email").val();
                     if(email.length > 4){
                         $("#status_email").html('Sprawdzanie dostępności.');
-                        $("#status_email").load("../ajax.php",{ email:email },
+                        $("#status_email").load("../../ajax.php",{ checkEmail:email },
                                             function(responseTxt,statusTxt,xhr){
                                                 if(statusTxt=="success"){
                                                     if(responseTxt == "OK"){
@@ -76,7 +88,7 @@
 				var login = $("#login").val();
 				if(login.length > 4){
 					$("#status_login").html('Sprawdzanie dostępności.');
-                                        $("#status_login").load("../ajax.php",{ login: login },
+                                        $("#status_login").load("../../ajax.php",{ checkLogin: login },
                                             function(responseTxt,statusTxt,xhr){
                                                 if(statusTxt=="success"){
                                                     if(responseTxt == "OK"){
@@ -174,14 +186,6 @@
 			});
 		});
 	</script>
-	
-	
-	</head>
-	<body>
-		<?php
-			Logo();
-			Menu();
-			Canvas();
-		?>
-	</body>
+        
+        
 </html>

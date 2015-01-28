@@ -1,55 +1,85 @@
 <?php
 
 interface IUser{
-    /*
-     * user
-     */
+    
+    public function showAjaxBooksSearch();
+    public function showAjaxBoorowsSearch();
+    public function showAjaxAdminSearch();
+    
     public function showMainPage();
     public function showHours();
     public function showSearch();
+    public function showAdvancedSearch();
     public function showContact();
     public function showRegulation();
-    public function showLogin();
-    public function logout();
-    public function login($login, $password);
-    public function session();
-    public function search($isbn, $title, $publisher_house, $edition, $premiere, $author);
-    public function checkSession();
-    /*
-     * admin and reader
-     */
     public function showOptionPanel();
     public function showNews();
+    
+    public function search($search);
+    public function advancedSearch($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname);
+    
+    public function logout();
+    public function login($login, $password);
+    
+    public function session();
+    public function checkSession();
+    public function timeOut();
+            
     public function showAccount(); 
-    public function showLogged();  
+    public function extendAccount($id);
+    
+    public function showLoginForm();
     public function showAddBookForm();  
     public function showAddNewsForm();
-    public function showRegistrationReader();
-    public function showRegistrationAdmin();
-    public function showAllUsers();
-    public function showAllAdmins();
-    public function showAllBorrows();
-    public function showAllBooks();
+    public function showAddReaderForm();
+    public function showAddAdminForm();
+    public function showChangePassForm();
+    
+    public function showAllReaders($array);
+    public function showAllAdmins($array);
+    public function showAllBorrows($array);
+    public function showAllBooks($array);
+    public function showAllLogged(); 
+    
     public function showAdmin($adminID);
     public function showEditAdmin($readerID);
+    
     public function showReader($readerID);
     public function showReaderLight($readerID);
     public function showEditReader($readerID);
+    
     public function showBook($bookID);
     public function showEditBook($bookID);
     public function showBookLight($bookID);
+    
     public function showBorrow($borrowID);
     public function showMyBorrows();
-    public function addReader($login, $email, $name, $surname, $password1, $password2, $adres);
-    public function editReader($id, $login, $email, $name, $surname, $adres);
-    public function addBook($isbn, $title, $publisher_house, $nr_page, $edition, $premiere, $number, $author);
-    public function editBook($id,$isbn, $title, $publisher_house, $nr_page, $edition, $premiere, $number, $author);
-    public function addAdmin($name, $surname, $password1, $password2, $email, $login);
-    public function editAdmin($id, $name, $surname, $email, $login);
+    
+    public function addReader($array);
+    public function editReader($array);
+    public function deleteReader($id);
+    
+    public function addBook($isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname, $path);
+    public function editBook($id, $isbn, $original_title, $title, $original_punblisher_house, $original_country, $publisher_house, $country, $nr_page, $edition, $premiere, $number, $cover, $authorName, $authorSurname, $translatorName, $translatorSurname, $path);
+    public function deleteBook($id);
+    
+    public function addAdmin($array);
+    public function editAdmin($array);
+    public function deleteAdmin($id);
+    
     public function addNews($title, $text);
     public function deleteNews($id);
-    public function orderBook($bookID);
+   
+    public function addBorrow($bookID);
+    public function deleteBorrow($id);
+    public function receiveBorrow($id);
+    
     public function isActive($ID);
+    
     public function getData($ID);
-    }
+    
+    public function changePass($oldPass, $newPass);
+    public function generateNewPas($id);
+    
+}
 ?>
