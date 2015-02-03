@@ -1,5 +1,7 @@
 <?php
     // The path where the images are stored.
+
+    $con = new Controller();
     $imgLocation = 'C:/WebServ/httpd-users/covers/';
     if($_SERVER['REMOTE_ADDR'] == "::1" || $_SERVER['REMOTE_ADDR'] == "127.0.0.1")
         $imgLocation = 'C:/WebServ/httpd-users/covers/';
@@ -11,7 +13,7 @@
     // The "basename" function is there for
     // security, to make sure only a filename
     // is passed, not a path.
-    $imgName = basename($_GET['image']);
+    $imgName = basename($con->clear($_GET['image']));
      
     // Construct the actual image path.
     $imgPath = $imgLocation . $imgName;
